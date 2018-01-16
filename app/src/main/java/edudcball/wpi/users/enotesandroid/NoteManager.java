@@ -14,10 +14,12 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import AsyncTasks.DeleteTask;
 import AsyncTasks.NewNoteTask;
 import AsyncTasks.RetrieveNotesTask;
 import AsyncTasks.UpdateNoteTask;
@@ -35,10 +37,9 @@ public class NoteManager {
     static private ArrayList<String> noteTitles = new ArrayList<String>();
 
     static private ArrayAdapter<String> noteAdapter;
+    public static String username = "";
 
-    public static String sessionID = null;
-    public static String username = null;
-
+    public static CookieManager cookies = new CookieManager();
 
     public static void init(final MainActivity parent, ListView lv, final Context context){
 
@@ -70,11 +71,10 @@ public class NoteManager {
             protected void onPostExecute(String result) {
                 loadNotes(result);
             }
-        }.execute(NoteManager.sessionID);
+        }.execute();
     }
 
     public static void sessionExpired(){
-        NoteManager.sessionID = null;
         parent.startActivity(new Intent(parent, LoginActivity.class));
     }
 
@@ -86,6 +86,7 @@ public class NoteManager {
                 sessionExpired();
                 return;
             }
+            username = obj.getString("username");
             JSONArray arr = obj.getJSONArray("notes");
             for(int i=0; i<arr.length(); i++){
                 JSONObject note = arr.getJSONObject(i);
@@ -100,9 +101,11 @@ public class NoteManager {
                 addNote(n);
             }
             noteAdapter.notifyDataSetChanged();
+            Log.d("MYAPP", "NOTES LOADED");
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
+            Log.d("MYAPP", e.getMessage().toString());
         }
 
     }
@@ -132,7 +135,7 @@ public class NoteManager {
         }
         Note n = new Note(username);
 
-        new NewNoteTask(sessionID, n){
+        new NewNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
@@ -157,7 +160,7 @@ public class NoteManager {
 
     public static void updateNote(String tag){
         Note n = getNote(tag);
-        new UpdateNoteTask(sessionID, n){
+        new UpdateNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
@@ -171,6 +174,34 @@ public class NoteManager {
                 }
                 catch(Exception e){
                     Log.d("MYAPP", "Unable to form response JSON for update notes");
+                }
+            }
+        }.execute();
+    }
+
+    public static void deleteNote(String tag){
+        notes.remove(tag);
+        for(int i=0; i< noteTagLookup.size(); i++){
+            if(noteTagLookup.get(i).equals(tag)){
+                noteTagLookup.remove(i);
+                noteTitles.remove(i);
+                noteAdapter.notifyDataSetChanged();
+                i--;
+            }
+        }
+        new DeleteTask(tag){
+            @Override
+            protected void onPostExecute(String result) {
+                try{
+                    JSONObject obj = new JSONObject(result);
+                    if(obj.getBoolean("sessionExpired")){
+                        Log.d("MYAPP", "Session expired");
+                        NoteManager.sessionExpired();
+                        return;
+                    }
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Unable to form response JSON for delete note");
                 }
             }
         }.execute();

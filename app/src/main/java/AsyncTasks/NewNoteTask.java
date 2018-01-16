@@ -1,6 +1,7 @@
 package AsyncTasks;
 
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONObject;
@@ -11,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import edudcball.wpi.users.enotesandroid.Note;
+import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
  * Created by Owner on 1/10/2018.
@@ -20,11 +22,9 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
     private static String baseUrl = "http://stickybusiness.herokuapp.com/api";
 
     private Note n;
-    private String sessionID;
 
-    public NewNoteTask(String sessionID, Note n) {
+    public NewNoteTask(Note n) {
         this.n = n;
-        this.sessionID = sessionID;
     }
 
     @Override
@@ -34,10 +34,12 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
+            if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
+                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
+            }
             connection.setRequestMethod("POST");
 
             JSONObject msg = new JSONObject();
-            msg.put("sessionID", sessionID);
             msg.put("tag", n.getTag());
             msg.put("content", n.getContent());
             msg.put("x", n.getX());

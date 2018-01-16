@@ -42,13 +42,10 @@ public class MainActivity extends AppCompatActivity {
         NoteManager.init(this, notesList, this.getApplicationContext());
         NoteManager.openSession();
 
-        if(NoteManager.sessionID == null){
+        if(NoteManager.cookies.getCookieStore().getCookies().size() <= 0){
             startActivity(new Intent(this, LoginActivity.class));
             return;
         }
-
-
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newNoteFab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-
+        Log.d("MYAPP", "onResume");
         NoteManager.refreshTitles();
 
     }

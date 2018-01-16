@@ -1,6 +1,7 @@
 package edudcball.wpi.users.enotesandroid;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +40,13 @@ public class LoginActivity extends AppCompatActivity {
 
         me = this;
 
+        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+        String username = sp.getString("username", null);
+        String password = sp.getString("password", null);
+        if(username != null && password != null){
+            login(username, password);
+        }
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -47,33 +55,43 @@ public class LoginActivity extends AppCompatActivity {
                 messageText.setText("Logging in...");
                 messageText.setVisibility(View.VISIBLE);
 
-                new LoginTask(me){
+                login(usernameAttempt, passwordAttempt);
 
-                    @Override
-                    protected void onPostExecute(String result) {
-                        // this is executed on the main thread after the process is over
-                        // update your UI here
-                        try{
-                            JSONObject obj = new JSONObject(result);
-                            if(obj.getBoolean("successful")){
-                                String sessionID = obj.getString("sessionID");
-                                me.loginSuccess(sessionID);
-                            }
-                        }
-                        catch(Exception e){
-                            Log.d("MYAPP", "Failed to parse JSON");
-                        }
-                    }
-                }.execute(usernameAttempt, passwordAttempt);
 
             }
         });
     }
 
-    private void loginSuccess(String sessionID){
-        messageText.setText("");
-        messageText.setVisibility(View.GONE);
-        NoteManager.sessionID = sessionID;
+    private void login(final String usernameAttempt, final String passwordAttempt){
+        new LoginTask(me){
+
+            @Override
+            protected void onPostExecute(String result) {
+                messageText.setText("");
+                messageText.setVisibility(View.GONE);
+                // this is executed on the main thread after the process is over
+                // update your UI here
+                try{
+                    JSONObject obj = new JSONObject(result);
+                    if(obj.getBoolean("successful")){
+                        SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
+                        sp.edit().putString("username", usernameAttempt).putString("password", passwordAttempt).commit();
+                        me.loginSuccess();
+                    }
+                    else{
+                        messageText.setText("Login failed. Incorrect username or password.");
+                        messageText.setVisibility(View.VISIBLE);
+                    }
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Failed to parse JSON");
+                }
+            }
+        }.execute(usernameAttempt, passwordAttempt);
+    }
+
+
+    private void loginSuccess(){
         startActivity(new Intent(this, MainActivity.class));
     }
 }
