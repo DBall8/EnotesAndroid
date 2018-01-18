@@ -27,9 +27,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     ListView notesList;
-    ArrayAdapter<String> noteAdapter;
-
-    NoteManager nManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         notesList = (ListView) findViewById(R.id.NotesList);
         NoteManager.init(this, notesList, this.getApplicationContext());
         NoteManager.openSession();
+        Log.d("MYAPP", "ONCREATE");
 
         if(NoteManager.cookies.getCookieStore().getCookies().size() <= 0){
             startActivity(new Intent(this, LoginActivity.class));
@@ -84,6 +82,10 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+
+        if(id == R.id.action_logout){
+            LoginActivity.logout(this);
         }
 
         return super.onOptionsItemSelected(item);

@@ -2,6 +2,7 @@ package edudcball.wpi.users.enotesandroid;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -49,7 +50,21 @@ public class NoteManager {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
-                tv.setTextColor(ContextCompat.getColor(context, R.color.titleText));
+                tv.setTextColor(ContextCompat.getColor(context, R.color.black));
+                Note n = getNote(noteTagLookup.get(position));
+                JSONObject colors = n.getColors();
+                if(colors != null){
+                    try {
+                        tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
+                    }catch(Exception e){
+                        tv.setBackgroundColor(parent.getResources().getColor(R.color.defaultNote));
+                    }
+                }
+                else{
+                    tv.setBackgroundColor(parent.getResources().getColor(R.color.defaultNote));
+                }
+
+
                 return tv;
             }
         };
@@ -86,6 +101,9 @@ public class NoteManager {
                 sessionExpired();
                 return;
             }
+            notes.clear();
+            noteTitles.clear();
+            noteTagLookup.clear();
             username = obj.getString("username");
             JSONArray arr = obj.getJSONArray("notes");
             for(int i=0; i<arr.length(); i++){
@@ -206,6 +224,8 @@ public class NoteManager {
             }
         }.execute();
     }
+
+
 
     public static Note getNote(String tag){
         return notes.get(tag);

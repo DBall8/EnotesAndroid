@@ -13,7 +13,11 @@ import android.widget.TextView;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.net.CookieManager;
+
+import AsyncTasks.CreateUserTask;
 import AsyncTasks.LoginTask;
+import AsyncTasks.LogoutTask;
 
 /**
  * Created by Owner on 1/7/2018.
@@ -23,10 +27,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameField;
     private EditText passwordField;
+    private EditText passwordConfirm;
     private Button loginButton;
     private TextView messageText;
+    private TextView otherLoginModeText;
 
-    private LoginActivity me;
+    private Boolean newUser = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +41,10 @@ public class LoginActivity extends AppCompatActivity {
 
         usernameField = (EditText) findViewById(R.id.usernameField);
         passwordField = (EditText) findViewById(R.id.passwordField);
+        passwordConfirm = (EditText) findViewById(R.id.passwordConfirmation);
         loginButton = (Button) findViewById(R.id.loginButton);
         messageText = (TextView) findViewById(R.id.messageText);
-
-        me = this;
+        otherLoginModeText = (TextView) findViewById(R.id.switchLoginType);
 
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
         String username = sp.getString("username", null);
@@ -52,23 +58,59 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String usernameAttempt = usernameField.getText().toString();
                 String passwordAttempt = passwordField.getText().toString();
-                messageText.setText("Logging in...");
-                messageText.setVisibility(View.VISIBLE);
 
-                login(usernameAttempt, passwordAttempt);
+                if(newUser){
+                    String passwordConfirmAttempt = passwordConfirm.getText().toString();
+                    if(passwordAttempt.equals(passwordConfirmAttempt)){
+                        createNewUser(usernameAttempt, passwordAttempt);
+                    }
+                    else{
+                        messageText.setText("Passwords do not match.");
+                        messageText.setVisibility(View.VISIBLE);
+                    }
+                }
+                else{
+                    login(usernameAttempt, passwordAttempt);
+                }
+
 
 
             }
         });
+
+        otherLoginModeText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchNewUser();
+            }
+        });
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        messageText.setText("");
+        messageText.setVisibility(View.GONE);
+        if(newUser){
+            switchNewUser();
+        }
+        loginButton.setEnabled(true);
+    }
+
+
     private void login(final String usernameAttempt, final String passwordAttempt){
-        new LoginTask(me){
+
+        loginButton.setEnabled(false);
+        loginButton.setText("Logging in...");
+
+        final AppCompatActivity me= this;
+
+        new LoginTask(){
 
             @Override
             protected void onPostExecute(String result) {
-                messageText.setText("");
-                messageText.setVisibility(View.GONE);
+                loginButton.setText("Login");
+                loginButton.setEnabled(true);
                 // this is executed on the main thread after the process is over
                 // update your UI here
                 try{
@@ -76,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                     if(obj.getBoolean("successful")){
                         SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("username", usernameAttempt).putString("password", passwordAttempt).commit();
-                        me.loginSuccess();
+                        loginSuccess();
                     }
                     else{
                         messageText.setText("Login failed. Incorrect username or password.");
@@ -90,8 +132,72 @@ public class LoginActivity extends AppCompatActivity {
         }.execute(usernameAttempt, passwordAttempt);
     }
 
+    private void createNewUser(final String usernameAttempt, final String passwordAttempt){
+
+        loginButton.setEnabled(false);
+        loginButton.setText("Creating account...");
+
+        final AppCompatActivity me= this;
+
+        new CreateUserTask(){
+
+            @Override
+            protected void onPostExecute(String result) {
+                loginButton.setText("Create Account");
+                loginButton.setEnabled(true);
+                // this is executed on the main thread after the process is over
+                // update your UI here
+                try{
+                    JSONObject obj = new JSONObject(result);
+                    if(!obj.getBoolean("userAlreadyExists")){
+                        SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
+                        sp.edit().putString("username", usernameAttempt).putString("password", passwordAttempt).commit();
+                        loginSuccess();
+                    }
+                    else{
+                        messageText.setText("User already exists, please choose a different username.");
+                        messageText.setVisibility(View.VISIBLE);
+                    }
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Failed to parse JSON");
+                }
+            }
+        }.execute(usernameAttempt, passwordAttempt);
+    }
+
+    public static void logout(AppCompatActivity act){
+        final AppCompatActivity activity = act;
+        new LogoutTask(){
+
+            @Override
+            protected void onPostExecute(String result) {
+                activity.startActivity(new Intent(activity, LoginActivity.class));
+                NoteManager.cookies = new CookieManager();
+                SharedPreferences sp = activity.getSharedPreferences("Login", MODE_PRIVATE);
+                sp.edit().putString("username", null).putString("password", null).commit();
+            }
+        }.execute();
+
+    }
+
 
     private void loginSuccess(){
         startActivity(new Intent(this, MainActivity.class));
+    }
+
+    private void switchNewUser(){
+        if(newUser){
+            passwordConfirm.setVisibility(View.GONE);
+            loginButton.setText("Login");
+            otherLoginModeText.setText(R.string.signUpSwitch);
+            newUser = false;
+        }
+        else{
+            passwordConfirm.setVisibility(View.VISIBLE);
+            loginButton.setText("Create Account");
+            otherLoginModeText.setText(R.string.loginSwitch);
+            newUser = true;
+        }
     }
 }

@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,44 +18,27 @@ import edudcball.wpi.users.enotesandroid.LoginActivity;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
- * Created by Owner on 1/4/2018.
+ * Created by Owner on 1/16/2018.
  */
 
-public abstract class LoginTask extends AsyncTask<String, Integer, String> {
+public abstract class LogoutTask extends AsyncTask<String, Integer, String> {
 
     static final String COOKIES_HEADER = "Set-Cookie";
 
-    private static String urlStr = "http://stickybusiness.herokuapp.com/login";
+    private static String urlStr = "http://stickybusiness.herokuapp.com/";
+
 
     @Override
     protected String doInBackground(String... vals) {
         try{
             URL url = new URL(urlStr);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
+            connection.setDoOutput(false);
             connection.setDoInput(true);
-            connection.setRequestMethod("POST");
-
-            JSONObject msg = new JSONObject();
-            msg.put("username", vals[0]);
-            msg.put("password", vals[1]);
-            msg.put("stayLoggedIn", false);
-
-
-            // write the message
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(msg.toString());
-            out.close();
-
-            Map<String, List<String>> headerFields = connection.getHeaderFields();
-            List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
-
-            if (cookiesHeader != null) {
-                for (String cookie : cookiesHeader) {
-                    NoteManager.cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
-                }
+            if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
+                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
             }
-
+            connection.setRequestMethod("POST");
 
             DataInputStream in = new DataInputStream(connection.getInputStream());
             String input;

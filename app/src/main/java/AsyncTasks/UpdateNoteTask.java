@@ -48,7 +48,7 @@ public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> 
             msg.put("newW", n.getW());
             msg.put("newH", n.getH());
             msg.put("newZ", n.getZ());
-            msg.put("newColors", n.getColors());
+            msg.put("newColors", n.getColors().toString());
 
 
             // write the message

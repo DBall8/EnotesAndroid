@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public class Note {
     private String tag;
     private String content;
-    private String colors;
+    private JSONObject colors;
     private int x;
     private int y;
     private int width;
@@ -19,7 +19,12 @@ public class Note {
     public Note(String username){
         this.tag = username + '-' + System.currentTimeMillis();
         this.content = "";
-        this.colors = "{}";
+        try {
+            this.colors = new JSONObject("{head: \'#ddaf00\', body: \'#ffe062\'}");
+        }
+        catch(Exception e){
+            this.colors = null;
+        }
         this.x = 200;
         this.y = 200;
         this.width = 300;
@@ -31,7 +36,12 @@ public class Note {
     public Note(String tag, String content, int x, int y, int w, int h, int z, String colors) {
         this.tag = tag;
         this.content = content;
-        this.colors = colors;
+        try {
+            this.colors = new JSONObject(colors);
+        }
+        catch(Exception e){
+            this.colors = null;
+        }
         this.x = x;
         this.y = y;
         this.width = w;
@@ -63,7 +73,7 @@ public class Note {
 
     public int getZ() { return this.zindex; };
 
-    public String getColors() { return this.colors; };
+    public JSONObject getColors() { return this.colors; };
 
 
 }

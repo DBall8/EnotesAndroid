@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,14 +18,14 @@ import edudcball.wpi.users.enotesandroid.LoginActivity;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
- * Created by Owner on 1/4/2018.
+ * Created by Owner on 1/17/2018.
  */
 
-public abstract class LoginTask extends AsyncTask<String, Integer, String> {
+public abstract class CreateUserTask extends AsyncTask<String, Integer, String> {
 
     static final String COOKIES_HEADER = "Set-Cookie";
 
-    private static String urlStr = "http://stickybusiness.herokuapp.com/login";
+    private static String urlStr = "http://stickybusiness.herokuapp.com/newuser";
 
     @Override
     protected String doInBackground(String... vals) {
