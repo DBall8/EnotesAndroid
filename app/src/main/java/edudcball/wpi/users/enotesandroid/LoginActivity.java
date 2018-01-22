@@ -89,12 +89,23 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        messageText.setText("");
-        messageText.setVisibility(View.GONE);
+
+        String error = getIntent().getStringExtra("error");
+        if(error != null){
+            messageText.setText(error);
+            messageText.setVisibility(View.VISIBLE);
+        }
+        else{
+            messageText.setText("");
+            messageText.setVisibility(View.GONE);
+        }
+
         if(newUser){
             switchNewUser();
         }
         loginButton.setEnabled(true);
+
+
     }
 
 

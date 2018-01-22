@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/noteConstraint"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,35 +29,52 @@
                 android:id="@+id/saveButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:text="Save" />
+                android:background="@color/background"
+                android:text="Save"
+                android:textColor="@color/black" />
 
             <Button
                 android:id="@+id/cancelButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:text="Cancel" />
+                android:background="@color/background"
+                android:text="Cancel"
+                android:textColor="@color/black" />
 
             <Button
                 android:id="@+id/deleteButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:text="Delete" />
+                android:background="@color/background"
+                android:text="Delete"
+                android:textColor="@color/black" />
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/noteText"
-            style="@android:style/Widget.EditText"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:ems="10"
-            android:gravity="top|left"
-            android:inputType="textMultiLine|textWebEditText"
-            android:padding="10dp"
-            tools:layout_editor_absoluteX="85dp"
-            tools:layout_editor_absoluteY="73dp" />
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/noteText"
+                style="@android:style/Widget.Holo.EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:gravity="top|left"
+                android:inputType="textMultiLine|textWebEditText"
+                android:padding="10dp"
+                android:textColor="@color/white"
+                tools:layout_editor_absoluteX="85dp"
+                tools:layout_editor_absoluteY="73dp" />
+
+        </ScrollView>
 
     </LinearLayout>
 

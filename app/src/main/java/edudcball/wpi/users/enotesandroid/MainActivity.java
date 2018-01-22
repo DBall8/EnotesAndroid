@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         notesList = (ListView) findViewById(R.id.NotesList);
         NoteManager.init(this, notesList, this.getApplicationContext());
-        NoteManager.openSession();
+        NoteManager.retrieveNotes();
         Log.d("MYAPP", "ONCREATE");
 
         if(NoteManager.cookies.getCookieStore().getCookies().size() <= 0){
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume(){
         super.onResume();
         Log.d("MYAPP", "onResume");
-        NoteManager.refreshTitles();
+        NoteManager.retrieveNotes();
 
     }
 

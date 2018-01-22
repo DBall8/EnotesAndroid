@@ -3,9 +3,9 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/lightgrey</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="colorAccent">@color/loginpurple</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -25,6 +25,11 @@
 
         <item name="colorControlActivated">@color/loginpurple</item>
         <item name="colorControlHighlight">@color/loginpurple</item>
+    </style>
+
+    <style name="listItemStyle" parent="@android:style/Widget.ListView">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/background</item>
     </style>
 
 </resources>

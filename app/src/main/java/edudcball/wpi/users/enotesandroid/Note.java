@@ -1,5 +1,7 @@
 package edudcball.wpi.users.enotesandroid;
 
+import android.util.Log;
+
 import org.json.JSONObject;
 
 /**
@@ -17,7 +19,7 @@ public class Note {
     private int zindex;
 
     public Note(String username){
-        this.tag = username + '-' + System.currentTimeMillis();
+        this.tag = "note-" + System.currentTimeMillis();
         this.content = "";
         try {
             this.colors = new JSONObject("{head: \'#ddaf00\', body: \'#ffe062\'}");
@@ -53,7 +55,11 @@ public class Note {
         this.content = c;
     }
 
-    public void decrementZ(){ this.zindex--; }
+    public void decrementZ(){
+        if(this.zindex > 0){
+            this.zindex--;
+        }
+    }
 
     public String getTag(){
         return this.tag;
@@ -74,6 +80,10 @@ public class Note {
     public int getZ() { return this.zindex; };
 
     public JSONObject getColors() { return this.colors; };
+
+    public void moveToTop(){
+        this.zindex = 9999;
+    }
 
 
 }

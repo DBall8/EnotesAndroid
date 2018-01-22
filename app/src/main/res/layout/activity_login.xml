@@ -41,8 +41,8 @@
             android:layout_margin="5dp"
             android:padding="5dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:visibility="gone"
-            android:textColor="@color/white"/>
+            android:textColor="@android:color/holo_red_dark"
+            android:visibility="gone" />
 
         <EditText
             android:id="@+id/usernameField"

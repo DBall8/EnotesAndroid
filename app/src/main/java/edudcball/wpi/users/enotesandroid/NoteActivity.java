@@ -2,7 +2,9 @@ package edudcball.wpi.users.enotesandroid;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -28,6 +30,7 @@ public class NoteActivity extends AppCompatActivity {
     private Button cancelButton;
     private Button deleteButton;
     private EditText contentView;
+    private ConstraintLayout layout;
     private String tag;
 
     private AlertDialog.Builder confirmDialog;
@@ -43,6 +46,7 @@ public class NoteActivity extends AppCompatActivity {
         saveButton = (Button) findViewById(R.id.saveButton);
         cancelButton = (Button) findViewById(R.id.cancelButton);
         deleteButton = (Button) findViewById(R.id.deleteButton);
+        layout = (ConstraintLayout) findViewById(R.id.noteConstraint);
         contentView.setText(content);
 
         final NoteActivity me = this;
@@ -55,6 +59,18 @@ public class NoteActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        try{
+            int color = Color.parseColor(NoteManager.getNote(tag).getColors().getString("body"));
+            saveButton.setBackgroundColor(color);
+            cancelButton.setBackgroundColor(color);
+            deleteButton.setBackgroundColor(color);
+            //layout.setBackgroundColor(color);
+        }
+        catch(Exception e){
+            Log.d("MYAPP", "Could not get color");
+        }
+
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override

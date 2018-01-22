@@ -6,6 +6,8 @@
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
     <color name="background">#333333</color>
+    <color name="lightgrey">#b9b9b9</color>
     <color name="defaultNote">#ffe062</color>
     <color name="loginpurple">#9212d2</color>
+    <color name="lightpurple">#cb62ff</color>
 </resources>
