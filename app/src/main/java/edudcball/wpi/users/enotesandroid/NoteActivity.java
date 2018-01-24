@@ -60,16 +60,18 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
+        int color;
         try{
-            int color = Color.parseColor(NoteManager.getNote(tag).getColors().getString("body"));
-            saveButton.setBackgroundColor(color);
-            cancelButton.setBackgroundColor(color);
-            deleteButton.setBackgroundColor(color);
-            //layout.setBackgroundColor(color);
+            color = Color.parseColor(NoteManager.getNote(tag).getColors().getString("body"));
         }
         catch(Exception e){
+            color = getResources().getColor(R.color.defaultNote);
             Log.d("MYAPP", "Could not get color");
         }
+        saveButton.setBackgroundColor(color);
+        cancelButton.setBackgroundColor(color);
+        deleteButton.setBackgroundColor(color);
+        //layout.setBackgroundColor(color);
 
 
         cancelButton.setOnClickListener(new View.OnClickListener() {

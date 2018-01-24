@@ -3,4 +3,6 @@
     <string name="action_settings">Settings</string>
     <string name="signUpSwitch">Don\'t have an account? \n<u>Click here</u> to sign up!</string>
     <string name="loginSwitch">Already have an account? \n<u>Click here</u> to Log in!</string>
+    <string name="baseURL">https://enotes.site</string>
+    <string name="apiURL">https://enotes.site/api</string>
 </resources>

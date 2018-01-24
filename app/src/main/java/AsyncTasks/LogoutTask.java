@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import edudcball.wpi.users.enotesandroid.LoginActivity;
+import edudcball.wpi.users.enotesandroid.NetInfo;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
@@ -25,13 +26,10 @@ public abstract class LogoutTask extends AsyncTask<String, Integer, String> {
 
     static final String COOKIES_HEADER = "Set-Cookie";
 
-    private static String urlStr = "http://stickybusiness.herokuapp.com/";
-
-
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(urlStr);
+            URL url = new URL(NetInfo.baseURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(false);
             connection.setDoInput(true);

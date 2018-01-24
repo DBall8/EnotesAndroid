@@ -183,6 +183,7 @@ public class NoteManager {
         notes.put(n.getTag(), n);
         noteTagLookup.add(n.getTag());
         noteTitles.add(getTitleFromNote(n));
+        noteAdapter.notifyDataSetChanged();
     }
 
     public static void newNote(){

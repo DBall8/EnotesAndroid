@@ -46,12 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         messageText = (TextView) findViewById(R.id.messageText);
         otherLoginModeText = (TextView) findViewById(R.id.switchLoginType);
 
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        String username = sp.getString("username", null);
-        String password = sp.getString("password", null);
-        if(username != null && password != null){
-            login(username, password);
-        }
+
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,6 +99,15 @@ public class LoginActivity extends AppCompatActivity {
             switchNewUser();
         }
         loginButton.setEnabled(true);
+
+        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+        String username = sp.getString("username", null);
+        String password = sp.getString("password", null);
+        if(username != null && password != null){
+            usernameField.setText(username);
+            passwordField.setText(password);
+            login(username, password);
+        }
 
 
     }

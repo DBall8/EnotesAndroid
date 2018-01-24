@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import edudcball.wpi.users.enotesandroid.NetInfo;
 import edudcball.wpi.users.enotesandroid.Note;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
@@ -19,7 +20,6 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  */
 
 public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
-    private static String baseUrl = "http://stickybusiness.herokuapp.com/api";
 
     private Note n;
 
@@ -30,7 +30,7 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(baseUrl);
+            URL url = new URL(NetInfo.apiURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
