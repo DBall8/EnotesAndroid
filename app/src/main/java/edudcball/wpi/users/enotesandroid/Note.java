@@ -10,16 +10,20 @@ import org.json.JSONObject;
 
 public class Note {
     private String tag;
+    private String title;
     private String content;
     private JSONObject colors;
     private int x;
     private int y;
     private int width;
     private int height;
+    private String font;
+    private int fontSize;
     private int zindex;
 
     public Note(String username){
         this.tag = "note-" + System.currentTimeMillis();
+        this.title = "";
         this.content = "";
         try {
             this.colors = new JSONObject("{head: \'#ddaf00\', body: \'#ffe062\'}");
@@ -31,12 +35,20 @@ public class Note {
         this.y = 200;
         this.width = 300;
         this.height = 400;
+        this.font = "Arial";
+        this.fontSize = 12;
         this.zindex = 9999;
     }
 
 
-    public Note(String tag, String content, int x, int y, int w, int h, int z, String colors) {
+    public Note(String tag, String title, String content, int x, int y, int w, int h, String font, int fontSize, int z, String colors) {
         this.tag = tag;
+        if(title == null){
+            this.title = "";
+        }
+        else {
+            this.title = title;
+        }
         this.content = content;
         try {
             this.colors = new JSONObject(colors);
@@ -48,6 +60,8 @@ public class Note {
         this.y = y;
         this.width = w;
         this.height = h;
+        this.font = font;
+        this.fontSize = fontSize;
         this.zindex = z;
     }
 
@@ -65,21 +79,27 @@ public class Note {
         return this.tag;
     }
 
+    public String getTitle(){ return this.title; }
+
     public String getContent(){
         return this.content;
     }
 
-    public int getX() { return this.x; };
+    public int getX() { return this.x; }
 
-    public int getY() { return this.y; };
+    public int getY() { return this.y; }
 
-    public int getW() { return this.width; }
+    public int getWidth() { return this.width; }
 
-    public int getH() { return this.height; };
+    public int getHeight() { return this.height; }
 
-    public int getZ() { return this.zindex; };
+    public String getFont(){ return this.font; }
 
-    public JSONObject getColors() { return this.colors; };
+    public int getFontSize(){ return this.fontSize; }
+
+    public int getZ() { return this.zindex; }
+
+    public JSONObject getColors() { return this.colors; }
 
     public void moveToTop(){
         this.zindex = 9999;

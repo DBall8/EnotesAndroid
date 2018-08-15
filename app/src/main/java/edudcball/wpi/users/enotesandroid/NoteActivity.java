@@ -1,7 +1,6 @@
 package edudcball.wpi.users.enotesandroid;
 
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -13,12 +12,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import AsyncTasks.DeleteTask;
-import AsyncTasks.UpdateNoteTask;
 
 /**
  * Created by Owner on 1/6/2018.

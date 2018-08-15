@@ -1,4 +1,4 @@
-package AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -8,53 +8,54 @@ import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.LoginActivity;
 import edudcball.wpi.users.enotesandroid.NetInfo;
+import edudcball.wpi.users.enotesandroid.Note;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
- * Created by Owner on 1/17/2018.
+ * Created by Owner on 1/7/2018.
  */
 
-public abstract class CreateUserTask extends AsyncTask<String, Integer, String> {
+public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> {
 
-    static final String COOKIES_HEADER = "Set-Cookie";
+    private Note n;
+
+    public UpdateNoteTask(Note n) {
+        this.n = n;
+    }
 
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.baseURL + "/newuser");
+            URL url = new URL(NetInfo.apiURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
-            connection.setRequestMethod("POST");
+            if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
+                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
+            }
+            connection.setRequestMethod("PUT");
 
             JSONObject msg = new JSONObject();
-            msg.put("username", vals[0]);
-            msg.put("password", vals[1]);
-            msg.put("stayLoggedIn", false);
-
-
+            msg.put("tag", n.getTag());
+            msg.put("newtitle", n.getTitle());
+            msg.put("newcontent", n.getContent());
+            msg.put("newx", n.getX());
+            msg.put("newy", n.getY());
+            msg.put("newW", n.getWidth());
+            msg.put("newH", n.getHeight());
+            msg.put("newFont", n.getFont());
+            msg.put("newFontSize", n.getFontSize());
+            msg.put("newZ", n.getZ());
+            msg.put("newColors", n.getColors().toString());
+            
             // write the message
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(msg.toString());
             out.close();
-
-            Map<String, List<String>> headerFields = connection.getHeaderFields();
-            List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
-
-            if (cookiesHeader != null) {
-                for (String cookie : cookiesHeader) {
-                    NoteManager.cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
-                }
-            }
-
 
             DataInputStream in = new DataInputStream(connection.getInputStream());
             String input;

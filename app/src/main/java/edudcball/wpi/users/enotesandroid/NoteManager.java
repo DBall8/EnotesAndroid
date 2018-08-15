@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import AsyncTasks.DeleteTask;
-import AsyncTasks.NewNoteTask;
-import AsyncTasks.RetrieveNotesTask;
-import AsyncTasks.UpdateNoteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.DeleteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.NewNoteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.RetrieveNotesTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.UpdateNoteTask;
 
 /**
  * Created by Owner on 1/5/2018.
@@ -112,11 +112,14 @@ public class NoteManager {
                 String tag = note.getString("tag");
                 if(notes.get(tag) == null){
                     Note n = new Note(note.getString("tag"),
+                            note.getString("title"),
                             note.getString("content"),
                             note.getInt("x"),
                             note.getInt("y"),
                             note.getInt("width"),
                             note.getInt("height"),
+                            note.getString("font"),
+                            note.getInt("fontsize"),
                             note.getInt("zindex"),
                             note.getString("colors"));
                     notes.put(n.getTag(), n);
@@ -125,11 +128,14 @@ public class NoteManager {
                     int z = notes.get(tag).getZ();
                     notes.remove(tag);
                     Note n = new Note(note.getString("tag"),
+                            note.getString("title"),
                             note.getString("content"),
                             note.getInt("x"),
                             note.getInt("y"),
                             note.getInt("width"),
                             note.getInt("height"),
+                            note.getString("font"),
+                            note.getInt("fontsize"),
                             z,
                             note.getString("colors"));
                     notes.put(n.getTag(), n);

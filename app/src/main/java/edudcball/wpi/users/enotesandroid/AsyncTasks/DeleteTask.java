@@ -1,4 +1,4 @@
-package AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -12,19 +12,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import edudcball.wpi.users.enotesandroid.NetInfo;
-import edudcball.wpi.users.enotesandroid.Note;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
- * Created by Owner on 1/10/2018.
+ * Created by Owner on 1/11/2018.
  */
 
-public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
+public abstract class DeleteTask extends AsyncTask<String, Integer, String> {
 
-    private Note n;
+    private String tag;
 
-    public NewNoteTask(Note n) {
-        this.n = n;
+    public DeleteTask(String tag) {
+        this.tag = tag;
     }
 
     @Override
@@ -37,18 +36,10 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
             if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
                 connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
             }
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod("DELETE");
 
             JSONObject msg = new JSONObject();
-            msg.put("tag", n.getTag());
-            msg.put("content", n.getContent());
-            msg.put("x", n.getX());
-            msg.put("y", n.getY());
-            msg.put("width", n.getW());
-            msg.put("height", n.getH());
-            msg.put("zindex", n.getZ());
-            msg.put("colors", n.getColors());
-
+            msg.put("tag", tag);
 
             // write the message
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());

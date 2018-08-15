@@ -1,21 +1,18 @@
-package AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
 import android.os.AsyncTask;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.CookieManager;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.LoginActivity;
 import edudcball.wpi.users.enotesandroid.NetInfo;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 

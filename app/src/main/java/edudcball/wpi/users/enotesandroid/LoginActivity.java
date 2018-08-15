@@ -11,13 +11,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.net.CookieManager;
 
-import AsyncTasks.CreateUserTask;
-import AsyncTasks.LoginTask;
-import AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.CreateUserTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.LoginTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
 
 /**
  * Created by Owner on 1/7/2018.

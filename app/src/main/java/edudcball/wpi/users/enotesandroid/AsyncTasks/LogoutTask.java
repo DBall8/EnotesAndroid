@@ -1,59 +1,35 @@
-package AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.json.JSONObject;
-
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import edudcball.wpi.users.enotesandroid.NetInfo;
-import edudcball.wpi.users.enotesandroid.Note;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
- * Created by Owner on 1/7/2018.
+ * Created by Owner on 1/16/2018.
  */
 
-public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> {
+public abstract class LogoutTask extends AsyncTask<String, Integer, String> {
 
-    private Note n;
-
-    public UpdateNoteTask(Note n) {
-        this.n = n;
-    }
+    static final String COOKIES_HEADER = "Set-Cookie";
 
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.apiURL);
+            URL url = new URL(NetInfo.baseURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
+            connection.setDoOutput(false);
             connection.setDoInput(true);
             if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
                 connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
             }
-            connection.setRequestMethod("PUT");
-
-            JSONObject msg = new JSONObject();
-            msg.put("tag", n.getTag());
-            msg.put("newcontent", n.getContent());
-            msg.put("newx", n.getX());
-            msg.put("newy", n.getY());
-            msg.put("newW", n.getW());
-            msg.put("newH", n.getH());
-            msg.put("newZ", n.getZ());
-            msg.put("newColors", n.getColors().toString());
-
-
-            // write the message
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(msg.toString());
-            out.close();
+            connection.setRequestMethod("POST");
 
             DataInputStream in = new DataInputStream(connection.getInputStream());
             String input;
