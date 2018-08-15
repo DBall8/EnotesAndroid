@@ -20,10 +20,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  * Created by Owner on 1/4/2018.
  */
 
-public abstract class LoginTask extends AsyncTask<String, Integer, String> {
-
-    static final String COOKIES_HEADER = "Set-Cookie";
-
+public abstract class LoginTask extends ENotesTask {
 
     @Override
     protected String doInBackground(String... vals) {
@@ -74,9 +71,4 @@ public abstract class LoginTask extends AsyncTask<String, Integer, String> {
             return null;
         }
     }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }

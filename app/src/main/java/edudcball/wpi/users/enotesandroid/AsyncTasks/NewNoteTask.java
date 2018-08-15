@@ -19,7 +19,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  * Created by Owner on 1/10/2018.
  */
 
-public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
+public abstract class NewNoteTask extends ENotesTask {
 
     private Note n;
 
@@ -52,6 +52,7 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
             msg.put("zindex", n.getZ());
             msg.put("colors", n.getColors());
 
+            Log.d("NEWNOTE", msg.toString());
 
             // write the message
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
@@ -77,9 +78,4 @@ public abstract class NewNoteTask extends AsyncTask<String, Integer, String> {
             return null;
         }
     }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }

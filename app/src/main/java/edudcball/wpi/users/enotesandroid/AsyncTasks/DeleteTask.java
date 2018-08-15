@@ -18,7 +18,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  * Created by Owner on 1/11/2018.
  */
 
-public abstract class DeleteTask extends AsyncTask<String, Integer, String> {
+public abstract class DeleteTask extends ENotesTask {
 
     private String tag;
 
@@ -29,7 +29,7 @@ public abstract class DeleteTask extends AsyncTask<String, Integer, String> {
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.apiURL);
+            URL url = new URL(apiURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
@@ -65,9 +65,4 @@ public abstract class DeleteTask extends AsyncTask<String, Integer, String> {
             return null;
         }
     }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }

@@ -19,7 +19,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  * Created by Owner on 1/7/2018.
  */
 
-public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> {
+public abstract class UpdateNoteTask extends ENotesTask {
 
     private Note n;
 
@@ -30,7 +30,7 @@ public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> 
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.apiURL);
+            URL url = new URL(apiURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
@@ -51,7 +51,7 @@ public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> 
             msg.put("newFontSize", n.getFontSize());
             msg.put("newZ", n.getZ());
             msg.put("newColors", n.getColors().toString());
-            
+
             // write the message
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(msg.toString());
@@ -65,7 +65,6 @@ public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> 
                 response += input;
             }
             in.close();
-            Log.d("MYAPP", response);
 
             connection.disconnect();
 
@@ -77,8 +76,4 @@ public abstract class UpdateNoteTask extends AsyncTask<String, Integer, String> 
         }
     }
 
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }

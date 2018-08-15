@@ -24,9 +24,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for creating the main view of the app, which is the list of notes
+ */
 public class MainActivity extends AppCompatActivity {
 
-    ListView notesList;
+    private ListView notesList; // the listview listing each note by its title
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         notesList = (ListView) findViewById(R.id.NotesList);
         NoteManager.init(this, notesList, this.getApplicationContext());
         NoteManager.retrieveNotes();
-        Log.d("MYAPP", "ONCREATE");
 
         if(NoteManager.cookies.getCookieStore().getCookies().size() <= 0){
             startActivity(new Intent(this, LoginActivity.class));
@@ -57,9 +59,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        Log.d("MYAPP", "onResume");
         NoteManager.retrieveNotes();
-
     }
 
 

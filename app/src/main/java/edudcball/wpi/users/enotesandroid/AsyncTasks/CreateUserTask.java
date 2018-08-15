@@ -18,16 +18,16 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
  * Created by Owner on 1/17/2018.
+ * An task for creating a new user account on enotes.site
+ * Override the onPostExecute method to active after completion
  */
 
-public abstract class CreateUserTask extends AsyncTask<String, Integer, String> {
-
-    static final String COOKIES_HEADER = "Set-Cookie";
+public abstract class CreateUserTask extends ENotesTask{
 
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.baseURL + "/newuser");
+            URL url = new URL(baseURL + "/newuser");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoOutput(true);
             connection.setDoInput(true);
@@ -73,9 +73,4 @@ public abstract class CreateUserTask extends AsyncTask<String, Integer, String> 
             return null;
         }
     }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }

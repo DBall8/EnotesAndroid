@@ -2,6 +2,7 @@ package edudcball.wpi.users.enotesandroid;
 
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -21,7 +22,7 @@ public class Note {
     private int fontSize;
     private int zindex;
 
-    public Note(String username){
+    public Note(){
         this.tag = "note-" + System.currentTimeMillis();
         this.title = "";
         this.content = "";
@@ -41,28 +42,33 @@ public class Note {
     }
 
 
-    public Note(String tag, String title, String content, int x, int y, int w, int h, String font, int fontSize, int z, String colors) {
-        this.tag = tag;
-        if(title == null){
-            this.title = "";
-        }
-        else {
-            this.title = title;
-        }
-        this.content = content;
+    public Note(JSONObject json) {
         try {
-            this.colors = new JSONObject(colors);
+            this.tag = json.getString("tag");
+            String title = json.getString("title");
+            if (title == null || title.equals("null")) {
+                this.title = "";
+            } else {
+                this.title = title;
+            }
+            this.content = json.getString("content");
+            this.x = json.getInt("x");
+            this.y = json.getInt("y");
+            this.width = json.getInt("width");
+            this.height = json.getInt("height");
+            this.font = json.getString("font");
+            this.fontSize = json.getInt("fontsize");
+            this.zindex = json.getInt("zindex");
+
+            try {
+                this.colors = new JSONObject(json.getString("colors"));
+            } catch (Exception e) {
+                this.colors = null;
+            }
         }
-        catch(Exception e){
-            this.colors = null;
+        catch(JSONException e){
+            Log.d("ERR", "FAILED TO BUILD NOTE");
         }
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
-        this.font = font;
-        this.fontSize = fontSize;
-        this.zindex = z;
     }
 
     public void setContent(String c){
@@ -73,6 +79,10 @@ public class Note {
         if(this.zindex > 0){
             this.zindex--;
         }
+    }
+
+    public void setZIndex(int z){
+        this.zindex = z;
     }
 
     public String getTag(){

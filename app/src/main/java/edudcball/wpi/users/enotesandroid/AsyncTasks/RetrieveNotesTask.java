@@ -15,7 +15,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
  * Created by Owner on 1/5/2018.
  */
 
-public abstract class RetrieveNotesTask extends AsyncTask<String, Integer, String> {
+public abstract class RetrieveNotesTask extends ENotesTask {
 
 
     @Override
@@ -38,7 +38,6 @@ public abstract class RetrieveNotesTask extends AsyncTask<String, Integer, Strin
                 response += input;
             }
             in.close();
-            Log.d("MYAPP", response);
 
             connection.disconnect();
 
@@ -49,9 +48,4 @@ public abstract class RetrieveNotesTask extends AsyncTask<String, Integer, Strin
             return null;
         }
     }
-
-    protected void onProgressUpdate(Integer... progress) {
-    }
-
-    protected abstract void onPostExecute(String result);
 }
