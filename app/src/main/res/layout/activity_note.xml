@@ -7,75 +7,90 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <LinearLayout
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/titleBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:visibility="visible"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:id="@+id/buttonsLayout"
+
+        <TextView
+            android:id="@+id/titleBar"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:padding="10dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonsLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleBarLayout">
+
+        <EditText
+            android:id="@+id/noteText"
+            style="@android:style/Widget.Holo.EditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:gravity="top|left"
+            android:inputType="textMultiLine|textWebEditText"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            tools:layout_editor_absoluteX="85dp"
+            tools:layout_editor_absoluteY="73dp" />
 
-            <Button
-                android:id="@+id/saveButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:background="@color/background"
-                android:text="Save"
-                android:textColor="@color/black" />
+    </ScrollView>
 
-            <Button
-                android:id="@+id/cancelButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:background="@color/background"
-                android:text="Cancel"
-                android:textColor="@color/black" />
+    <LinearLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
-            <Button
-                android:id="@+id/deleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:background="@color/background"
-                android:text="Delete"
-                android:textColor="@color/black" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@color/background"
+            android:text="Save"
+            android:textColor="@color/black" />
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@color/background"
+            android:text="Cancel"
+            android:textColor="@color/black" />
 
-            <EditText
-                android:id="@+id/noteText"
-                style="@android:style/Widget.Holo.EditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:ems="10"
-                android:gravity="top|left"
-                android:inputType="textMultiLine|textWebEditText"
-                android:padding="10dp"
-                android:textColor="@color/white"
-                tools:layout_editor_absoluteX="85dp"
-                tools:layout_editor_absoluteY="73dp" />
-
-        </ScrollView>
-
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_weight="1"
+            android:background="@color/background"
+            android:text="Delete"
+            android:textColor="@color/black" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

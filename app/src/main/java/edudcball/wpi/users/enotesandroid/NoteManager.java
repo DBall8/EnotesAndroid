@@ -3,6 +3,8 @@ package edudcball.wpi.users.enotesandroid;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -67,6 +69,8 @@ public class NoteManager {
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
                 tv.setTextColor(ContextCompat.getColor(context, R.color.black));
+                Drawable bg = ContextCompat.getDrawable(context, R.drawable.note_icon);
+                tv.setBackground(bg);
 
                 // Get the note by its position in the list
                 Note n = getNote(getInstance().noteTagLookup.get(position));
@@ -74,7 +78,8 @@ public class NoteManager {
                 JSONObject colors = n.getColors();
                 if(colors != null){
                     try {
-                        tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
+                        bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.MULTIPLY);
+                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
                     }catch(Exception e){
                         tv.setBackgroundColor(parent.getResources().getColor(R.color.defaultNote));
                     }
@@ -330,7 +335,6 @@ public class NoteManager {
 
         Intent noteActivity = new Intent(getInstance().parent, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
-        noteActivity.putExtra("Content", n.getContent());
         getInstance().parent.startActivity(noteActivity);
     }
 

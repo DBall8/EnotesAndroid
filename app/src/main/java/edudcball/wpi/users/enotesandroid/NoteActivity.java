@@ -6,12 +6,13 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toolbar;
 
 /**
  * Created by Owner on 1/6/2018.
@@ -24,6 +25,7 @@ public class NoteActivity extends AppCompatActivity {
     private Button deleteButton;
     private EditText contentView;
     private ConstraintLayout layout;
+    private TextView titleBar;
     private String tag;
 
     private AlertDialog.Builder confirmDialog;
@@ -32,15 +34,20 @@ public class NoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         tag = getIntent().getStringExtra("Tag");
-        String content = getIntent().getStringExtra("Content");
-        contentView = (EditText) findViewById(R.id.noteText);
-        saveButton = (Button) findViewById(R.id.saveButton);
-        cancelButton = (Button) findViewById(R.id.cancelButton);
-        deleteButton = (Button) findViewById(R.id.deleteButton);
-        layout = (ConstraintLayout) findViewById(R.id.noteConstraint);
-        contentView.setText(content);
+        Note n = NoteManager.getNote(tag);
+
+        contentView = findViewById(R.id.noteText);
+        saveButton = findViewById(R.id.saveButton);
+        cancelButton = findViewById(R.id.cancelButton);
+        deleteButton = findViewById(R.id.deleteButton);
+        layout = findViewById(R.id.noteConstraint);
+        titleBar = findViewById(R.id.titleBar);
+
+        titleBar.setText(n.getTitle());
+        contentView.setText(n.getContent());
 
         final NoteActivity me = this;
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -55,7 +62,7 @@ public class NoteActivity extends AppCompatActivity {
 
         int color;
         try{
-            color = Color.parseColor(NoteManager.getNote(tag).getColors().getString("body"));
+            color = Color.parseColor(n.getColors().getString("body"));
         }
         catch(Exception e){
             color = getResources().getColor(R.color.defaultNote);
@@ -64,6 +71,7 @@ public class NoteActivity extends AppCompatActivity {
         saveButton.setBackgroundColor(color);
         cancelButton.setBackgroundColor(color);
         deleteButton.setBackgroundColor(color);
+        titleBar.setBackgroundColor(color);
         //layout.setBackgroundColor(color);
 
 
@@ -94,22 +102,7 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-        contentView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(final Editable editable) {
-
-            }
-        });
 
     }
 }
