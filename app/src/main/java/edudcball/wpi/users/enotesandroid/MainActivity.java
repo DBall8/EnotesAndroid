@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         NoteManager.init(this, notesList, this.getApplicationContext());
         NoteManager.retrieveNotes();
 
-        if(NoteManager.cookies.getCookieStore().getCookies().size() <= 0){
+        if(NoteManager.getCookies().getCookies().size() <= 0){
             startActivity(new Intent(this, LoginActivity.class));
             return;
         }

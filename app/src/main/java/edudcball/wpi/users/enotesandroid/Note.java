@@ -67,18 +67,50 @@ public class Note {
             }
         }
         catch(JSONException e){
-            Log.d("ERR", "FAILED TO BUILD NOTE");
+            Log.d("MYAPP", "FAILED TO BUILD NOTE");
+        }
+    }
+
+    public JSONObject toJSON(boolean isNew){
+        try {
+
+            JSONObject json = new JSONObject();
+            if(isNew) {
+                json.put("tag", tag);
+                json.put("title", title);
+                json.put("content", content);
+                json.put("x", x);
+                json.put("y", y);
+                json.put("width", width);
+                json.put("height", height);
+                json.put("font", font);
+                json.put("fontSize", fontSize);
+                json.put("zindex", zindex);
+                json.put("colors", colors);
+            }
+            else{
+                json.put("tag", tag);
+                json.put("newtitle", title);
+                json.put("newcontent", content);
+                json.put("newx", x);
+                json.put("newy", y);
+                json.put("newW", width);
+                json.put("newH", height);
+                json.put("newFont", font);
+                json.put("newFontSize", fontSize);
+                json.put("newZ", zindex);
+                json.put("newColors", colors);
+            }
+            return json;
+
+        } catch(JSONException e){
+            Log.d("MYAPP", "UNABLE TO CONVERT NOTE TO JSON: " + e.getMessage());
+            return null;
         }
     }
 
     public void setContent(String c){
         this.content = c;
-    }
-
-    public void decrementZ(){
-        if(this.zindex > 0){
-            this.zindex--;
-        }
     }
 
     public void setZIndex(int z){
@@ -110,10 +142,6 @@ public class Note {
     public int getZ() { return this.zindex; }
 
     public JSONObject getColors() { return this.colors; }
-
-    public void moveToTop(){
-        this.zindex = 9999;
-    }
 
 
 }

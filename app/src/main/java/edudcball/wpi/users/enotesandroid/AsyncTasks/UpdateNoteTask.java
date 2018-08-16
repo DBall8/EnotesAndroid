@@ -1,6 +1,5 @@
 package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
-import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -11,7 +10,6 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import edudcball.wpi.users.enotesandroid.NetInfo;
 import edudcball.wpi.users.enotesandroid.Note;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
@@ -30,48 +28,21 @@ public abstract class UpdateNoteTask extends ENotesTask {
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(apiURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
-            }
-            connection.setRequestMethod("PUT");
+            connect(apiURL, true, true, "PUT");
 
-            JSONObject msg = new JSONObject();
-            msg.put("tag", n.getTag());
-            msg.put("newtitle", n.getTitle());
-            msg.put("newcontent", n.getContent());
-            msg.put("newx", n.getX());
-            msg.put("newy", n.getY());
-            msg.put("newW", n.getWidth());
-            msg.put("newH", n.getHeight());
-            msg.put("newFont", n.getFont());
-            msg.put("newFontSize", n.getFontSize());
-            msg.put("newZ", n.getZ());
-            msg.put("newColors", n.getColors().toString());
+            JSONObject msg = n.toJSON(false);
 
             // write the message
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(msg.toString());
-            out.close();
+            writeMessage(msg.toString());
 
-            DataInputStream in = new DataInputStream(connection.getInputStream());
-            String input;
-            String response = "";
-            while ((input = in.readLine()) != null) {
-                //input = input.replace("null", "");
-                response += input;
-            }
-            in.close();
+            String resp = readResponse();
 
             connection.disconnect();
 
-            return response;
+            return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "UH OH " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN UPDATING NOTE: " + e.toString());
             return null;
         }
     }

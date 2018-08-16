@@ -1,6 +1,5 @@
 package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
-import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -8,7 +7,6 @@ import java.io.DataInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import edudcball.wpi.users.enotesandroid.NetInfo;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
@@ -21,30 +19,16 @@ public abstract class RetrieveNotesTask extends ENotesTask {
     @Override
     protected String doInBackground(String... vals) {
         try{
-            URL url = new URL(NetInfo.apiURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(false);
-            connection.setDoInput(true);
-            if(NoteManager.cookies.getCookieStore().getCookies().size() > 0){
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.cookies.getCookieStore().getCookies()));
-            }
-            connection.setRequestMethod("GET");
+            connect(apiURL, true, false, "GET");
 
-            DataInputStream in = new DataInputStream(connection.getInputStream());
-            String input;
-            String response = "";
-            while ((input = in.readLine()) != null) {
-                //input = input.replace("null", "");
-                response += input;
-            }
-            in.close();
+            String resp = readResponse();
 
             connection.disconnect();
 
-            return response;
+            return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "UH OH " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN RETRIEVING NOTES: " + e.toString());
             return null;
         }
     }

@@ -187,7 +187,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String result) {
                 activity.startActivity(new Intent(activity, LoginActivity.class));
-                NoteManager.cookies = new CookieManager();
+                NoteManager.resetCookies();
                 SharedPreferences sp = activity.getSharedPreferences("Login", MODE_PRIVATE);
                 sp.edit().putString("username", null).putString("password", null).commit();
             }

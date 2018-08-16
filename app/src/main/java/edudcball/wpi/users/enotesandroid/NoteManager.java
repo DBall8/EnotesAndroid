@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.CookieManager;
+import java.net.CookieStore;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,17 +32,28 @@ import edudcball.wpi.users.enotesandroid.AsyncTasks.UpdateNoteTask;
 
 public class NoteManager {
 
+    private final static int TOPZ = 9999;
+    private final static int BOTTOMZ = 100;
+
     private MainActivity parent;
 
-    private HashMap<String, Note> notes = new HashMap<String, Note>();
-    private ArrayList<String> noteTagLookup = new ArrayList<String>();
-    private ArrayList<String> noteTitles = new ArrayList<String>();
+    private HashMap<String, Note> notes = new HashMap<>(); // Map of notes by their tag
+    private ArrayList<String> noteTagLookup = new ArrayList<>(); // Maps note tags to their index in the noteAdapter
+    private ArrayList<String> noteTitles = new ArrayList<>(); // The list of note titles to display in the list view
 
-    private ArrayAdapter<String> noteAdapter;
-    private static String username = "";
+    private ArrayAdapter<String> noteAdapter; // The array adapter for displaying notes in the list view
+    private String username = ""; // user's username
 
-    public static CookieManager cookies = new CookieManager();
+    private CookieManager cookies = new CookieManager(); // manages cookies
 
+    private int topNoteZ = BOTTOMZ;
+
+    /**
+     * Initializes the NoteManager and attaches it to a list view for displaying notes
+     * @param parent the calling activity
+     * @param lv the list view for displaying notes
+     * @param context the context (was a while ago)
+     */
     public static void init(final MainActivity parent, ListView lv, final Context context){
 
         NoteManager instance = getInstance();
@@ -116,6 +128,7 @@ public class NoteManager {
             // Clear everything, start from empty, except the notes list to preserve their z index
             noteTitles.clear();
             noteTagLookup.clear();
+            notes.clear();
 
             // store the user's username
             username = obj.getString("username");
@@ -124,17 +137,11 @@ public class NoteManager {
             JSONArray arr = obj.getJSONArray("notes");
             for(int i=0; i<arr.length(); i++){
                 JSONObject noteJSON = arr.getJSONObject(i);
-                String tag = noteJSON.getString("tag");
-
                 Note n = new Note(noteJSON);
-                // If the note already existed, preserve its zindex
-                if(notes.containsKey(tag)){
-                    int z = notes.get(tag).getZ();
-                    notes.remove(tag);
-                    n.setZIndex(z);
-                }
                 notes.put(n.getTag(), n);
-
+                if(n.getZ() > topNoteZ){
+                    topNoteZ = n.getZ();
+                }
             }
             createNoteList();
             Log.d("MYAPP", "NOTES LOADED");
@@ -142,6 +149,7 @@ public class NoteManager {
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
             Log.d("MYAPP", e.getMessage().toString());
+            Log.d("RESPONSE", res);
             sessionExpired("Error when contacting server. Please try again later.");
         }
 
@@ -195,30 +203,27 @@ public class NoteManager {
         getInstance().noteAdapter.notifyDataSetChanged();
     }
 
-
-    public static void addNote(Note n){
-        getInstance().notes.put(n.getTag(), n);
-        getInstance().noteTagLookup.add(n.getTag());
-        getInstance().noteTitles.add(getTitleFromNote(n));
-        getInstance().noteAdapter.notifyDataSetChanged();
-    }
-
     public static void newNote(){
-        if(username == null){
-            Log.d("MYAPP", "Username is null");
-        }
-        Note n = new Note();
+
+        final Note n = new Note();
+        getInstance().notes.put(n.getTag(), n);
 
         new NewNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
                 try{
+
                     JSONObject obj = new JSONObject(result);
                     if(obj.getBoolean("sessionExpired")){
                         Log.d("MYAPP", "Session expired");
                         sessionExpired("Session expired. Please log in again.");
                         return;
+                    }
+                    else{
+                        getInstance().topNoteZ++;
+                        n.setZIndex(getInstance().topNoteZ);
+                        switchToNote(n);
                     }
                 }
                 catch(Exception e){
@@ -227,10 +232,6 @@ public class NoteManager {
                 }
             }
         }.execute();
-
-        addNote(n);
-        decrementZ(n.getTag());
-        switchToNote(n);
     }
 
     public static void updateNote(String tag){
@@ -307,22 +308,34 @@ public class NoteManager {
         return n.getContent().substring(0, end);
     }
 
-    public static void decrementZ(String tag){
-        for(Map.Entry<String, Note> cursor: getInstance().notes.entrySet()){
-            if(cursor.getKey() != tag){
-                cursor.getValue().decrementZ();
-            }
+    private void restackNotes(){
+        // noteTagLookup should already be sorted by zindex, so no need to resort.
+        int len = noteTagLookup.size();
+        for(int i=len-1; i>=0; i--){
+            Note n = getNote(noteTagLookup.get(i));
+            n.setZIndex(BOTTOMZ + i);
         }
+
+        topNoteZ = BOTTOMZ + len;
     }
 
     private static void switchToNote(Note n){
-        n.moveToTop();
-        decrementZ(n.getTag());
+
+        if(getInstance().topNoteZ >= TOPZ){
+            getInstance().restackNotes();
+        }
+
+        getInstance().topNoteZ++;
+        n.setZIndex(getInstance().topNoteZ);
+
         Intent noteActivity = new Intent(getInstance().parent, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
         noteActivity.putExtra("Content", n.getContent());
         getInstance().parent.startActivity(noteActivity);
     }
+
+    public static CookieStore getCookies(){ return getInstance().cookies.getCookieStore(); }
+    public static void resetCookies(){ getInstance().cookies = new CookieManager(); }
 
     private NoteManager(){}
 
