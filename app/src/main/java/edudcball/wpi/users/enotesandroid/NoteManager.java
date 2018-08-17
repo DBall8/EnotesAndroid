@@ -113,6 +113,8 @@ public class NoteManager {
 
             @Override
             protected void onPostExecute(String result) {
+                if(result == null) return;
+
                 getInstance().loadNotes(result);
             }
         }.execute();
@@ -123,6 +125,7 @@ public class NoteManager {
      * @param res the string version of an http response from the server
      */
     private void loadNotes(String res){
+
         try{
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
@@ -154,8 +157,7 @@ public class NoteManager {
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
-            Log.d("MYAPP", e.getMessage().toString());
-            Log.d("RESPONSE", res);
+            Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
             sessionExpired("Error when contacting server. Please try again later.");
         }
 
@@ -218,6 +220,9 @@ public class NoteManager {
 
             @Override
             protected void onPostExecute(String result) {
+
+                if(result == null) return;
+
                 try{
 
                     JSONObject obj = new JSONObject(result);
@@ -246,6 +251,9 @@ public class NoteManager {
 
             @Override
             protected void onPostExecute(String result) {
+
+                if(result == null) return;
+
                 try{
                     JSONObject obj = new JSONObject(result);
                     if(obj.getBoolean("sessionExpired")){
@@ -275,6 +283,9 @@ public class NoteManager {
         new DeleteTask(tag){
             @Override
             protected void onPostExecute(String result) {
+
+                if(result == null) return;
+
                 try{
                     JSONObject obj = new JSONObject(result);
                     if(obj.getBoolean("sessionExpired")){

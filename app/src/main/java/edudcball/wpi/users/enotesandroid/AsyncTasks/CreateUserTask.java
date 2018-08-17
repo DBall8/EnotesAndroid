@@ -4,23 +4,13 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import edudcball.wpi.users.enotesandroid.NoteManager;
-
 /**
  * Created by Owner on 1/17/2018.
  * An task for creating a new user account on enotes.site
  * Override the onPostExecute method to active after completion
  */
 
-public abstract class CreateUserTask extends ENotesTask{
+public abstract class CreateUserTask extends HttpConnectionTask {
 
     @Override
     protected String doInBackground(String... vals) {

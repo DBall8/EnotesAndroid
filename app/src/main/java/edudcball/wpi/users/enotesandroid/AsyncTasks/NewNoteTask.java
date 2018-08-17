@@ -10,7 +10,7 @@ import edudcball.wpi.users.enotesandroid.Note;
  * Created by Owner on 1/10/2018.
  */
 
-public abstract class NewNoteTask extends ENotesTask {
+public abstract class NewNoteTask extends HttpConnectionTask {
 
     private Note n;
 

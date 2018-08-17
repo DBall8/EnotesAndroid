@@ -4,21 +4,11 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import edudcball.wpi.users.enotesandroid.NoteManager;
-
 /**
  * Created by Owner on 1/4/2018.
  */
 
-public abstract class LoginTask extends ENotesTask {
+public abstract class LoginTask extends HttpConnectionTask {
 
     @Override
     protected String doInBackground(String... vals) {

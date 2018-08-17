@@ -1,23 +1,16 @@
 package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import edudcball.wpi.users.enotesandroid.Note;
-import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
  * Created by Owner on 1/7/2018.
  */
 
-public abstract class UpdateNoteTask extends ENotesTask {
+public abstract class UpdateNoteTask extends HttpConnectionTask {
 
     private Note n;
 

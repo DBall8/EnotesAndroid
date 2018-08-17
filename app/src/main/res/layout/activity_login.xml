@@ -41,7 +41,8 @@
             android:layout_margin="5dp"
             android:padding="5dp"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="@android:color/holo_red_dark"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
             android:visibility="gone" />
 
         <EditText

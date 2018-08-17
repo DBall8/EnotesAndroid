@@ -1,19 +1,12 @@
 package edudcball.wpi.users.enotesandroid.AsyncTasks;
 
-import android.text.TextUtils;
 import android.util.Log;
-
-import java.io.DataInputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import edudcball.wpi.users.enotesandroid.NoteManager;
 
 /**
  * Created by Owner on 1/16/2018.
  */
 
-public abstract class LogoutTask extends ENotesTask {
+public abstract class LogoutTask extends HttpConnectionTask {
 
     @Override
     protected String doInBackground(String... vals) {

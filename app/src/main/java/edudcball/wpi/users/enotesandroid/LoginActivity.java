@@ -83,6 +83,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
 
+        // Whipe session info
+        NoteManager.resetCookies();
+        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+        sp.edit().putString("session", null).commit();
+
         String error = getIntent().getStringExtra("error");
         if(error != null){
             messageText.setText(error);
@@ -111,8 +116,11 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(String result) {
+
                 loginButton.setText("Login");
                 loginButton.setEnabled(true);
+
+                if(result == null) return;
 
                 // this is executed on the main thread after the process is over
                 // update your UI here
@@ -146,8 +154,12 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected void onPostExecute(String result) {
+
                 loginButton.setText("Create Account");
                 loginButton.setEnabled(true);
+
+                if(result == null) return;
+
                 // this is executed on the main thread after the process is over
                 // update your UI here
                 try{
@@ -168,22 +180,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         }.execute(usernameAttempt, passwordAttempt);
-    }
-
-    public static void logout(AppCompatActivity act){
-        final AppCompatActivity activity = act;
-        new LogoutTask(){
-
-            @Override
-            protected void onPostExecute(String result) {
-                activity.startActivity(new Intent(activity, LoginActivity.class));
-                NoteManager.resetCookies();
-                SharedPreferences sp = activity.getSharedPreferences("Login", MODE_PRIVATE);
-                //sp.edit().clear();
-                sp.edit().putString("username", null).putString("password", null).putString("session", null).commit();
-            }
-        }.execute();
-
     }
 
 

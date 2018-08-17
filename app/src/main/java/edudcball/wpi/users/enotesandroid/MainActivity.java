@@ -1,5 +1,6 @@
 package edudcball.wpi.users.enotesandroid;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
 
 
 /**
@@ -49,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
         String session = sp.getString("session", null);
-
         if(session != null){
             NoteManager.resetCookies();
             NoteManager.addCookies(session);
@@ -78,7 +79,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if(id == R.id.action_logout){
-            LoginActivity.logout(this);
+
+            final Activity activity = this;
+            new LogoutTask(){
+
+                @Override
+                protected void onPostExecute(String result) {
+                    if(result == null) return;
+                    activity.startActivity(new Intent(activity, LoginActivity.class));
+                }
+            }.execute();
         }
 
         return super.onOptionsItemSelected(item);
