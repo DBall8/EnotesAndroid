@@ -6,13 +6,17 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toolbar;
+
+import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 
 /**
  * Created by Owner on 1/6/2018.
@@ -25,8 +29,11 @@ public class NoteActivity extends AppCompatActivity {
     private Button deleteButton;
     private EditText contentView;
     private ConstraintLayout layout;
-    private TextView titleBar;
-    private String tag;
+    private Toolbar noteToolbar;
+    private EditText titleBar;
+
+    private Note note;
+    private int color;
 
     private AlertDialog.Builder confirmDialog;
 
@@ -34,11 +41,14 @@ public class NoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
+
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        tag = getIntent().getStringExtra("Tag");
-        Note n = NoteManager.getNote(tag);
+        String tag = getIntent().getStringExtra("Tag");
+        note = NoteManager.getNote(tag);
 
+        noteToolbar = findViewById(R.id.noteToolbar);
+        setSupportActionBar(noteToolbar);
         contentView = findViewById(R.id.noteText);
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
@@ -46,34 +56,31 @@ public class NoteActivity extends AppCompatActivity {
         layout = findViewById(R.id.noteConstraint);
         titleBar = findViewById(R.id.titleBar);
 
-        titleBar.setText(n.getTitle());
-        contentView.setText(n.getContent());
+        titleBar.setText(note.getTitle());
+
+        contentView.setText(note.getContent());
+        contentView.requestFocus();
 
         final NoteActivity me = this;
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Note n = NoteManager.getNote(tag);
-                n.setContent(contentView.getText().toString());
-                NoteManager.updateNote(tag);
+                note.setContent(contentView.getText().toString());
+                note.setTitle(titleBar.getText().toString());
+                NoteManager.updateNote(note.getTag());
                 finish();
             }
         });
 
-        int color;
         try{
-            color = Color.parseColor(n.getColors().getString("body"));
+            color = Color.parseColor(note.getColors().getString("body"));
         }
         catch(Exception e){
             color = getResources().getColor(R.color.defaultNote);
             Log.d("MYAPP", "Could not get color");
         }
-        saveButton.setBackgroundColor(color);
-        cancelButton.setBackgroundColor(color);
-        deleteButton.setBackgroundColor(color);
-        titleBar.setBackgroundColor(color);
-        //layout.setBackgroundColor(color);
 
+        setColors();
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +95,7 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                NoteManager.deleteNote(tag);
+                NoteManager.deleteNote(note.getTag());
                 finish();
             }
         });
@@ -104,5 +111,39 @@ public class NoteActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private void setColors(){
+        saveButton.setBackgroundColor(color);
+        cancelButton.setBackgroundColor(color);
+        deleteButton.setBackgroundColor(color);
+        noteToolbar.setBackgroundColor(color);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_note, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.colorMenuItem:
+                ColorDialog dialog = new ColorDialog(NoteActivity.this, note, new EventHandler<Integer>() {
+                    @Override
+                    public void handle(Integer event) {
+                        color = event;
+                        setColors();
+                    }
+                });
+                dialog.show();
+                return true;
+            default:
+                return true;
+        }
     }
 }

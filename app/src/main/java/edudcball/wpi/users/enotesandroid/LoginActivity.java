@@ -13,6 +13,7 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import java.net.CookieManager;
+import java.net.HttpCookie;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.CreateUserTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LoginTask;
@@ -44,8 +45,6 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = (Button) findViewById(R.id.loginButton);
         messageText = (TextView) findViewById(R.id.messageText);
         otherLoginModeText = (TextView) findViewById(R.id.switchLoginType);
-
-
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,17 +97,6 @@ public class LoginActivity extends AppCompatActivity {
             switchNewUser();
         }
         loginButton.setEnabled(true);
-
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        String username = sp.getString("username", null);
-        String password = sp.getString("password", null);
-        if(username != null && password != null){
-            usernameField.setText(username);
-            passwordField.setText(password);
-            login(username, password);
-        }
-
-
     }
 
 
@@ -125,13 +113,14 @@ public class LoginActivity extends AppCompatActivity {
             protected void onPostExecute(String result) {
                 loginButton.setText("Login");
                 loginButton.setEnabled(true);
+
                 // this is executed on the main thread after the process is over
                 // update your UI here
                 try{
                     JSONObject obj = new JSONObject(result);
                     if(obj.getBoolean("successful")){
                         SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("username", usernameAttempt).putString("password", passwordAttempt).commit();
+                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
                         loginSuccess();
                     }
                     else{
@@ -164,8 +153,9 @@ public class LoginActivity extends AppCompatActivity {
                 try{
                     JSONObject obj = new JSONObject(result);
                     if(!obj.getBoolean("userAlreadyExists")){
+
                         SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("username", usernameAttempt).putString("password", passwordAttempt).commit();
+                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
                         loginSuccess();
                     }
                     else{
@@ -189,7 +179,8 @@ public class LoginActivity extends AppCompatActivity {
                 activity.startActivity(new Intent(activity, LoginActivity.class));
                 NoteManager.resetCookies();
                 SharedPreferences sp = activity.getSharedPreferences("Login", MODE_PRIVATE);
-                sp.edit().putString("username", null).putString("password", null).commit();
+                //sp.edit().clear();
+                sp.edit().putString("username", null).putString("password", null).putString("session", null).commit();
             }
         }.execute();
 

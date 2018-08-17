@@ -1,9 +1,13 @@
 package edudcball.wpi.users.enotesandroid;
 
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Owner on 1/5/2018.
@@ -109,8 +113,18 @@ public class Note {
         }
     }
 
+    public void setColor(int color){
+        JSONObject colorJSON = ColorConversions.getJSONFromColor(color);
+        if(colorJSON != null)
+            this.colors = colorJSON;
+    }
+
     public void setContent(String c){
         this.content = c;
+    }
+
+    public void setTitle(String title){
+        this.title = title;
     }
 
     public void setZIndex(int z){
@@ -142,6 +156,4 @@ public class Note {
     public int getZ() { return this.zindex; }
 
     public JSONObject getColors() { return this.colors; }
-
-
 }

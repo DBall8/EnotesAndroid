@@ -30,7 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@android:color/holo_orange_light"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:rippleColor="@color/loginpurple"
         app:srcCompat="@drawable/ic_action_name" />
 
 </android.support.design.widget.CoordinatorLayout>

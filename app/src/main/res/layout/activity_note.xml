@@ -16,15 +16,26 @@
         app:layout_constraintTop_toTopOf="parent">
 
 
-        <TextView
-            android:id="@+id/titleBar"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/noteToolbar"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:gravity="center_vertical|center_horizontal"
-            android:padding="10dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@color/black"
-            android:textStyle="bold" />
+            android:layout_height="wrap_content"
+            android:background="@color/background"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme" >
+
+            <EditText
+                android:id="@+id/titleBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:gravity="center_vertical|center_horizontal"
+                android:inputType="text|textPersonName"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/black"
+                android:textStyle="bold" />
+        </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
     <ScrollView

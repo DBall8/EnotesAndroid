@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryDark">#303f9f</color>
     <color name="colorAccent">#FF4081</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
@@ -10,4 +10,11 @@
     <color name="defaultNote">#ffe062</color>
     <color name="loginpurple">#9212d2</color>
     <color name="lightpurple">#cb62ff</color>
+    <!-- note colors -->
+    <color name="noteYellow">#ffe062</color>
+    <color name="noteOrange">#ffa63d</color>
+    <color name="noteRed">#f97e7e</color>
+    <color name="noteGreen">#53ce57</color>
+    <color name="noteBlue">#7fc8f5</color>
+    <color name="notePurple">#e083f7</color>
 </resources>

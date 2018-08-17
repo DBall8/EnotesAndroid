@@ -30,7 +30,6 @@ public abstract class LoginTask extends ENotesTask {
             msg.put("password", vals[1]);
             msg.put("stayLoggedIn", false);
 
-
             // write the message
             writeMessage(msg.toString());
 

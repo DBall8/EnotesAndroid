@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import java.net.CookieManager;
 import java.net.CookieStore;
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -339,6 +340,9 @@ public class NoteManager {
     }
 
     public static CookieStore getCookies(){ return getInstance().cookies.getCookieStore(); }
+    public static void addCookies(String cookie){
+        getInstance().cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
+    }
     public static void resetCookies(){ getInstance().cookies = new CookieManager(); }
 
     private NoteManager(){}
