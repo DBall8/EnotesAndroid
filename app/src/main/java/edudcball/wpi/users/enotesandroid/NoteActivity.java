@@ -184,8 +184,14 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void setFont(String font){
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + note.getFont() + ".ttf");
-        contentView.setTypeface(typeface);
+        try {
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + note.getFont() + ".ttf");
+            contentView.setTypeface(typeface);
+        }
+        catch(Exception e){
+            Log.d("MYAPP", "FONT: " + font + " is not loaded.");
+            contentView.setTypeface(Typeface.DEFAULT);
+        }
     }
 
     private void setFontSize(int size){

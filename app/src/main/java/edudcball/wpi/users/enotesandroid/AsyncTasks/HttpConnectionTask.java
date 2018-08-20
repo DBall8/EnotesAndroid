@@ -19,25 +19,43 @@ import java.util.Map;
 import edudcball.wpi.users.enotesandroid.NoteManager;
 
 
+/**
+ * An abstract class for managing communication with the enotes server
+ * Overrides AsyncTask
+ * Each subclass from this class should override onPostExecute to call the callback function
+ */
 public abstract class HttpConnectionTask extends AsyncTask<String, Integer, String> {
 
+    // URL of the server
     protected static final String baseURL = "https://enotes.site";//"http://10.0.2.2:8080";//
-    protected static final String apiURL = "/api";
-    protected static final String COOKIES_HEADER = "Set-Cookie";
-    private static final int TIMEOUT = 5000; // ms
+    protected static final String apiURL = "/api"; // path that all note requests are sent to
+    protected static final String COOKIES_HEADER = "Set-Cookie"; // header to look for new cookies to save
+    private static final int TIMEOUT = 5000; // Timeout time for connection in milliseconds
 
-    protected HttpURLConnection connection;
+    protected HttpURLConnection connection; // active http connection
 
+    /**
+     * Creates a connection with the server
+     * @param urlStr the path to connect to
+     * @param doInput true if the connection will expect a response
+     * @param doOutput true if the app will send a message to the server
+     * @param method HTTP method that will be used (GET, POST, PUT, or DELETE)
+     */
     protected void connect(String urlStr, boolean doInput, boolean doOutput, String method){
         try {
+            // connect
             URL url = new URL(baseURL + urlStr);
             connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(TIMEOUT);
             connection.setDoOutput(doOutput);
             connection.setDoInput(doInput);
+
+            // add any cookies that are saved
             if (NoteManager.getCookies().getCookies().size() > 0) {
                 connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.getCookies().getCookies()));
             }
+
+            // set method
             connection.setRequestMethod(method);
         }
         catch(Exception e){
@@ -45,23 +63,36 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
         }
     }
 
+    /**
+     * Sends a message to the server
+     * @param msg the message to send
+     */
     protected void writeMessage(String msg){
         try {
+            // fail if connection isnt open
             if (connection == null) {
                 Log.d("ERROR", "No open connection");
+                NoteManager.sessionExpired("Lost connection to server.");
                 return;
             }
 
+            // Write message
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(msg);
             out.close();
+
         }catch(IOException e){
             NoteManager.sessionExpired("Lost connection to server.");
         }
     }
 
+    /**
+     * Reads a response from the server
+     * @return the response body as a string
+     */
     protected String readResponse(){
         try {
+            // read until the message is finished
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String input;
             String response = "";
@@ -78,6 +109,9 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
         }
     }
 
+    /**
+     * Save cookies set by the server
+     */
     protected void saveCookies(){
         Map<String, List<String>> headerFields = connection.getHeaderFields();
         List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);

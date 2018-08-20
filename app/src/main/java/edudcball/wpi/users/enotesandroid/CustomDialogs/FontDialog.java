@@ -3,22 +3,27 @@ package edudcball.wpi.users.enotesandroid.CustomDialogs;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.widget.RadioButton;
 
-
 import java.util.HashMap;
-
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
 
+/**
+ * A dialog for selecting the font of a note
+ */
 public class FontDialog extends CustomOptionsDialog<String> {
 
+    // Constructor
     public FontDialog(Context context, String selectedFont, EventHandler<String> confirmEvent) {
         super(context, R.layout.dialog_font, selectedFont, confirmEvent);
     }
 
+    /**
+     * Sets each radio button to bind to a certain font
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

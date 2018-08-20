@@ -5,35 +5,54 @@ import android.util.Log;
 import org.json.JSONObject;
 
 /**
- * Created by Owner on 1/17/2018.
- * An task for creating a new user account on enotes.site
- * Override the onPostExecute method to active after completion
+ * A task for creating a new user account
+ * Override the onPostExecute method to activate after completion
  */
 
 public abstract class CreateUserTask extends HttpConnectionTask {
 
+    private String username, password;
+
+    public CreateUserTask(String username, String password){
+        this.username = username;
+        this.password = password;
+    }
+
+    private CreateUserTask(){}
+
+    /**
+     * Runs when the the task is executed
+     * @param vals unused
+     * @return returns the string response from the server
+     */
     @Override
     protected String doInBackground(String... vals) {
         try{
-
+            // Connect to the server
             connect("/newuser", true, true, "POST");
 
+            // Build the message
             JSONObject msg = new JSONObject();
-            msg.put("username", vals[0]);
-            msg.put("password", vals[1]);
+            msg.put("username", username);
+            msg.put("password", password);
             msg.put("stayLoggedIn", false);
 
 
             // write the message
             writeMessage(msg.toString());
 
+            // Save the user session
             saveCookies();
 
+            // read the response
             String resp = readResponse();
 
-            Log.d("MYAPP", resp);
-
+            // stop the connection
             connection.disconnect();
+
+            // wipe login data just in case
+            username = null;
+            password = null;
 
             return resp;
 

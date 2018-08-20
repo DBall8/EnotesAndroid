@@ -11,13 +11,18 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A class for converting between color id codes and their JSON forms used on the web version
+ */
 public class ColorConversions {
 
-    private final Map<Integer, JSONObject> colorToJSON = new HashMap<>();
-    private Context context;
+    private final Map<Integer, JSONObject> colorToJSON = new HashMap<>(); // map from color id to JSON
 
+    /**
+     * Builds the color conversion table
+     * @param context the context to use to load the color IDs
+     */
     public static void init(Context context){
-        getInstance().context = context;
         Map<Integer, JSONObject> map = getInstance().colorToJSON;
         map.put(ContextCompat.getColor(context, R.color.noteYellow), makeColorJSON("#ddaf00", "#ffe062"));
         map.put(ContextCompat.getColor(context, R.color.noteOrange), makeColorJSON("#e88a19", "#ffa63d"));
@@ -27,6 +32,12 @@ public class ColorConversions {
         map.put(ContextCompat.getColor(context, R.color.notePurple), makeColorJSON("#b34ace", "#e083f7"));
     }
 
+    /**
+     * Builds a JSON object with the format that matches the format used on the web server
+     * @param head the color of the note head
+     * @param body the color of the note body
+     * @return the JSON object with the given values for head and body
+     */
     private static JSONObject makeColorJSON(String head, String body){
         JSONObject json = new JSONObject();
         try {
@@ -39,6 +50,11 @@ public class ColorConversions {
         }
     }
 
+    /**
+     * Retrieves the JSON object corresponding to the given color code
+     * @param color
+     * @return
+     */
     public static JSONObject getJSONFromColor(int color){
         if(getInstance().colorToJSON.containsKey(color)) {
             return getInstance().colorToJSON.get(color);
@@ -47,6 +63,7 @@ public class ColorConversions {
     }
 
 
+    // ----------------- Code for creating a protected singleton ----------------------------------
     private ColorConversions(){}
 
     private static class SingletonHelper{

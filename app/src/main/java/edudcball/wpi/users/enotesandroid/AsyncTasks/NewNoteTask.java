@@ -7,30 +7,40 @@ import org.json.JSONObject;
 import edudcball.wpi.users.enotesandroid.Note;
 
 /**
- * Created by Owner on 1/10/2018.
+ * A task for sending a new note event to the server
+ * Override the onPostExecute method to activate after completion
  */
 
 public abstract class NewNoteTask extends HttpConnectionTask {
 
-    private Note n;
+    private Note n; // the new note being added
 
     public NewNoteTask(Note n) {
         this.n = n;
     }
 
+    /**
+     * Runs on task execution
+     * @param vals unused
+     * @return
+     */
     @Override
     protected String doInBackground(String... vals) {
         try{
 
+            // connect to the server
             connect(apiURL, true, true, "POST");
 
+            // create the message from the note
             JSONObject msg = n.toJSON(true);
 
             // write the message
             writeMessage(msg.toString());
 
+            // get the response
             String resp = readResponse();
 
+            // disconnect
             connection.disconnect();
 
             return resp;

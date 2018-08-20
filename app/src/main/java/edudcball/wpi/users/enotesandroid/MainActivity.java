@@ -54,9 +54,13 @@ public class MainActivity extends AppCompatActivity {
         if(session != null){
             NoteManager.resetCookies();
             NoteManager.addCookies(session);
+            NoteManager.retrieveNotes();
+        }
+        else{
+            startActivity(new Intent(this, LoginActivity.class));
         }
 
-        NoteManager.retrieveNotes();
+
     }
 
     @Override

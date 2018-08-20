@@ -9,12 +9,20 @@ import java.util.HashMap;
 import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
 
+/**
+ * A dialog for selecting the font size of the note
+ */
 public class FontSizeDialog extends CustomOptionsDialog {
 
+    // Constructor
     public FontSizeDialog(Context context, int selectedFontSize, EventHandler<Integer> confirmEvent) {
         super(context, R.layout.dialog_font_size, selectedFontSize, confirmEvent);
     }
 
+    /**
+     * Binds each gont size to a radio button on creation
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

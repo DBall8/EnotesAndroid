@@ -3,19 +3,28 @@ package edudcball.wpi.users.enotesandroid.AsyncTasks;
 import android.util.Log;
 
 /**
- * Created by Owner on 1/16/2018.
+ * A task for loggin out of a user account
+ * Override the onPostExecute method to activate after completion
  */
 
 public abstract class LogoutTask extends HttpConnectionTask {
 
+    /**
+     * Runs on task execution
+     * @param vals unused
+     * @return
+     */
     @Override
     protected String doInBackground(String... vals) {
         try{
 
-            connect("", true, false, "POST");
+            // connect to server
+            connect("/logout", true, false, "POST");
 
+            // read the reponse
             String resp = readResponse();
 
+            // disconnect
             connection.disconnect();
 
             return resp;

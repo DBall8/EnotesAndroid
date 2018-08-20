@@ -3,19 +3,28 @@ package edudcball.wpi.users.enotesandroid.AsyncTasks;
 import android.util.Log;
 
 /**
- * Created by Owner on 1/5/2018.
+ * A task for retrieving all notes created by the user
+ * Override the onPostExecute method to activate after completion
  */
 
 public abstract class RetrieveNotesTask extends HttpConnectionTask {
 
 
+    /**
+     * Runs on task execution
+     * @param vals unused
+     * @return
+     */
     @Override
     protected String doInBackground(String... vals) {
         try{
+            // connect to the server
             connect(apiURL, true, false, "GET");
 
+            // read the response
             String resp = readResponse();
 
+            // disconnect from the server
             connection.disconnect();
 
             return resp;

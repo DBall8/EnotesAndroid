@@ -20,11 +20,12 @@ import edudcball.wpi.users.enotesandroid.AsyncTasks.LoginTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
 
 /**
- * Created by Owner on 1/7/2018.
+ * Class for running the Login screen of the application
  */
 
 public class LoginActivity extends AppCompatActivity {
 
+    // Screen fields and buttons
     private EditText usernameField;
     private EditText passwordField;
     private EditText passwordConfirm;
@@ -32,45 +33,39 @@ public class LoginActivity extends AppCompatActivity {
     private TextView messageText;
     private TextView otherLoginModeText;
 
+    // True when in new user mode, false when in log in mode
     private Boolean newUser = false;
 
+    /**
+     * Runs when the login activity is first opened
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // load layout
         setContentView(R.layout.activity_login);
 
-        usernameField = (EditText) findViewById(R.id.usernameField);
-        passwordField = (EditText) findViewById(R.id.passwordField);
-        passwordConfirm = (EditText) findViewById(R.id.passwordConfirmation);
-        loginButton = (Button) findViewById(R.id.loginButton);
-        messageText = (TextView) findViewById(R.id.messageText);
-        otherLoginModeText = (TextView) findViewById(R.id.switchLoginType);
+        // find all the views
+        usernameField = findViewById(R.id.usernameField);
+        passwordField = findViewById(R.id.passwordField);
+        passwordConfirm = findViewById(R.id.passwordConfirmation);
+        loginButton = findViewById(R.id.loginButton);
+        messageText = findViewById(R.id.messageText);
+        otherLoginModeText = findViewById(R.id.switchLoginType);
+
+        // Set up button actions
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String usernameAttempt = usernameField.getText().toString();
-                String passwordAttempt = passwordField.getText().toString();
-
-                if(newUser){
-                    String passwordConfirmAttempt = passwordConfirm.getText().toString();
-                    if(passwordAttempt.equals(passwordConfirmAttempt)){
-                        createNewUser(usernameAttempt, passwordAttempt);
-                    }
-                    else{
-                        messageText.setText("Passwords do not match.");
-                        messageText.setVisibility(View.VISIBLE);
-                    }
-                }
-                else{
-                    login(usernameAttempt, passwordAttempt);
-                }
-
-
-
+                handleLoginClick();
             }
         });
 
+        // this makes clicking on the text below the login fields switch the activity between
+        // new user mode and login mode, where new user mode is for creating a new account
+        // and login mode is for logging in to an existing account
         otherLoginModeText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,15 +74,19 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Gets called each time the user returns to the login screen
+     */
     @Override
     protected void onResume(){
         super.onResume();
 
-        // Whipe session info
+        // Wipe any saved session info
         NoteManager.resetCookies();
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
         sp.edit().putString("session", null).commit();
 
+        // Get any error message text that might have been provided if an error caused te
         String error = getIntent().getStringExtra("error");
         if(error != null){
             messageText.setText(error);
@@ -104,6 +103,40 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setEnabled(true);
     }
 
+    private void handleLoginClick(){
+        // get username and password field values
+        String usernameAttempt = usernameField.getText().toString();
+        String passwordAttempt = passwordField.getText().toString();
+
+        if(usernameAttempt.equals("")){
+            displayError("Please enter a username.");
+            return;
+        }
+        if(passwordAttempt.equals("")){
+            displayError("Please enter a password.");
+            return;
+        }
+
+
+        // if in new user mode, check that the confirm password matches the given password
+        if(newUser){
+            String passwordConfirmAttempt = passwordConfirm.getText().toString();
+            if(passwordConfirmAttempt.equals("")){
+                displayError("Please enter confirm your password.");
+                return;
+            }
+            if(passwordAttempt.equals(passwordConfirmAttempt)){
+                createNewUser(usernameAttempt, passwordAttempt);
+            }
+            else{
+                displayError("Error: passwords do not match.");
+            }
+        }
+        else{
+            login(usernameAttempt, passwordAttempt);
+        }
+    }
+
 
     private void login(final String usernameAttempt, final String passwordAttempt){
 
@@ -112,7 +145,7 @@ public class LoginActivity extends AppCompatActivity {
 
         final AppCompatActivity me= this;
 
-        new LoginTask(){
+        new LoginTask(usernameAttempt, passwordAttempt){
 
             @Override
             protected void onPostExecute(String result) {
@@ -140,7 +173,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("MYAPP", "Failed to parse JSON");
                 }
             }
-        }.execute(usernameAttempt, passwordAttempt);
+        }.execute();
     }
 
     private void createNewUser(final String usernameAttempt, final String passwordAttempt){
@@ -150,7 +183,7 @@ public class LoginActivity extends AppCompatActivity {
 
         final AppCompatActivity me= this;
 
-        new CreateUserTask(){
+        new CreateUserTask(usernameAttempt, passwordAttempt){
 
             @Override
             protected void onPostExecute(String result) {
@@ -179,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("MYAPP", "Failed to parse JSON");
                 }
             }
-        }.execute(usernameAttempt, passwordAttempt);
+        }.execute();
     }
 
 
@@ -200,5 +233,14 @@ public class LoginActivity extends AppCompatActivity {
             otherLoginModeText.setText(R.string.loginSwitch);
             newUser = true;
         }
+    }
+
+    private void displayError(String errorText){
+        messageText.setText(errorText);
+        messageText.setVisibility(View.VISIBLE);
+    }
+
+    private void hideError(){
+        messageText.setVisibility(View.GONE);
     }
 }
