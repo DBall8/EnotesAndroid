@@ -2,12 +2,15 @@ package edudcball.wpi.users.enotesandroid;
 
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,7 +19,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
+import org.json.JSONException;
+
+import java.io.IOException;
+
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
+import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
+import edudcball.wpi.users.enotesandroid.CustomDialogs.FontSizeDialog;
 
 /**
  * Created by Owner on 1/6/2018.
@@ -60,6 +69,8 @@ public class NoteActivity extends AppCompatActivity {
 
         contentView.setText(note.getContent());
         contentView.requestFocus();
+        setFontSize(note.getFontSize());
+        setFont(note.getFont());
 
         final NoteActivity me = this;
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -109,8 +120,6 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
 
     private void setColors(){
@@ -133,17 +142,53 @@ public class NoteActivity extends AppCompatActivity {
 
         switch (item.getItemId()){
             case R.id.colorMenuItem:
-                ColorDialog dialog = new ColorDialog(NoteActivity.this, note, new EventHandler<Integer>() {
+                int selectedColor = 0;
+                try {
+                    selectedColor = Color.parseColor(note.getColors().getString("body"));
+                } catch (JSONException e) {
+                    selectedColor = ContextCompat.getColor(this, R.color.defaultNote);
+                }
+                ColorDialog cDialog = new ColorDialog(NoteActivity.this, selectedColor, new EventHandler<Integer>() {
                     @Override
-                    public void handle(Integer event) {
-                        color = event;
+                    public void handle(Integer eventColor) {
+                        note.setColor(eventColor);
+                        color = eventColor;
                         setColors();
                     }
                 });
-                dialog.show();
+                cDialog.show();
+                return true;
+            case R.id.fontMenuItem:
+                FontDialog fDialog = new FontDialog(NoteActivity.this, note.getFont(), new EventHandler<String>() {
+                    @Override
+                    public void handle(String stringEvent) {
+                        note.setFont(stringEvent);
+                        setFont(stringEvent);
+                    }
+                });
+                fDialog.show();
+                return true;
+            case R.id.fontSizeMenuItem:
+                FontSizeDialog fsDialog = new FontSizeDialog(NoteActivity.this, note.getFontSize(), new EventHandler<Integer>() {
+                    @Override
+                    public void handle(Integer sizeEvent) {
+                        note.setFontSize(sizeEvent);
+                        setFontSize(sizeEvent);
+                    }
+                });
+                fsDialog.show();
                 return true;
             default:
                 return true;
         }
+    }
+
+    private void setFont(String font){
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + note.getFont() + ".ttf");
+        contentView.setTypeface(typeface);
+    }
+
+    private void setFontSize(int size){
+        contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, note.getFontSize() + 4);
     }
 }

@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:background="@color/background"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme" >
+            android:theme="?attr/actionBarTheme">
 
             <EditText
                 android:id="@+id/titleBar"
@@ -38,30 +38,26 @@
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
 
-    <ScrollView
-        android:id="@+id/scrollView2"
+    <EditText
+        android:id="@+id/noteText"
+        style="@android:style/Widget.Holo.EditText"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:gravity="top|left"
+        android:inputType="textMultiLine|textWebEditText"
+        android:padding="10dp"
+        android:scrollbars="vertical"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/buttonsLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleBarLayout">
-
-        <EditText
-            android:id="@+id/noteText"
-            style="@android:style/Widget.Holo.EditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:ems="10"
-            android:gravity="top|left"
-            android:inputType="textMultiLine|textWebEditText"
-            android:padding="10dp"
-            android:textColor="@color/white"
-            tools:layout_editor_absoluteX="85dp"
-            tools:layout_editor_absoluteY="73dp" />
-
-    </ScrollView>
+        app:layout_constraintTop_toBottomOf="@+id/titleBarLayout" />
 
     <LinearLayout
         android:id="@+id/buttonsLayout"

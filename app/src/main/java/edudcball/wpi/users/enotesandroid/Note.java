@@ -119,6 +119,14 @@ public class Note {
             this.colors = colorJSON;
     }
 
+    public void setFont(String font){
+        this.font = font;
+    }
+
+    public void setFontSize(int fontSize){
+        this.fontSize = fontSize;
+    }
+
     public void setContent(String c){
         this.content = c;
     }

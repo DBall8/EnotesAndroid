@@ -17,46 +17,46 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <RadioButton
-            android:id="@+id/yellowButton"
+            android:id="@+id/tenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Yellow" />
+            android:text="10" />
 
         <RadioButton
-            android:id="@+id/orangeButton"
+            android:id="@+id/twelveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Orange" />
+            android:text="12" />
 
         <RadioButton
-            android:id="@+id/redButton"
+            android:id="@+id/fourteenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Red" />
+            android:text="14" />
 
         <RadioButton
-            android:id="@+id/greenButton"
+            android:id="@+id/eighteenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Green" />
+            android:text="18" />
 
         <RadioButton
-            android:id="@+id/blueButton"
+            android:id="@+id/twentyFourButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Blue" />
+            android:text="24" />
 
         <RadioButton
-            android:id="@+id/purpleButton"
+            android:id="@+id/thirtyTwoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Purple" />
+            android:text="32" />
 
     </RadioGroup>
 
