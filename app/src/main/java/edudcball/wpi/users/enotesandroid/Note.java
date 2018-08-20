@@ -1,53 +1,59 @@
 package edudcball.wpi.users.enotesandroid;
 
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Created by Owner on 1/5/2018.
+ * Class for containing all the data needed for a single Note
  */
 
 public class Note {
-    private String tag;
-    private String title;
-    private String content;
-    private JSONObject colors;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private String font;
-    private int fontSize;
-    private int zindex;
+    private String tag; // tag that uniquely identifies the note
+    private String title; // the optional title displayed at the top of the note
+    private String content; // the text content of the note
+    private JSONObject colors; // a JSON containing the colors used for the note
+    private int x; // the note's x coordinate
+    private int y; // the note's y coordinate
+    private int width; // the note's width
+    private int height; // the note's height
+    private String font; // the font of the note's text
+    private int fontSize; // the size of the note's text
+    private int zindex; // the depth of the note used for stacking and ordering
 
+    /**
+     * Constructor for a new empty note
+     */
     public Note(){
-        this.tag = "note-" + System.currentTimeMillis();
-        this.title = "";
-        this.content = "";
-        try {
+        this.tag = "note-" + System.currentTimeMillis(); // create a tag from the current time
+        this.title = ""; // empty title
+        this.content = ""; // empty content
+        try { // default color of yellow
             this.colors = new JSONObject("{head: \'#ddaf00\', body: \'#ffe062\'}");
         }
         catch(Exception e){
             this.colors = null;
         }
+
+        // default position of 200, 200
         this.x = 200;
         this.y = 200;
+        // default size of 300 x 400
         this.width = 300;
         this.height = 400;
-        this.font = "Arial";
-        this.fontSize = 12;
-        this.zindex = 9999;
+        this.font = "Arial"; // default font of Arial
+        this.fontSize = 12; //default size 12
+        this.zindex = 9999; // starts on top (is quickly changed)
     }
 
-
+    /**
+     * Create the note from a JSON object
+     * @param json the json object
+     */
     public Note(JSONObject json) {
         try {
+            // get each field from the JSON
             this.tag = json.getString("tag");
             String title = json.getString("title");
             if (title == null || title.equals("null")) {
@@ -75,6 +81,11 @@ public class Note {
         }
     }
 
+    /**
+     * Create a json object representing the note
+     * @param isNew true if the note is new, false if its an existing note (used for http json formats)
+     * @return a json object representing the note
+     */
     public JSONObject toJSON(boolean isNew){
         try {
 
@@ -113,7 +124,12 @@ public class Note {
         }
     }
 
+    /**
+     * Set the color of the note
+     * @param color the number ID of the color to set to
+     */
     public void setColor(int color){
+        // Get the JSON version of the color
         JSONObject colorJSON = ColorConversions.getJSONFromColor(color);
         if(colorJSON != null)
             this.colors = colorJSON;
@@ -148,14 +164,6 @@ public class Note {
     public String getContent(){
         return this.content;
     }
-
-    public int getX() { return this.x; }
-
-    public int getY() { return this.y; }
-
-    public int getWidth() { return this.width; }
-
-    public int getHeight() { return this.height; }
 
     public String getFont(){ return this.font; }
 

@@ -23,18 +23,26 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView notesList; // the listview listing each note by its title
 
+    /**
+     * Gets called the first time the main activity is created
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // setup layout
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        // setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        notesList = (ListView) findViewById(R.id.NotesList);
+        // Initialize the static note handler with the notesList
+        notesList = findViewById(R.id.NotesList);
         NoteManager.init(this, notesList, this.getApplicationContext());
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.newNoteFab);
+        // Set up the floating button for adding notes
+        FloatingActionButton fab = findViewById(R.id.newNoteFab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -42,20 +50,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // initialize the color conversion class
         ColorConversions.init(this.getApplicationContext());
     }
 
+    /**
+     * Gets called each time the app returns to the main activity
+     */
     @Override
     public void onResume(){
         super.onResume();
 
+        // look for a saved session in on the phone
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
         String session = sp.getString("session", null);
+
+        // if a session is saved, load the session into the cookie manager and load the user's notes
         if(session != null){
             NoteManager.resetCookies();
             NoteManager.addCookies(session);
             NoteManager.retrieveNotes();
         }
+        // If no session is saved, move to login screen
         else{
             startActivity(new Intent(this, LoginActivity.class));
         }
@@ -63,6 +79,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Simply sets up the toolbar menu to open the main activity menu
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -70,21 +91,28 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * Handles the selection of a certain menu item
+     * @param item the menu item that was selected
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
+        // Get the id of the menu item that was selected
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // do nothing yet
         if (id == R.id.action_settings) {
             return true;
         }
 
+        // Logout the user
         if(id == R.id.action_logout){
 
             final Activity activity = this;
+
+            // create a background task that logs out the user
             new LogoutTask(){
 
                 @Override

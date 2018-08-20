@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -81,6 +82,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
 
+        // remove keyboard at the start
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
         // Wipe any saved session info
         NoteManager.resetCookies();
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
@@ -89,25 +93,30 @@ public class LoginActivity extends AppCompatActivity {
         // Get any error message text that might have been provided if an error caused te
         String error = getIntent().getStringExtra("error");
         if(error != null){
-            messageText.setText(error);
-            messageText.setVisibility(View.VISIBLE);
+            displayError(error);
         }
         else{
-            messageText.setText("");
-            messageText.setVisibility(View.GONE);
+            hideError();
         }
 
+        // if in newUser mode, make sure the UI shows it
         if(newUser){
             switchNewUser();
         }
+
+        // make sure the login button is enabled
         loginButton.setEnabled(true);
     }
 
+    /**
+     * Method that is called when the user clicks the login/create account button
+     */
     private void handleLoginClick(){
         // get username and password field values
         String usernameAttempt = usernameField.getText().toString();
         String passwordAttempt = passwordField.getText().toString();
 
+        // ensure the fields aren't blank
         if(usernameAttempt.equals("")){
             displayError("Please enter a username.");
             return;
@@ -118,55 +127,74 @@ public class LoginActivity extends AppCompatActivity {
         }
 
 
-        // if in new user mode, check that the confirm password matches the given password
+        // if in new user mode
         if(newUser){
+            // make sure the confirm field isn't blank
             String passwordConfirmAttempt = passwordConfirm.getText().toString();
             if(passwordConfirmAttempt.equals("")){
                 displayError("Please enter confirm your password.");
                 return;
             }
-            if(passwordAttempt.equals(passwordConfirmAttempt)){
-                createNewUser(usernameAttempt, passwordAttempt);
-            }
-            else{
+            // check that the confirm password matches the given password
+            if(!passwordAttempt.equals(passwordConfirmAttempt)){
                 displayError("Error: passwords do not match.");
+                return;
             }
+
+            // create the new user account
+            createNewUser(usernameAttempt, passwordAttempt);
         }
         else{
+            // attempt to log in
             login(usernameAttempt, passwordAttempt);
         }
     }
 
-
+    /**
+     * Attempts to log in the user
+     * @param usernameAttempt the username the user is attempting to login with
+     * @param passwordAttempt the password the user is attempting to login with
+     */
     private void login(final String usernameAttempt, final String passwordAttempt){
 
+        // hide any previous error message
+        hideError();
+
+        // hide the login button and display that login is in progress
         loginButton.setEnabled(false);
         loginButton.setText("Logging in...");
 
-        final AppCompatActivity me= this;
-
+        // Create a background task that contacts the server for a user session
         new LoginTask(usernameAttempt, passwordAttempt){
 
+            /**
+             * CALLBACK - this method is called after the server responds
+             * @param result the server's response body as a string
+             */
             @Override
             protected void onPostExecute(String result) {
 
+                // return login button to its normal state
                 loginButton.setText("Login");
                 loginButton.setEnabled(true);
 
+                // if no response, something went wrong, end now
                 if(result == null) return;
 
-                // this is executed on the main thread after the process is over
-                // update your UI here
                 try{
+                    // Convert response to a JSON object
                     JSONObject obj = new JSONObject(result);
+                    // If successful flag received, save the session id on the phone for next time
                     if(obj.getBoolean("successful")){
-                        SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
+                        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
+
+                        // move to login success method
                         loginSuccess();
                     }
                     else{
-                        messageText.setText("Login failed. Incorrect username or password.");
-                        messageText.setVisibility(View.VISIBLE);
+                        // If no successful flag, show an error
+                        displayError("Login failed. Incorrect username or password.");
                     }
                 }
                 catch(Exception e){
@@ -176,36 +204,52 @@ public class LoginActivity extends AppCompatActivity {
         }.execute();
     }
 
+    /**
+     * Contacts the server to attempt to create a new user account
+     * @param usernameAttempt the username to use for the new account
+     * @param passwordAttempt the password to use for the new account
+     */
     private void createNewUser(final String usernameAttempt, final String passwordAttempt){
 
+        // clear any previous error
+        hideError();
+
+        // Show on the login button that the account is being created
         loginButton.setEnabled(false);
         loginButton.setText("Creating account...");
 
-        final AppCompatActivity me= this;
-
+        // Create a background task that attempts to create the new account
         new CreateUserTask(usernameAttempt, passwordAttempt){
 
+            /**
+             * CALLBACK - gets called after the server responds
+             * @param result the server's response body as a string
+             */
             @Override
             protected void onPostExecute(String result) {
 
+                // return login button back to normal
                 loginButton.setText("Create Account");
                 loginButton.setEnabled(true);
 
+                // if no response, something went wrong, end early
                 if(result == null) return;
 
-                // this is executed on the main thread after the process is over
-                // update your UI here
                 try{
+                    // convert response to a JSON object
                     JSONObject obj = new JSONObject(result);
+                    // If server indicates that the user did not already exist, then success!!
                     if(!obj.getBoolean("userAlreadyExists")){
-
-                        SharedPreferences sp = me.getSharedPreferences("Login", MODE_PRIVATE);
+                        // save user session on phone for next time
+                        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
+
+                        // move to login success method
                         loginSuccess();
                     }
                     else{
-                        messageText.setText("User already exists, please choose a different username.");
-                        messageText.setVisibility(View.VISIBLE);
+                        // Display an error showing the user already exists
+                        displayError("User already exists, please choose a different username.");
                     }
                 }
                 catch(Exception e){
@@ -215,18 +259,29 @@ public class LoginActivity extends AppCompatActivity {
         }.execute();
     }
 
-
+    /**
+     * Moves to the main activity once successfully logged in
+     */
     private void loginSuccess(){
+        // start main activity
         startActivity(new Intent(this, MainActivity.class));
     }
 
+    /**
+     * Switches between new user and login moves
+     */
     private void switchNewUser(){
+        // hide any previous error message
+        hideError();
+
+        // If in new user mode, switch to login mode
         if(newUser){
             passwordConfirm.setVisibility(View.GONE);
             loginButton.setText("Login");
             otherLoginModeText.setText(R.string.signUpSwitch);
             newUser = false;
         }
+        // If in login mode, switch to new user mode
         else{
             passwordConfirm.setVisibility(View.VISIBLE);
             loginButton.setText("Create Account");
@@ -235,11 +290,18 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Displays an error message
+     * @param errorText the message to display
+     */
     private void displayError(String errorText){
         messageText.setText(errorText);
         messageText.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Hides the error message
+     */
     private void hideError(){
         messageText.setVisibility(View.GONE);
     }

@@ -100,7 +100,7 @@ public class NoteManager {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Note n = getNote(getInstance().noteTagLookup.get(i));
-                switchToNote(n);
+                getInstance().switchToNote(n);
             }
         });
     }
@@ -234,7 +234,7 @@ public class NoteManager {
                     else{
                         getInstance().topNoteZ++;
                         n.setZIndex(getInstance().topNoteZ);
-                        switchToNote(n);
+                        getInstance().switchToNote(n);
                     }
                 }
                 catch(Exception e){
@@ -308,7 +308,7 @@ public class NoteManager {
         return getInstance().notes.get(tag);
     }
 
-    private static String getTitleFromNote(Note n){
+    private String getTitleFromNote(Note n){
 
         if(!n.getTitle().equals("")){
             return n.getTitle();
@@ -336,18 +336,18 @@ public class NoteManager {
         topNoteZ = BOTTOMZ + len;
     }
 
-    private static void switchToNote(Note n){
+    private void switchToNote(Note n){
 
-        if(getInstance().topNoteZ >= TOPZ){
-            getInstance().restackNotes();
+        if(topNoteZ >= TOPZ){
+            restackNotes();
         }
 
-        getInstance().topNoteZ++;
-        n.setZIndex(getInstance().topNoteZ);
+        topNoteZ++;
+        n.setZIndex(topNoteZ);
 
-        Intent noteActivity = new Intent(getInstance().parent, NoteActivity.class);
+        Intent noteActivity = new Intent(parent, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
-        getInstance().parent.startActivity(noteActivity);
+        parent.startActivity(noteActivity);
     }
 
     public static CookieStore getCookies(){ return getInstance().cookies.getCookieStore(); }
