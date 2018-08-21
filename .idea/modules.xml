@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/EnotesAndroid.iml" filepath="$PROJECT_DIR$/EnotesAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AndroidApp.iml" filepath="$PROJECT_DIR$/AndroidApp.iml" />
+      <module fileurl="file://C:\Users\Owner\Desktop\Programs\ENotes\AndroidApp\EnotesAndroid.iml" filepath="C:\Users\Owner\Desktop\Programs\ENotes\AndroidApp\EnotesAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
