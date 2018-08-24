@@ -32,7 +32,7 @@ public abstract class NewNoteTask extends HttpConnectionTask {
             connect(apiURL, true, true, "POST");
 
             // create the message from the note
-            JSONObject msg = n.toJSON(true);
+            JSONObject msg = n.toJSON();
 
             // write the message
             writeMessage(msg.toString());

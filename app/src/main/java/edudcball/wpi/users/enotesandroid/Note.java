@@ -83,27 +83,24 @@ public class Note {
 
     /**
      * Create a json object representing the note
-     * @param isNew true if the note is new, false if its an existing note (used for http json formats)
      * @return a json object representing the note
      */
-    public JSONObject toJSON(boolean isNew){
+    public JSONObject toJSON(){
         try {
 
             JSONObject json = new JSONObject();
-            if(isNew) {
-                json.put("tag", tag);
-                json.put("title", title);
-                json.put("content", content);
-                json.put("x", x);
-                json.put("y", y);
-                json.put("width", width);
-                json.put("height", height);
-                json.put("font", font);
-                json.put("fontSize", fontSize);
-                json.put("zindex", zindex);
-                json.put("colors", colors);
-            }
-            else{
+            json.put("tag", tag);
+            json.put("title", title);
+            json.put("content", content);
+            json.put("x", x);
+            json.put("y", y);
+            json.put("width", width);
+            json.put("height", height);
+            json.put("font", font);
+            json.put("fontSize", fontSize);
+            json.put("zindex", zindex);
+            json.put("colors", colors);
+                /*
                 json.put("tag", tag);
                 json.put("newtitle", title);
                 json.put("newcontent", content);
@@ -115,7 +112,7 @@ public class Note {
                 json.put("newFontSize", fontSize);
                 json.put("newZ", zindex);
                 json.put("newColors", colors);
-            }
+                */
             return json;
 
         } catch(JSONException e){

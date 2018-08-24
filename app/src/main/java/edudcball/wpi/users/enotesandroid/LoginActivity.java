@@ -199,6 +199,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 catch(Exception e){
                     Log.d("MYAPP", "Failed to parse JSON");
+                    displayError("Error when connecting to server.");
                 }
             }
         }.execute();
