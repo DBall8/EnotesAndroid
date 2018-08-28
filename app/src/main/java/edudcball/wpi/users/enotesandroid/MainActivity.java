@@ -7,13 +7,13 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 
 
 /**
@@ -22,6 +22,7 @@ import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
 public class MainActivity extends AppCompatActivity {
 
     private ListView notesList; // the listview listing each note by its title
+    private Menu menu;
 
     /**
      * Gets called the first time the main activity is created
@@ -86,9 +87,29 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        Menu sortByMenu = menu.findItem(R.id.action_sortBy).getSubMenu();
+        switch(Settings.getSortBy()){
+            case COLOR:
+                sortByMenu.findItem(R.id.action_color).setChecked(true);
+                break;
+            case RECENT:
+            default:
+                sortByMenu.findItem(R.id.action_recent).setChecked(true);
+
+        }
+
         return true;
+    }
+
+    private void clearMenuSelection(Menu menu){
+        for(int i=0; i<menu.size(); i++){
+            menu.getItem(i).setChecked(false);
+        }
     }
 
     /**
@@ -100,27 +121,35 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         // Get the id of the menu item that was selected
-        int id = item.getItemId();
+        switch(item.getItemId()){
+            case R.id.action_color:
+                Settings.setSortBy(Settings.SortBy.COLOR);
+                clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
+                item.setChecked(true);
+                return true;
+            case R.id.action_recent:
+                Settings.setSortBy(Settings.SortBy.RECENT);
+                clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
+                item.setChecked(true);
+                return true;
+            case R.id.action_settings:
+                SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this);
+                settingsDialog.show();
+                return true;
+            // Logout the user
+            case R.id.action_logout:
+                final Activity activity = this;
 
-        // do nothing yet
-        if (id == R.id.action_settings) {
-            return true;
-        }
+                // create a background task that logs out the user
+                new LogoutTask(){
 
-        // Logout the user
-        if(id == R.id.action_logout){
-
-            final Activity activity = this;
-
-            // create a background task that logs out the user
-            new LogoutTask(){
-
-                @Override
-                protected void onPostExecute(String result) {
-                    if(result == null) return;
-                    activity.startActivity(new Intent(activity, LoginActivity.class));
-                }
-            }.execute();
+                    @Override
+                    protected void onPostExecute(String result) {
+                        if(result == null) return;
+                        activity.startActivity(new Intent(activity, LoginActivity.class));
+                    }
+                }.execute();
+                break;
         }
 
         return super.onOptionsItemSelected(item);

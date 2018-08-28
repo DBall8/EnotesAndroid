@@ -4,7 +4,18 @@
     tools:context="edudcball.wpi.users.enotesandroid.MainActivity">
     <item
         android:id="@+id/action_sortBy"
-        android:title="Sort By" />
+        android:title="Sort By">
+        <menu>
+            <item
+                android:id="@+id/action_recent"
+                android:checkable="true"
+                android:title="Most Recent" />
+            <item
+                android:id="@+id/action_color"
+                android:checkable="true"
+                android:title="Color" />
+        </menu>
+    </item>
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

@@ -22,13 +22,13 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/loginpurple"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/menuStyle" />
 
     </android.support.design.widget.AppBarLayout>
 
     <ListView
         android:id="@+id/NotesList"
-        style="@style/listItemStyle"
+        style="@style/dialogStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="10dp"
@@ -49,9 +49,8 @@
         android:layout_marginEnd="8dp"
         android:src="@drawable/ic_action_name"
         app:backgroundTint="@color/loginpurple"
-        app:borderWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:rippleColor="@color/colorAccent" />
+        app:rippleColor="@color/lightpurple" />
 
 </android.support.constraint.ConstraintLayout>

@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:theme="@style/dialogStyle">
 
     <RadioGroup
         android:id="@+id/radioButtonGroup"
@@ -21,57 +22,80 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Yellow" />
+            android:text="Yellow"
+            android:textColor="@color/noteYellow"
+            android:buttonTint="@color/noteYellow"
+            android:textStyle="bold" />
 
         <RadioButton
             android:id="@+id/orangeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Orange" />
+            android:text="Orange"
+            android:textColor="@color/noteOrange"
+            android:buttonTint="@color/noteOrange"
+            android:textStyle="bold" />
 
         <RadioButton
             android:id="@+id/redButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Red" />
+            android:text="Red"
+            android:textColor="@color/noteRed"
+            android:buttonTint="@color/noteRed"
+            android:textStyle="bold" />
 
         <RadioButton
             android:id="@+id/greenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Green" />
+            android:text="Green"
+            android:textColor="@color/noteGreen"
+            android:buttonTint="@color/noteGreen"
+            android:textStyle="bold" />
 
         <RadioButton
             android:id="@+id/blueButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Blue" />
+            android:text="Blue"
+            android:textColor="@color/noteBlue"
+            android:buttonTint="@color/noteBlue"
+            android:textStyle="bold" />
 
         <RadioButton
             android:id="@+id/purpleButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Purple" />
+            android:text="Purple"
+            android:textColor="@color/notePurple"
+            android:buttonTint="@color/notePurple"
+            android:textStyle="bold" />
 
     </RadioGroup>
 
     <LinearLayout
         android:id="@+id/buttonLayout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:layout_weight="1"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioButtonGroup">
 
         <Button
             android:id="@+id/applyButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:layout_weight="1"
             android:text="Save" />
 
@@ -79,6 +103,7 @@
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:layout_weight="1"
             android:text="Cancel" />
     </LinearLayout>

@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.CookieManager;
@@ -50,6 +51,8 @@ public class NoteManager {
     private CookieManager cookies = new CookieManager(); // manages cookies
 
     private int topNoteZ = BOTTOMZ;
+
+
 
     /**
      * Initializes the NoteManager and attaches it to a list view for displaying notes
@@ -135,8 +138,6 @@ public class NoteManager {
             }
 
             // Clear everything, start from empty, except the notes list to preserve their z index
-            noteTitles.clear();
-            noteTagLookup.clear();
             notes.clear();
 
             // store the user's username
@@ -179,8 +180,25 @@ public class NoteManager {
      */
     private void createNoteList(){
 
+        noteTitles.clear();
+        noteTagLookup.clear();
+
+        switch(Settings.getSortBy()){
+            case COLOR:
+                getInstance().sortByColor();
+                break;
+            case RECENT:
+            default:
+                getInstance().sortByRecent();
+        }
+
+        // Notify the adatper that the list has been changed
+        getInstance().noteAdapter.notifyDataSetChanged();
+    }
+
+    private void sortByRecent(){
         ArrayList<String> workingList = new ArrayList<String>();
-        for(Map.Entry<String, Note> cursor: getInstance().notes.entrySet()){
+        for(Map.Entry<String, Note> cursor: notes.entrySet()){
             workingList.add(cursor.getKey());
         }
 
@@ -201,14 +219,37 @@ public class NoteManager {
             if(maxTag != null){
                 workingList.remove(maxTag);
                 Note note = getNote(maxTag);
-                getInstance().noteTitles.add(getTitleFromNote(note));
-                getInstance().noteTagLookup.add(maxTag);
+                noteTitles.add(getTitleFromNote(note));
+                noteTagLookup.add(maxTag);
             }
 
         }
+    }
 
-        // Notify the adatper that the list has been changed
-        getInstance().noteAdapter.notifyDataSetChanged();
+    private void sortByColor(){
+        ArrayList<String> workingList = new ArrayList<String>();
+        for(Map.Entry<String, Note> cursor: notes.entrySet()){
+            workingList.add(cursor.getKey());
+        }
+
+        int len = workingList.size();
+
+        String[] colorOrder = {"#ffe062", "#ffa63d"};
+
+        for(String color: colorOrder){
+            for(Map.Entry<String, Note> cursor: notes.entrySet()){
+                try {
+                    Note n = cursor.getValue();
+                    String noteColor = n.getColors().getString("body");
+                    if(color.equals(noteColor)){
+                        noteTitles.add(getTitleFromNote(n));
+                        noteTagLookup.add(cursor.getKey());
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public static void newNote(){
@@ -348,6 +389,10 @@ public class NoteManager {
         Intent noteActivity = new Intent(parent, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
         parent.startActivity(noteActivity);
+    }
+
+    public static void reSort(){
+        getInstance().createNoteList();
     }
 
     public static CookieStore getCookies(){ return getInstance().cookies.getCookieStore(); }

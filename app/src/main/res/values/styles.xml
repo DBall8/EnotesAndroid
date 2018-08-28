@@ -27,7 +27,30 @@
         <item name="colorControlHighlight">@color/loginpurple</item>
     </style>
 
-    <style name="listItemStyle" parent="@android:style/Widget.ListView">
+    <style name="buttonStyle" parent="@android:style/Widget.Button">
+        <item name="android:background">@color/loginpurple</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Large</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:minWidth">0dp</item>
+    </style>
+
+    <style name="radioButtonTheme" parent="@android:style/Widget.Holo.CompoundButton.RadioButton">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="dialogStyle" parent="@android:style/Widget.ListView">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/background</item>
+        <item name="android:buttonStyle">@style/buttonStyle</item>
+        <item name="android:radioButtonStyle">@style/radioButtonTheme</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Large</item>
+    </style>
+
+    <style name="menuStyle" parent="@android:style/Widget.ListView">
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@color/background</item>
     </style>
