@@ -4,12 +4,18 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
+import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.ScrollView;
 
 import java.util.Map;
 
@@ -18,7 +24,8 @@ import edudcball.wpi.users.enotesandroid.R;
 public class SettingsDialog extends Dialog {
 
     private Button applyButton, cancelButton;
-    private int width, height;
+    //private WindowManager.LayoutParams params;
+    int width, height;
 
     public SettingsDialog(Context activity) {
         super(activity);
@@ -26,10 +33,12 @@ public class SettingsDialog extends Dialog {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity)activity).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         WindowManager.LayoutParams params = this.getWindow().getAttributes();
-        params.width = (int)(displayMetrics.widthPixels * 0.8);
-        params.height = (int)(displayMetrics.heightPixels * 0.8);
-        getWindow().setLayout((int)(displayMetrics.widthPixels * 0.8), (int)(displayMetrics.heightPixels * 0.8));
-        //this.getWindow().setAttributes(params);
+        width = (int)(displayMetrics.widthPixels * 0.8);
+        height = (int)(displayMetrics.heightPixels * 0.8);
+        params.width = width;
+        params.height = height;
+        //getWindow().setLayout((int)(displayMetrics.widthPixels * 0.8), (int)(displayMetrics.heightPixels * 0.8));
+        getWindow().setAttributes(params);
     }
 
     /**

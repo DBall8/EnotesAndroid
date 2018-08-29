@@ -1,41 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
+    android:gravity="center"
+    android:orientation="vertical"
     android:theme="@style/dialogStyle"
     android:visibility="visible">
 
     <ScrollView
         android:id="@+id/scrollView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_weight="200">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="fill_horizontal|center"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/dFontView"
-                android:layout_width="wrap_content"
+                android:id="@+id/settingsLabel"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="Settings"
+                android:textColor="@color/lightpurple"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/iconSizeView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:padding="5dp"
+                android:text="Icon Size"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/iconSizeGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <RadioButton
+                    android:id="@+id/smallIconRB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Small" />
+
+                <RadioButton
+                    android:id="@+id/mediumIconRB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Medium" />
+
+                <RadioButton
+                    android:id="@+id/largeIconRB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="large" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/dColorView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Default Color"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/dColorGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="5dp">
+
+                <RadioButton
+                    android:id="@+id/yellowButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/noteYellow"
+                    android:text="Yellow"
+                    android:textColor="@color/noteYellow"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/orangeButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/noteOrange"
+                    android:text="Orange"
+                    android:textColor="@color/noteOrange"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/redButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/noteRed"
+                    android:text="Red"
+                    android:textColor="@color/noteRed"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/greenButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/noteGreen"
+                    android:text="Green"
+                    android:textColor="@color/noteGreen"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/blueButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/noteBlue"
+                    android:text="Blue"
+                    android:textColor="@color/noteBlue"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/purpleButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:buttonTint="@color/notePurple"
+                    android:text="Purple"
+                    android:textColor="@color/notePurple"
+                    android:textStyle="bold" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/dFontView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="5dp"
                 android:text="Default Font"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textSize="30sp"
+                android:textStyle="bold"
                 tools:layout_editor_absoluteX="132dp"
                 tools:layout_editor_absoluteY="76dp" />
 
             <RadioGroup
                 android:id="@+id/dFontGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="5dp">
 
                 <RadioButton
                     android:id="@+id/arialRadioButton"
@@ -61,15 +197,21 @@
 
             <TextView
                 android:id="@+id/dFontSizeView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:padding="5dp"
                 android:text="Default Font Size"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textSize="30sp"
+                android:textStyle="bold" />
 
             <RadioGroup
                 android:id="@+id/dFontSizeGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingBottom="15dp"
+                android:paddingTop="5dp">
 
                 <RadioButton
                     android:id="@+id/tenRadioButton"
@@ -114,68 +256,15 @@
                     android:text="32" />
             </RadioGroup>
 
-            <TextView
-                android:id="@+id/dColorView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Default Color"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
-
-            <RadioGroup
-                android:id="@+id/dColorGroup"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <RadioButton
-                    android:id="@+id/yellowRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Yellow" />
-
-                <RadioButton
-                    android:id="@+id/orangeRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Orange" />
-
-                <RadioButton
-                    android:id="@+id/redRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Red" />
-
-                <RadioButton
-                    android:id="@+id/greenRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Green" />
-
-                <RadioButton
-                    android:id="@+id/blueRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Blue" />
-
-                <RadioButton
-                    android:id="@+id/purpleRadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Purple" />
-            </RadioGroup>
-
         </LinearLayout>
     </ScrollView>
 
     <LinearLayout
         android:id="@+id/buttonLayout"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:minWidth="300dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -187,9 +276,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
+            android:background="@drawable/custom_button"
             android:padding="5dp"
             android:text="Apply Changes"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textSize="24sp" />
 
         <Button
             android:id="@+id/cancelButton"
@@ -199,7 +290,8 @@
             android:layout_weight="1"
             android:padding="5dp"
             android:text="Cancel"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textSize="24sp" />
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
