@@ -158,7 +158,6 @@ public class NoteActivity extends AppCompatActivity {
                             NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
                             return;
                         }
-                        NoteManager.removeNote(note.getTag());
                         finish();
                     }
                     catch(Exception e){

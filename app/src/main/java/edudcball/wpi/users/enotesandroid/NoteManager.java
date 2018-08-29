@@ -180,9 +180,11 @@ public class NoteManager {
      */
     private void createNoteList(){
 
+        // Clear both lists being built
         noteTitles.clear();
         noteTagLookup.clear();
 
+        // Rebuild lists depending on the current sorting settings
         switch(Settings.getSortBy()){
             case COLOR:
                 getInstance().sortByColor();
@@ -196,7 +198,11 @@ public class NoteManager {
         getInstance().noteAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Sorts the notes where the most recently viewed note is first
+     */
     private void sortByRecent(){
+        // Convert hashmap into a list
         ArrayList<String> workingList = new ArrayList<String>();
         for(Map.Entry<String, Note> cursor: notes.entrySet()){
             workingList.add(cursor.getKey());
@@ -226,17 +232,17 @@ public class NoteManager {
         }
     }
 
+    /**
+     * Sort notes by color (currently color order is set in stone)
+     */
     private void sortByColor(){
-        ArrayList<String> workingList = new ArrayList<String>();
-        for(Map.Entry<String, Note> cursor: notes.entrySet()){
-            workingList.add(cursor.getKey());
-        }
 
-        int len = workingList.size();
+        // The order of colors to add in
+        String[] colorOrder = {"#ffe062", "#ffa63d", "#f97e7e", "#53ce57", "#7fc8f5", "#e083f7"};
 
-        String[] colorOrder = {"#ffe062", "#ffa63d"};
-
+        // Go through each color and add all notes of that color
         for(String color: colorOrder){
+            // Go through hashmap and add all notes of the current color
             for(Map.Entry<String, Note> cursor: notes.entrySet()){
                 try {
                     Note n = cursor.getValue();
@@ -252,30 +258,38 @@ public class NoteManager {
         }
     }
 
+    /**
+     * Adds a new note, locally and server side, and opens the note
+     */
     public static void newNote(){
 
+        // create and add new note
         final Note n = new Note();
         getInstance().notes.put(n.getTag(), n);
 
+        // Send message to server about the new note
         new NewNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
 
+                // If connection lost, return to login
                 if(result == null) {
                     sessionExpired(getInstance().parent, "Connection to server lost, please login again.");
                     return;
                 }
 
                 try{
-
+                    // parse the server's response
                     JSONObject obj = new JSONObject(result);
+                    // if session expired, return to login
                     if(obj.getBoolean("sessionExpired")){
                         Log.d("MYAPP", "Session expired");
                         sessionExpired(getInstance().parent, "Session expired. Please log in again.");
                         return;
                     }
                     else{
+                        // Note addition succeeded! update the note's zindex and open the note
                         getInstance().topNoteZ++;
                         n.setZIndex(getInstance().topNoteZ);
                         getInstance().switchToNote(n);
@@ -289,25 +303,44 @@ public class NoteManager {
         }.execute();
     }
 
+    /**
+     * Updates the server of the note's status
+     * @param n the note to update the server about
+     * @param callback the function handler to call when the response is received
+     */
     public static void updateNote(Note n, final EventHandler<String> callback){
+        // Call asynch update task
         new UpdateNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
+                // asynch task finished, call callback
                 callback.handle(result);
             }
         }.execute();
     }
 
+    /**
+     * Tells the server to delete a note from the database
+     * @param tag the tag of the note to delete
+     * @param callback a funciton handler to call after the server responds
+     */
     public static void deleteNote(final String tag, final EventHandler<String> callback){
+        // Call a delete asynch task
         new DeleteTask(tag){
             @Override
             protected void onPostExecute(String result) {
+                // task completed, call callback
                 callback.handle(result);
             }
         }.execute();
     }
 
+    /**
+     * Removes a note from the local note list
+     * @param tag the tag of the note to remove
+     */
+    /*
     public static void removeNote(String tag){
         getInstance().notes.remove(tag);
         for(int i=0; i< getInstance().noteTagLookup.size(); i++){
@@ -319,17 +352,30 @@ public class NoteManager {
             }
         }
     }
+    */
 
+    /**
+     * Retrieves a note from the hashmap
+     * @param tag the tag of the note to retrieve
+     * @return the note with the given tag
+     */
     public static Note getNote(String tag){
         return getInstance().notes.get(tag);
     }
 
+    /**
+     * Creates a title to display on the note icon
+     * @param n the note to create the title from
+     * @return a title to display on the note icon
+     */
     private String getTitleFromNote(Note n){
 
+        // If the note has a title, use that
         if(!n.getTitle().equals("")){
             return n.getTitle();
         }
 
+        // Otherwise, create a dummy title from the first 100 characters in its content's first line
         String content = n.getContent();
         int end = content.length()<100? content.length(): 100;
         for(int i=0; i<end; i++){
@@ -341,6 +387,9 @@ public class NoteManager {
         return n.getContent().substring(0, end);
     }
 
+    /**
+     * Resets the zindex of every note to create the smallest z index range possible
+     */
     private void restackNotes(){
         // noteTagLookup should already be sorted by zindex, so no need to resort.
         int len = noteTagLookup.size();
@@ -352,29 +401,42 @@ public class NoteManager {
         topNoteZ = BOTTOMZ + len;
     }
 
+    /**
+     * Starts a note activity
+     * @param n the note to create the note activity for
+     */
     private void switchToNote(Note n){
 
+        // restack zindex if the zindex has gotten too large
         if(topNoteZ >= TOPZ){
             restackNotes();
         }
 
+        // increment the top z and set the note to have that top z
         topNoteZ++;
         n.setZIndex(topNoteZ);
 
+        // start the new note activity for the given note
         Intent noteActivity = new Intent(parent, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
         parent.startActivity(noteActivity);
     }
 
+    /**
+     * Resorts the note list
+     */
     public static void reSort(){
         getInstance().createNoteList();
     }
 
+    // Cookie getter, setter, and resetter
     public static CookieStore getCookies(){ return getInstance().cookies.getCookieStore(); }
     public static void addCookies(String cookie){
         getInstance().cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
     }
     public static void resetCookies(){ getInstance().cookies = new CookieManager(); }
+
+    // singleton methods
 
     private NoteManager(){}
 
