@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the static note handler with the notesList
         notesList = findViewById(R.id.NotesList);
-        NoteManager.init(this, notesList, this.getApplicationContext());
+        NoteManager.init(this, notesList);
 
         // Set up the floating button for adding notes
         FloatingActionButton fab = findViewById(R.id.newNoteFab);

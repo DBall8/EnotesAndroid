@@ -1,3 +1,6 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <integer name="font_small">14</integer>
+    <integer name="font_medium">24</integer>
+    <integer name="font_large">36</integer>
 </resources>

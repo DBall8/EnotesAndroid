@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -41,6 +42,8 @@ public class NoteManager {
     private final static int BOTTOMZ = 100;
 
     private MainActivity parent;
+    private Context context;
+    private ListView lv;
 
     private HashMap<String, Note> notes = new HashMap<>(); // Map of notes by their tag
     private ArrayList<String> noteTagLookup = new ArrayList<>(); // Maps note tags to their index in the noteAdapter
@@ -53,51 +56,23 @@ public class NoteManager {
 
     private int topNoteZ = BOTTOMZ;
 
-
-
     /**
      * Initializes the NoteManager and attaches it to a list view for displaying notes
      * @param parent the calling activity
      * @param lv the list view for displaying notes
-     * @param context the context (was a while ago)
      */
-    public static void init(final MainActivity parent, ListView lv, final Context context){
+    public static void init(final MainActivity parent, ListView lv){
 
-        NoteManager instance = getInstance();
+        final NoteManager instance = getInstance();
 
         // save parent for screen switching
         instance.parent = parent;
+        instance.context = parent.getApplicationContext();
+        instance.lv = lv;
 
         // Load the noteAdapter used for displaying icons represeting notes that can be clicked on
-        instance.noteAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, instance.noteTitles){
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView tv = (TextView) super.getView(position, convertView, parent);
-                tv.setTextColor(ContextCompat.getColor(context, R.color.black));
-                Drawable bg = ContextCompat.getDrawable(context, R.drawable.note_icon);
-                tv.setBackground(bg);
+        instance.buildNoteAdapter();
 
-                // Get the note by its position in the list
-                Note n = getNote(getInstance().noteTagLookup.get(position));
-                // Set the background to match the note's color
-                JSONObject colors = n.getColors();
-                if(colors != null){
-                    try {
-                        bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.MULTIPLY);
-                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
-                    }catch(Exception e){
-                        tv.setBackgroundColor(parent.getResources().getColor(R.color.defaultNote));
-                    }
-                }
-                else{
-                    tv.setBackgroundColor(parent.getResources().getColor(R.color.defaultNote));
-                }
-
-                return tv;
-            }
-        };
-        // Load the adapter for the listview
-        lv.setAdapter(instance.noteAdapter);
         // Set clicking on an item to open that note
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
@@ -107,6 +82,54 @@ public class NoteManager {
                 getInstance().switchToNote(n);
             }
         });
+    }
+
+    public static void buildNoteAdapter(){
+        final NoteManager instance = getInstance();
+        instance.noteAdapter = new ArrayAdapter<String>(instance.context, android.R.layout.simple_list_item_1, instance.noteTitles){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView tv = (TextView) super.getView(position, convertView, parent);
+                tv.setTextColor(ContextCompat.getColor(instance.context, R.color.black));
+                Drawable bg = ContextCompat.getDrawable(instance.context, R.drawable.note_icon);
+
+                tv.setBackground(bg);
+
+                switch(Settings.getIconSize()){
+                    case SMALL:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_small));
+                        break;
+                    case MEDIUM:
+                    default:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_medium));
+                        break;
+                    case LARGE:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_large));
+                        break;
+                }
+
+                // Get the note by its position in the list
+                Note n = getNote(instance.noteTagLookup.get(position));
+                // Set the background to match the note's color
+                JSONObject colors = n.getColors();
+                if(colors != null){
+                    try {
+                        bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.MULTIPLY);
+                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
+                    }catch(Exception e){
+                        tv.setBackgroundColor(instance.parent.getResources().getColor(R.color.defaultNote));
+                    }
+                }
+                else{
+                    tv.setBackgroundColor(instance.parent.getResources().getColor(R.color.defaultNote));
+                }
+
+                return tv;
+            }
+        };
+
+        // Load the adapter for the listview
+        instance.lv.setAdapter(instance.noteAdapter);
     }
 
     /**

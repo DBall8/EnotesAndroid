@@ -8,4 +8,7 @@
     <string name="arial">Arial</string>
     <string name="palatino">Palatino Linotype</string>
     <string name="courier">Courier New</string>
+    <string name="small">Small</string>
+    <string name="medium">Medium</string>
+    <string name="large">Large</string>
 </resources>

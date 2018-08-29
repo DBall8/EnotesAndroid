@@ -7,13 +7,26 @@ public class Settings {
     private String defaultFont;
     private JSONObject defaultColor;
     private int defaultFontSize;
+    private SortBy sortBy = SortBy.RECENT;
+    private Size iconSize = Size.MEDIUM;
+
+
+    public enum Size{
+        SMALL,
+        MEDIUM,
+        LARGE
+    }
 
     public enum SortBy{
         RECENT,
         COLOR
     }
 
-    private SortBy sortBy = SortBy.RECENT;
+    public static Size getIconSize(){ return getInstance().iconSize; }
+    public static void setIconSize(Size iconSize){
+        getInstance().iconSize = iconSize;
+        NoteManager.buildNoteAdapter();
+    }
 
     public static void setSortBy(SortBy sortBy){
         if(getInstance().sortBy == sortBy) return;
