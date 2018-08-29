@@ -27,7 +27,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
 public abstract class HttpConnectionTask extends AsyncTask<String, Integer, String> {
 
     // URL of the server
-    protected static final String baseURL = "https://enotes.site";//"http://10.0.2.2:8080";//
+    protected static final String baseURL = "http://10.0.2.2:8080";//"https://enotes.site";//
     protected static final String apiURL = "/api"; // path that all note requests are sent to
     protected static final String COOKIES_HEADER = "Set-Cookie"; // header to look for new cookies to save
     private static final int TIMEOUT = 5000; // Timeout time for connection in milliseconds
@@ -41,7 +41,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
      * @param doOutput true if the app will send a message to the server
      * @param method HTTP method that will be used (GET, POST, PUT, or DELETE)
      */
-    protected void connect(String urlStr, boolean doInput, boolean doOutput, String method){
+    protected void connect(String urlStr, boolean doInput, boolean doOutput, String method) throws Exception{
         try {
             // connect
             URL url = new URL(baseURL + urlStr);
@@ -59,7 +59,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
             connection.setRequestMethod(method);
         }
         catch(Exception e){
-            NoteManager.sessionExpired("Lost connection to server.");
+            throw e;
         }
     }
 
@@ -67,13 +67,12 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
      * Sends a message to the server
      * @param msg the message to send
      */
-    protected void writeMessage(String msg){
+    protected void writeMessage(String msg) throws Exception{
         try {
             // fail if connection isnt open
             if (connection == null) {
                 Log.d("ERROR", "No open connection");
-                NoteManager.sessionExpired("Lost connection to server.");
-                return;
+                throw new Exception("Lost connection to server.");
             }
 
             // Write message
@@ -82,7 +81,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
             out.close();
 
         }catch(IOException e){
-            NoteManager.sessionExpired("Lost connection to server.");
+            throw e;
         }
     }
 
@@ -90,7 +89,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
      * Reads a response from the server
      * @return the response body as a string
      */
-    protected String readResponse(){
+    protected String readResponse() throws Exception{
         try {
             // read until the message is finished
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -104,8 +103,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
             return response;
         }
         catch(IOException e){
-            NoteManager.sessionExpired("Lost connection to server.");
-            return null;
+            throw e;
         }
     }
 
@@ -121,9 +119,5 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
                 NoteManager.getCookies().add(null, HttpCookie.parse(cookie).get(0));
             }
         }
-    }
-
-    private void connectionLost(int responseCode){
-        NoteManager.sessionExpired("Lost connection to server. (" + responseCode + ")");
     }
 }

@@ -179,7 +179,10 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setEnabled(true);
 
                 // if no response, something went wrong, end now
-                if(result == null) return;
+                if(result == null){
+                    displayError("Could not connect to server. Please try again later.");
+                    return;
+                }
 
                 try{
                     // Convert response to a JSON object
@@ -234,7 +237,10 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setEnabled(true);
 
                 // if no response, something went wrong, end early
-                if(result == null) return;
+                if(result == null){
+                    displayError("Could not connect to server. Please try again later.");
+                    return;
+                }
 
                 try{
                     // convert response to a JSON object
@@ -265,7 +271,8 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void loginSuccess(){
         // start main activity
-        startActivity(new Intent(this, MainActivity.class));
+        //startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     /**

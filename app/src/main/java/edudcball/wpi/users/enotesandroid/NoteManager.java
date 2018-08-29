@@ -1,5 +1,6 @@
 package edudcball.wpi.users.enotesandroid;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -117,7 +118,6 @@ public class NoteManager {
             @Override
             protected void onPostExecute(String result) {
                 if(result == null) return;
-
                 getInstance().loadNotes(result);
             }
         }.execute();
@@ -133,7 +133,7 @@ public class NoteManager {
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
                 Log.d("MYAPP", "Session expired");
-                sessionExpired("Session expired. Please log in again.");
+                sessionExpired(parent,"Session expired. Please log in again.");
                 return;
             }
 
@@ -159,7 +159,7 @@ public class NoteManager {
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
-            sessionExpired("Error when contacting server. Please try again later.");
+            sessionExpired(parent, "Error when contacting server. Please try again later.");
         }
 
     }
@@ -168,10 +168,10 @@ public class NoteManager {
      * Redirects the user back to the login screen
      * @param message the message to display once back on the login screen
      */
-    public static void sessionExpired(String message){
-        Intent next = new Intent(getInstance().parent, LoginActivity.class);
+    public static void sessionExpired(Activity activity, String message){
+        Intent next = new Intent(activity, LoginActivity.class);
         next.putExtra("error", message);
-        getInstance().parent.startActivity(next);
+        activity.startActivity(next);
     }
 
 
@@ -262,14 +262,17 @@ public class NoteManager {
             @Override
             protected void onPostExecute(String result) {
 
-                if(result == null) return;
+                if(result == null) {
+                    sessionExpired(getInstance().parent, "Connection to server lost, please login again.");
+                    return;
+                }
 
                 try{
 
                     JSONObject obj = new JSONObject(result);
                     if(obj.getBoolean("sessionExpired")){
                         Log.d("MYAPP", "Session expired");
-                        sessionExpired("Session expired. Please log in again.");
+                        sessionExpired(getInstance().parent, "Session expired. Please log in again.");
                         return;
                     }
                     else{
@@ -280,38 +283,32 @@ public class NoteManager {
                 }
                 catch(Exception e){
                     Log.d("MYAPP", "Unable to form response JSON for update notes");
-                    sessionExpired("Error when contacting server. Please try again later.");
+                    sessionExpired(getInstance().parent,"Error when contacting server. Please try again later.");
                 }
             }
         }.execute();
     }
 
-    public static void updateNote(String tag){
-        Note n = getNote(tag);
+    public static void updateNote(Note n, final EventHandler<String> callback){
         new UpdateNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
-
-                if(result == null) return;
-
-                try{
-                    JSONObject obj = new JSONObject(result);
-                    if(obj.getBoolean("sessionExpired")){
-                        Log.d("MYAPP", "Session expired");
-                        sessionExpired("Session expired. Please log in again.");
-                        return;
-                    }
-                }
-                catch(Exception e){
-                    Log.d("MYAPP", "Unable to form response JSON for update notes");
-                    sessionExpired("Error when contacting server. Please try again later.");
-                }
+                callback.handle(result);
             }
         }.execute();
     }
 
-    public static void deleteNote(String tag){
+    public static void deleteNote(final String tag, final EventHandler<String> callback){
+        new DeleteTask(tag){
+            @Override
+            protected void onPostExecute(String result) {
+                callback.handle(result);
+            }
+        }.execute();
+    }
+
+    public static void removeNote(String tag){
         getInstance().notes.remove(tag);
         for(int i=0; i< getInstance().noteTagLookup.size(); i++){
             if(getInstance().noteTagLookup.get(i).equals(tag)){
@@ -321,29 +318,7 @@ public class NoteManager {
                 i--;
             }
         }
-        new DeleteTask(tag){
-            @Override
-            protected void onPostExecute(String result) {
-
-                if(result == null) return;
-
-                try{
-                    JSONObject obj = new JSONObject(result);
-                    if(obj.getBoolean("sessionExpired")){
-                        Log.d("MYAPP", "Session expired");
-                        NoteManager.sessionExpired("Session expired. Please log in again.");
-                        return;
-                    }
-                }
-                catch(Exception e){
-                    Log.d("MYAPP", "Unable to form response JSON for delete note");
-                    sessionExpired("Error when contacting server. Please try again later.");
-                }
-            }
-        }.execute();
     }
-
-
 
     public static Note getNote(String tag){
         return getInstance().notes.get(tag);

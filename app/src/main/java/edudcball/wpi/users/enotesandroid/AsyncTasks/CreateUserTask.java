@@ -58,7 +58,7 @@ public abstract class CreateUserTask extends HttpConnectionTask {
 
         }catch(Exception e){
             Log.d("MYAPP", "ERROR WHEN CREATING USER: " + e.toString());
-            return "";
+            return null;
         }
     }
 }

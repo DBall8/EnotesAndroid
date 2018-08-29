@@ -1,5 +1,6 @@
 package edudcball.wpi.users.enotesandroid;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
@@ -89,15 +91,39 @@ public class NoteActivity extends AppCompatActivity {
 
         setColors();
 
+        final Activity activity = this;
+
         // Set the save button to save changes
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // update text
-                note.setContent(contentView.getText().toString());
-                note.setTitle(titleBar.getText().toString());
-                NoteManager.updateNote(note.getTag());
-                finish();
+            // update text
+            note.setContent(contentView.getText().toString());
+            note.setTitle(titleBar.getText().toString());
+
+            NoteManager.updateNote(note, new EventHandler<String>() {
+                @Override
+                public void handle(String event) {
+
+                    if(event == null){
+                        NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                        return;
+                    }
+
+                    try {
+                        JSONObject obj = new JSONObject(event);
+                        if (obj.getBoolean("sessionExpired")) {
+                            Log.d("MYAPP", "Session expired");
+                            NoteManager.sessionExpired(activity,"Session expired. Please log in again.");
+                            return;
+                        }
+                        finish();
+                    } catch (Exception e) {
+                        Log.d("MYAPP", "Unable to form response JSON for update notes");
+                        NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                    }
+                }
+            });
             }
         });
 
@@ -116,8 +142,32 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                NoteManager.deleteNote(note.getTag());
-                finish();
+            NoteManager.deleteNote(note.getTag(), new EventHandler<String>() {
+                @Override
+                public void handle(String event) {
+
+                    if(event == null){
+                        NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                        return;
+                    }
+
+                    try{
+                        JSONObject obj = new JSONObject(event);
+                        if(obj.getBoolean("sessionExpired")){
+                            Log.d("MYAPP", "Session expired");
+                            NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
+                            return;
+                        }
+                        NoteManager.removeNote(note.getTag());
+                        finish();
+                    }
+                    catch(Exception e){
+                        Log.d("MYAPP", "Unable to form response JSON for delete note");
+                        NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                    }
+                }
+            });
+
             }
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
