@@ -32,6 +32,7 @@
                 android:ems="10"
                 android:gravity="center_vertical|center_horizontal"
                 android:inputType="text|textPersonName"
+                android:maxLength="100"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@color/black"
                 android:textStyle="bold" />
@@ -51,6 +52,7 @@
         android:ems="10"
         android:gravity="top|left"
         android:inputType="textMultiLine|textWebEditText"
+        android:maxLength="4096"
         android:padding="10dp"
         android:scrollbars="vertical"
         android:textColor="@color/white"
