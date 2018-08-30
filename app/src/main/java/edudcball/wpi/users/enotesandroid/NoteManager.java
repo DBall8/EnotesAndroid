@@ -1,20 +1,12 @@
 package edudcball.wpi.users.enotesandroid;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,9 +33,7 @@ public class NoteManager {
     private final static int TOPZ = 9999;
     private final static int BOTTOMZ = 100;
 
-    private MainActivity parent;
-    private Context context;
-    private ListView lv;
+    private MainActivity mainActivity;
 
     private HashMap<String, Note> notes = new HashMap<>(); // Map of notes by their tag
     private ArrayList<String> noteTagLookup = new ArrayList<>(); // Maps note tags to their index in the noteAdapter
@@ -58,78 +48,29 @@ public class NoteManager {
 
     /**
      * Initializes the NoteManager and attaches it to a list view for displaying notes
-     * @param parent the calling activity
+     * @param mainActivity the calling activity
      * @param lv the list view for displaying notes
      */
-    public static void init(final MainActivity parent, ListView lv){
+    public static void init(final MainActivity mainActivity, ListView lv){
 
         final NoteManager instance = getInstance();
 
-        // save parent for screen switching
-        instance.parent = parent;
-        instance.context = parent.getApplicationContext();
-        instance.lv = lv;
+        // save mainActivity for screen switching
+        instance.mainActivity = mainActivity;
 
         // Load the noteAdapter used for displaying icons represeting notes that can be clicked on
-        instance.buildNoteAdapter();
+        //instance.buildNoteAdapter();
 
-        // Set clicking on an item to open that note
+        instance.noteAdapter = (ArrayAdapter<String>)lv.getAdapter();
+
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Note n = getNote(getInstance().noteTagLookup.get(i));
-                getInstance().switchToNote(n);
+                Note n = getNote(i);
+                instance.switchToNote(n);
             }
         });
-    }
-
-    public static void buildNoteAdapter(){
-        final NoteManager instance = getInstance();
-        instance.noteAdapter = new ArrayAdapter<String>(instance.context, android.R.layout.simple_list_item_1, instance.noteTitles){
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView tv = (TextView) super.getView(position, convertView, parent);
-                tv.setTextColor(ContextCompat.getColor(instance.context, R.color.black));
-                Drawable bg = ContextCompat.getDrawable(instance.context, R.drawable.note_icon);
-
-                tv.setBackground(bg);
-
-                switch(Settings.getIconSize()){
-                    case SMALL:
-                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_small));
-                        break;
-                    case MEDIUM:
-                    default:
-                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_medium));
-                        break;
-                    case LARGE:
-                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_large));
-                        break;
-                }
-
-                // Get the note by its position in the list
-                Note n = getNote(instance.noteTagLookup.get(position));
-                // Set the background to match the note's color
-                JSONObject colors = n.getColors();
-                if(colors != null){
-                    try {
-                        bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.MULTIPLY);
-                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
-                    }catch(Exception e){
-                        tv.setBackgroundColor(instance.parent.getResources().getColor(R.color.defaultNote));
-                    }
-                }
-                else{
-                    tv.setBackgroundColor(instance.parent.getResources().getColor(R.color.defaultNote));
-                }
-
-                return tv;
-            }
-        };
-
-        // Load the adapter for the listview
-        instance.lv.setAdapter(instance.noteAdapter);
     }
 
     /**
@@ -156,7 +97,7 @@ public class NoteManager {
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
                 Log.d("MYAPP", "Session expired");
-                sessionExpired(parent,"Session expired. Please log in again.");
+                sessionExpired(mainActivity,"Session expired. Please log in again.");
                 return;
             }
 
@@ -182,7 +123,7 @@ public class NoteManager {
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
-            sessionExpired(parent, "Error when contacting server. Please try again later.");
+            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
         }
 
     }
@@ -298,7 +239,7 @@ public class NoteManager {
 
                 // If connection lost, return to login
                 if(result == null) {
-                    sessionExpired(getInstance().parent, "Connection to server lost, please login again.");
+                    sessionExpired(getInstance().mainActivity, "Connection to server lost, please login again.");
                     return;
                 }
 
@@ -308,7 +249,7 @@ public class NoteManager {
                     // if session expired, return to login
                     if(obj.getBoolean("sessionExpired")){
                         Log.d("MYAPP", "Session expired");
-                        sessionExpired(getInstance().parent, "Session expired. Please log in again.");
+                        sessionExpired(getInstance().mainActivity, "Session expired. Please log in again.");
                         return;
                     }
                     else{
@@ -320,7 +261,7 @@ public class NoteManager {
                 }
                 catch(Exception e){
                     Log.d("MYAPP", "Unable to form response JSON for update notes");
-                    sessionExpired(getInstance().parent,"Error when contacting server. Please try again later.");
+                    sessionExpired(getInstance().mainActivity,"Error when contacting server. Please try again later.");
                 }
             }
         }.execute();
@@ -360,30 +301,16 @@ public class NoteManager {
     }
 
     /**
-     * Removes a note from the local note list
-     * @param tag the tag of the note to remove
-     */
-    /*
-    public static void removeNote(String tag){
-        getInstance().notes.remove(tag);
-        for(int i=0; i< getInstance().noteTagLookup.size(); i++){
-            if(getInstance().noteTagLookup.get(i).equals(tag)){
-                getInstance().noteTagLookup.remove(i);
-                getInstance().noteTitles.remove(i);
-                getInstance().noteAdapter.notifyDataSetChanged();
-                i--;
-            }
-        }
-    }
-    */
-
-    /**
      * Retrieves a note from the hashmap
      * @param tag the tag of the note to retrieve
      * @return the note with the given tag
      */
     public static Note getNote(String tag){
         return getInstance().notes.get(tag);
+    }
+
+    public static Note getNote(int i){
+        return getInstance().notes.get(getInstance().noteTagLookup.get(i));
     }
 
     /**
@@ -440,10 +367,12 @@ public class NoteManager {
         n.setZIndex(topNoteZ);
 
         // start the new note activity for the given note
-        Intent noteActivity = new Intent(parent, NoteActivity.class);
+        Intent noteActivity = new Intent(mainActivity, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
-        parent.startActivity(noteActivity);
+        mainActivity.startActivity(noteActivity);
     }
+
+    public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }
 
     /**
      * Resorts the note list

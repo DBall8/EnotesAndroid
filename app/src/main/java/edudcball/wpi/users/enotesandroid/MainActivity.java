@@ -1,22 +1,30 @@
 package edudcball.wpi.users.enotesandroid;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 
 
@@ -25,7 +33,7 @@ import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private ListView notesList; // the listview listing each note by its title
+    private ArrayAdapter<String> noteAdapter;
     private Menu menu;
 
     /**
@@ -43,7 +51,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Initialize the static note handler with the notesList
-        notesList = findViewById(R.id.NotesList);
+        ListView notesList = findViewById(R.id.NotesList);
+        noteAdapter = buildNotesAdapter();
+        notesList.setAdapter(noteAdapter);
+
         NoteManager.init(this, notesList);
 
         // Set up the floating button for adding notes
@@ -56,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // initialize the color conversion class
-        ColorConversions.init(this.getApplicationContext());
+        NoteLookupTable.init(this.getApplicationContext());
     }
 
     /**
@@ -80,8 +91,6 @@ public class MainActivity extends AppCompatActivity {
         else{
             startActivity(new Intent(this, LoginActivity.class));
         }
-
-
     }
 
     /**
@@ -137,7 +146,12 @@ public class MainActivity extends AppCompatActivity {
                 item.setChecked(true);
                 return true;
             case R.id.action_settings:
-                SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this);
+                SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this, new EventHandler<Void>() {
+                    @Override
+                    public void handle(Void event) {
+                        noteAdapter.notifyDataSetChanged();
+                    }
+                });
                 settingsDialog.show();
                 return true;
             // Logout the user
@@ -159,4 +173,55 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Builds the array adapter for handling the list of notes on the main screen
+     * @return an array adapter
+     */
+    private ArrayAdapter<String> buildNotesAdapter(){
+
+        final Context context = this.getApplicationContext();
+        ArrayAdapter<String> noteAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getNoteTitles()){
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView tv = (TextView) super.getView(position, convertView, parent);
+                tv.setTextColor(ContextCompat.getColor(context, R.color.black));
+                Drawable bg = ContextCompat.getDrawable(context, R.drawable.note_icon);
+
+                tv.setBackground(bg);
+
+                switch(Settings.getIconSize()){
+                    case SMALL:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_small));
+                        break;
+                    case MEDIUM:
+                    default:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_medium));
+                        break;
+                    case LARGE:
+                        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_large));
+                        break;
+                }
+
+                // Get the note by its position in the list
+                Note n = NoteManager.getNote(position);
+                // Set the background to match the note's color
+                JSONObject colors = n.getColors();
+                if(colors != null){
+                    try {
+                        bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.MULTIPLY);
+                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
+                    }catch(Exception e){
+                        tv.setBackgroundColor(getResources().getColor(R.color.defaultNote));
+                    }
+                }
+                else{
+                    tv.setBackgroundColor(getResources().getColor(R.color.defaultNote));
+                }
+
+                return tv;
+            }
+        };
+
+        return noteAdapter;
+    }
 }

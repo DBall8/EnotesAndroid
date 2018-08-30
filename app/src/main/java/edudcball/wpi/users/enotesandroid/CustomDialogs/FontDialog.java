@@ -9,14 +9,15 @@ import java.util.HashMap;
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
  * A dialog for selecting the font of a note
  */
-public class FontDialog extends CustomOptionsDialog<String> {
+public class FontDialog extends CustomOptionsDialog<NoteLookupTable.NoteFont> {
 
     // Constructor
-    public FontDialog(Context context, String selectedFont, EventHandler<String> confirmEvent) {
+    public FontDialog(Context context, NoteLookupTable.NoteFont selectedFont, EventHandler<NoteLookupTable.NoteFont> confirmEvent) {
         super(context, R.layout.dialog_font, selectedFont, confirmEvent);
     }
 
@@ -30,9 +31,9 @@ public class FontDialog extends CustomOptionsDialog<String> {
         buttonMap = new HashMap<>();
 
         Resources res = context.getResources();
-        buttonMap.put(res.getString(R.string.arial), (RadioButton)findViewById(R.id.arialButton));
-        buttonMap.put(res.getString(R.string.palatino), (RadioButton)findViewById(R.id.palatinoButton));
-        buttonMap.put(res.getString(R.string.courier), (RadioButton)findViewById(R.id.courierButton));
+        buttonMap.put(NoteLookupTable.NoteFont.ARIAL, (RadioButton)findViewById(R.id.arialButton));
+        buttonMap.put(NoteLookupTable.NoteFont.PALATINO, (RadioButton)findViewById(R.id.palatinoButton));
+        buttonMap.put(NoteLookupTable.NoteFont.COURIER, (RadioButton)findViewById(R.id.courierButton));
 
         selectOption();
     }

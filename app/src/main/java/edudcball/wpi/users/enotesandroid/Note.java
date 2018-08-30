@@ -5,6 +5,8 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+
 /**
  * Class for containing all the data needed for a single Note
  */
@@ -29,12 +31,7 @@ public class Note {
         this.tag = "note-" + System.currentTimeMillis(); // create a tag from the current time
         this.title = ""; // empty title
         this.content = ""; // empty content
-        try { // default color of yellow
-            this.colors = new JSONObject("{head: \'#ddaf00\', body: \'#ffe062\'}");
-        }
-        catch(Exception e){
-            this.colors = null;
-        }
+        this.colors = NoteLookupTable.getColorJSON(Settings.getDefaultColor()); // default color
 
         // default position of 200, 200
         this.x = 200;
@@ -42,8 +39,8 @@ public class Note {
         // default size of 300 x 400
         this.width = 300;
         this.height = 400;
-        this.font = "Arial"; // default font of Arial
-        this.fontSize = 12; //default size 12
+        this.font = NoteLookupTable.getFontString(Settings.getDefaultFont()); // default font of Arial
+        this.fontSize = Settings.getDefaultFontSize(); //default size 12
         this.zindex = 9999; // starts on top (is quickly changed)
     }
 
@@ -121,16 +118,8 @@ public class Note {
         }
     }
 
-    /**
-     * Set the color of the note
-     * @param color the number ID of the color to set to
-     */
-    public void setColor(int color){
-        // Get the JSON version of the color
-        JSONObject colorJSON = ColorConversions.getJSONFromColor(color);
-        if(colorJSON != null)
-            this.colors = colorJSON;
-    }
+
+    public void setColor(JSONObject colors){ this.colors = colors; }
 
     public void setFont(String font){
         this.font = font;

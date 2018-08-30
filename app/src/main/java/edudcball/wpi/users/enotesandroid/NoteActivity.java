@@ -22,6 +22,9 @@ import android.widget.EditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Set;
+
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontSizeDialog;
@@ -222,11 +225,11 @@ public class NoteActivity extends AppCompatActivity {
                     selectedColor = ContextCompat.getColor(this, R.color.defaultNote);
                 }
                 // open the dialog, and have it update the note and colors upon completion
-                ColorDialog cDialog = new ColorDialog(NoteActivity.this, selectedColor, new EventHandler<Integer>() {
+                ColorDialog cDialog = new ColorDialog(NoteActivity.this, NoteLookupTable.getColorFromInt(selectedColor), new EventHandler<NoteLookupTable.NoteColor>() {
                     @Override
-                    public void handle(Integer eventColor) {
-                        note.setColor(eventColor);
-                        color = eventColor;
+                    public void handle(NoteLookupTable.NoteColor eventColor) {
+                        note.setColor(NoteLookupTable.getColorJSON(eventColor));
+                        color = NoteLookupTable.getColorInt(eventColor);
                         setColors();
                     }
                 });
@@ -235,11 +238,14 @@ public class NoteActivity extends AppCompatActivity {
 
             // Opens the font menu
             case R.id.fontMenuItem:
-                FontDialog fDialog = new FontDialog(NoteActivity.this, note.getFont(), new EventHandler<String>() {
+                FontDialog fDialog = new FontDialog(NoteActivity.this,
+                        NoteLookupTable.getFontFromStr(note.getFont()),
+                        new EventHandler<NoteLookupTable.NoteFont>() {
                     @Override
-                    public void handle(String stringEvent) {
-                        note.setFont(stringEvent);
-                        setFont(stringEvent);
+                    public void handle(NoteLookupTable.NoteFont fontEvent) {
+                        String fontString = NoteLookupTable.getFontString(fontEvent);
+                        note.setFont(fontString);
+                        setFont(fontString);
                     }
                 });
                 fDialog.show();
@@ -284,6 +290,17 @@ public class NoteActivity extends AppCompatActivity {
      * @param size the size tos et to
      */
     private void setFontSize(int size){
-        contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size + 4);
+        switch(Settings.getTextSize()){
+            case SMALL:
+                break;
+            default:
+            case MEDIUM:
+                size += 8;
+                break;
+            case LARGE:
+                size += 16;
+                break;
+        }
+        contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
 }

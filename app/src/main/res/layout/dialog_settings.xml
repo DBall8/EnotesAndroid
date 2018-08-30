@@ -71,6 +71,45 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/large" />
+
+                <TextView
+                    android:id="@+id/textSizeView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="5dp"
+                    android:text="Text Size"
+                    android:textSize="30dp"
+                    android:textStyle="bold" />
+
+                <RadioGroup
+                    android:id="@+id/textSizeGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <RadioButton
+                        android:id="@+id/smallTextRB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/small" />
+
+                    <RadioButton
+                        android:id="@+id/mediumTextRB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/medium" />
+
+                    <RadioButton
+                        android:id="@+id/largeTextRB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/large" />
+                </RadioGroup>
             </RadioGroup>
 
             <TextView
@@ -97,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/noteYellow"
-                    android:text="Yellow"
+                    android:text="@string/yellow"
                     android:textColor="@color/noteYellow"
                     android:textStyle="bold" />
 
@@ -107,7 +146,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/noteOrange"
-                    android:text="Orange"
+                    android:text="@string/orange"
                     android:textColor="@color/noteOrange"
                     android:textStyle="bold" />
 
@@ -117,7 +156,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/noteRed"
-                    android:text="Red"
+                    android:text="@string/red"
                     android:textColor="@color/noteRed"
                     android:textStyle="bold" />
 
@@ -127,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/noteGreen"
-                    android:text="Green"
+                    android:text="@string/green"
                     android:textColor="@color/noteGreen"
                     android:textStyle="bold" />
 
@@ -137,7 +176,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/noteBlue"
-                    android:text="Blue"
+                    android:text="@string/blue"
                     android:textColor="@color/noteBlue"
                     android:textStyle="bold" />
 
@@ -147,7 +186,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:buttonTint="@color/notePurple"
-                    android:text="Purple"
+                    android:text="@string/purple"
                     android:textColor="@color/notePurple"
                     android:textStyle="bold" />
             </RadioGroup>

@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/noteYellow"
-            android:text="Yellow"
+            android:text="@string/yellow"
             android:textColor="@color/noteYellow"
             android:textStyle="bold" />
 
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/noteOrange"
-            android:text="Orange"
+            android:text="@string/orange"
             android:textColor="@color/noteOrange"
             android:textStyle="bold" />
 
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/noteRed"
-            android:text="Red"
+            android:text="@string/red"
             android:textColor="@color/noteRed"
             android:textStyle="bold" />
 
@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/noteGreen"
-            android:text="Green"
+            android:text="@string/green"
             android:textColor="@color/noteGreen"
             android:textStyle="bold" />
 
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/noteBlue"
-            android:text="Blue"
+            android:text="@string/blue"
             android:textColor="@color/noteBlue"
             android:textStyle="bold" />
 
@@ -82,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:buttonTint="@color/notePurple"
-            android:text="Purple"
+            android:text="@string/purple"
             android:textColor="@color/notePurple"
             android:textStyle="bold" />
 

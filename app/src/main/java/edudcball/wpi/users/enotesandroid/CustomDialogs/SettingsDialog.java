@@ -4,23 +4,20 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.NestedScrollView;
-import android.text.Layout;
+import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.ScrollView;
 
-import java.util.Map;
+import java.util.Set;
 
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 
@@ -28,20 +25,27 @@ public class SettingsDialog extends Dialog {
 
     Context context;
     private Button applyButton, cancelButton;
-    //private WindowManager.LayoutParams params;
-    int width, height;
 
-    public SettingsDialog(Context context) {
+    private RadioGroup iconSizeGroup;
+    private RadioGroup textSizeGroup;
+    private RadioGroup dColorGroup;
+    private RadioGroup dFontGroup;
+    private RadioGroup dFontSizeGroup;
+
+    private EventHandler<Void> finishedEvent;
+
+
+    public SettingsDialog(Context context, EventHandler<Void> finishedEvent) {
         super(context);
 
+        this.finishedEvent = finishedEvent;
         this.context = context;
+
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         WindowManager.LayoutParams params = this.getWindow().getAttributes();
-        width = (int)(displayMetrics.widthPixels * 0.8);
-        height = (int)(displayMetrics.heightPixels * 0.8);
-        params.width = width;
-        params.height = height;
+        params.width = (int)(displayMetrics.widthPixels * 0.8);
+        params.height = (int)(displayMetrics.heightPixels * 0.8);
         getWindow().setAttributes(params);
     }
 
@@ -60,28 +64,23 @@ public class SettingsDialog extends Dialog {
         applyButton = findViewById(R.id.applyButton);
         cancelButton = findViewById(R.id.cancelButton);
 
-        final RadioGroup iconSizeGroup = findViewById(R.id.iconSizeGroup);
+        iconSizeGroup = findViewById(R.id.iconSizeGroup);
+        textSizeGroup = findViewById(R.id.textSizeGroup);
+        dColorGroup = findViewById(R.id.dColorGroup);
+        dFontGroup = findViewById(R.id.dFontGroup);
+        dFontSizeGroup = findViewById(R.id.dFontSizeGroup);
+
+        setChecks();
 
         // set apply button action
         applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                RadioButton selectedRB = findViewById(iconSizeGroup.getCheckedRadioButtonId());
+                updateSettings();
 
-                switch(selectedRB.getText().toString()){
-                    case "Small":
-                        Settings.setIconSize(Settings.Size.SMALL);
-                        break;
-                    case "Medium":
-                    default:
-                        Settings.setIconSize(Settings.Size.MEDIUM);
-                        break;
-                    case "Large":
-                        Settings.setIconSize(Settings.Size.LARGE);
-                        break;
-                }
                 // close dialog
+                finishedEvent.handle(null);
                 dismiss();
             }
         });
@@ -94,5 +93,140 @@ public class SettingsDialog extends Dialog {
             }
         });
 
+    }
+
+    private void updateSettings(){
+        RadioButton selectedRB = findViewById(iconSizeGroup.getCheckedRadioButtonId());
+        switch(selectedRB.getText().toString()){
+            case "Small":
+                Settings.setIconSize(Settings.Size.SMALL);
+                break;
+            case "Medium":
+            default:
+                Settings.setIconSize(Settings.Size.MEDIUM);
+                break;
+            case "Large":
+                Settings.setIconSize(Settings.Size.LARGE);
+                break;
+        }
+
+        selectedRB = findViewById(textSizeGroup.getCheckedRadioButtonId());
+        switch(selectedRB.getText().toString()){
+            case "Small":
+                Settings.setTextSize(Settings.Size.SMALL);
+                break;
+            case "Medium":
+            default:
+                Settings.setTextSize(Settings.Size.MEDIUM);
+                break;
+            case "Large":
+                Settings.setTextSize(Settings.Size.LARGE);
+                break;
+        }
+
+        selectedRB = findViewById(dColorGroup.getCheckedRadioButtonId());
+        Settings.setDefaultColor(NoteLookupTable.getColorFromStr(selectedRB.getText().toString()));
+
+        selectedRB = findViewById(dFontGroup.getCheckedRadioButtonId());
+        Settings.setDefaultFont(NoteLookupTable.getFontFromStr(selectedRB.getText().toString()));
+
+        selectedRB = findViewById(dFontSizeGroup.getCheckedRadioButtonId());
+        try{
+            Settings.setDefaultFontSize(Integer.parseInt(selectedRB.getText().toString()));
+        } catch (Exception e){
+            Log.d("MYAPP", "Could not parse integer: " + selectedRB.getText());
+        }
+    }
+
+    private void setChecks(){
+        RadioButton radioButton;
+        switch(Settings.getIconSize()){
+            case SMALL:
+                radioButton = findViewById(R.id.smallIconRB);
+                break;
+            case MEDIUM:
+            default:
+                radioButton = findViewById(R.id.mediumIconRB);
+                break;
+            case LARGE:
+                radioButton = findViewById(R.id.largeIconRB);
+                break;
+        }
+        radioButton.setChecked(true);
+
+        switch(Settings.getTextSize()){
+            case SMALL:
+                radioButton = findViewById(R.id.smallTextRB );
+                break;
+            case MEDIUM:
+            default:
+                radioButton = findViewById(R.id.mediumTextRB);
+                break;
+            case LARGE:
+                radioButton = findViewById(R.id.largeTextRB);
+                break;
+        }
+        radioButton.setChecked(true);
+
+        switch (Settings.getDefaultColor()){
+            default:
+            case YELLOW:
+                radioButton = findViewById(R.id.yellowButton);
+                break;
+            case ORANGE:
+                radioButton = findViewById(R.id.orangeButton);
+                break;
+            case RED:
+                radioButton = findViewById(R.id.redButton);
+                break;
+            case GREEN:
+                radioButton = findViewById(R.id.greenButton);
+                break;
+            case BLUE:
+                radioButton = findViewById(R.id.blueButton);
+                break;
+            case PURPLE:
+                radioButton = findViewById(R.id.purpleButton);
+                break;
+        }
+        radioButton.setChecked(true);
+
+        switch(Settings.getDefaultFont()){
+            default:
+            case ARIAL:
+                radioButton = findViewById(R.id.arialRadioButton);
+                break;
+            case PALATINO:
+                radioButton = findViewById(R.id.palatinoRadioButton);
+                break;
+            case COURIER:
+                radioButton = findViewById(R.id.courierRadioButton);
+                break;
+        }
+
+        radioButton.setChecked(true);
+
+        switch (Settings.getDefaultFontSize()){
+            case 10:
+                radioButton = findViewById(R.id.tenRadioButton);
+                break;
+            default:
+            case 12:
+                radioButton = findViewById(R.id.twelveRadioButton);
+                break;
+            case 14:
+                radioButton = findViewById(R.id.fourteenRadioButton);
+                break;
+            case 18:
+                radioButton = findViewById(R.id.eighteenRadioButton);
+                break;
+            case 24:
+                radioButton = findViewById(R.id.twelveRadioButton);
+                break;
+            case 32:
+                radioButton = findViewById(R.id.thirtyTwoRadioButton);
+                break;
+        }
+        radioButton.setChecked(true);
     }
 }

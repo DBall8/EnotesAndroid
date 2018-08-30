@@ -1,22 +1,19 @@
 package edudcball.wpi.users.enotesandroid.CustomDialogs;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.widget.RadioButton;
-
-import org.json.JSONException;
 
 import java.util.HashMap;
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.R;
 
 /**
  * A class for creating a dialog for selecting a color
  */
-public class ColorDialog extends CustomOptionsDialog<Integer> {
+public class ColorDialog extends CustomOptionsDialog<NoteLookupTable.NoteColor> {
 
     /**
      * Constructor
@@ -24,7 +21,7 @@ public class ColorDialog extends CustomOptionsDialog<Integer> {
      * @param selectedColor the color the note is currently
      * @param confirmEvent the event for running when the apply button is pressed
      */
-    public ColorDialog(Context context, int selectedColor, EventHandler<Integer> confirmEvent) {
+    public ColorDialog(Context context, NoteLookupTable.NoteColor selectedColor, EventHandler<NoteLookupTable.NoteColor> confirmEvent) {
         // build the dialog with the color layout
         super(context, R.layout.dialog_color, selectedColor, confirmEvent);
     }
@@ -39,12 +36,12 @@ public class ColorDialog extends CustomOptionsDialog<Integer> {
 
         // associate each radio button with a color code
         buttonMap = new HashMap<>();
-        buttonMap.put(ContextCompat.getColor(context, R.color.noteYellow), (RadioButton)findViewById(R.id.yellowButton));
-        buttonMap.put(ContextCompat.getColor(context, R.color.noteOrange), (RadioButton)findViewById(R.id.orangeButton));
-        buttonMap.put(ContextCompat.getColor(context, R.color.noteRed), (RadioButton)findViewById(R.id.redButton));
-        buttonMap.put(ContextCompat.getColor(context, R.color.noteGreen), (RadioButton)findViewById(R.id.greenButton));
-        buttonMap.put(ContextCompat.getColor(context, R.color.noteBlue), (RadioButton)findViewById(R.id.blueButton));
-        buttonMap.put(ContextCompat.getColor(context, R.color.notePurple), (RadioButton)findViewById(R.id.purpleButton));
+        buttonMap.put(NoteLookupTable.NoteColor.YELLOW, (RadioButton)findViewById(R.id.yellowButton));
+        buttonMap.put(NoteLookupTable.NoteColor.ORANGE, (RadioButton)findViewById(R.id.orangeButton));
+        buttonMap.put(NoteLookupTable.NoteColor.RED, (RadioButton)findViewById(R.id.redButton));
+        buttonMap.put(NoteLookupTable.NoteColor.GREEN, (RadioButton)findViewById(R.id.greenButton));
+        buttonMap.put(NoteLookupTable.NoteColor.BLUE, (RadioButton)findViewById(R.id.blueButton));
+        buttonMap.put(NoteLookupTable.NoteColor.PURPLE, (RadioButton)findViewById(R.id.purpleButton));
 
         // select the current color radio button
         selectOption();
