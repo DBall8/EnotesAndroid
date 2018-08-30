@@ -14,7 +14,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:padding="10dp"
-        android:text="Font"
+        android:text="@string/font"
         android:textSize="36sp"
         android:textStyle="bold" />
 
@@ -68,16 +68,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:text="Save" />
+            android:text="@string/save" />
 
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
     </LinearLayout>
 
 </LinearLayout>

@@ -50,7 +50,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:color/transparent"
         android:ems="10"
-        android:gravity="top|left"
+        android:gravity="top|start"
         android:inputType="textMultiLine|textWebEditText"
         android:maxLength="4096"
         android:padding="10dp"
@@ -78,7 +78,7 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@color/loginpurple"
-            android:text="Save"
+            android:text="@string/save"
             android:textColor="@color/black"
             android:textSize="18sp" />
 
@@ -89,7 +89,7 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@color/loginpurple"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:textColor="@color/black"
             android:textSize="18sp" />
 
@@ -100,7 +100,7 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@color/loginpurple"
-            android:text="Delete"
+            android:text="@string/delete"
             android:textColor="@color/black"
             android:textSize="18sp" />
     </LinearLayout>

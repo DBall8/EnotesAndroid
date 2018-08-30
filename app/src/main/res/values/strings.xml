@@ -17,4 +17,21 @@
     <string name="green">Green</string>
     <string name="blue">Blue</string>
     <string name="purple">Purple</string>
+    <string name="welcome_to_enotes">Welcome to ENotes</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="color">Color</string>
+    <string name="font">Font</string>
+    <string name="_24">24</string>
+    <string name="_18">18</string>
+    <string name="_14">14</string>
+    <string name="_12">12</string>
+    <string name="_10">10</string>
+    <string name="font_size">Font Size</string>
+    <string name="_32">32</string>
 </resources>

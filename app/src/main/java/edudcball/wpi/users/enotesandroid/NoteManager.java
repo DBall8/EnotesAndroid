@@ -156,6 +156,8 @@ public class NoteManager {
             case RECENT:
             default:
                 getInstance().sortByRecent();
+            case ALPHA:
+                getInstance().sortByAlpha();
         }
 
         // Notify the adatper that the list has been changed
@@ -219,6 +221,43 @@ public class NoteManager {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void sortByAlpha(){
+        // Convert hashmap into a list
+        ArrayList<String> workingList = new ArrayList<String>();
+        for(Map.Entry<String, Note> cursor: notes.entrySet()){
+            workingList.add(cursor.getKey());
+        }
+
+        int len = workingList.size();
+
+        String firstTitle;
+        int titleAlpha;
+        int a;
+        // Loop through and add the note with the highest z index until all notes are added
+        for(int i=0; i<len; i++){
+
+            String firstTag = workingList.get(0);
+            firstTitle = getTitleFromNote(getNote(firstTag));
+            titleAlpha = Character.toLowerCase(firstTitle.charAt(0));
+            for(int j=1; j<workingList.size(); j++){
+                String title = getTitleFromNote(getNote(workingList.get(j)));
+                a = Character.toLowerCase(title.charAt(0));
+                if(a < titleAlpha){
+                    firstTag = workingList.get(j);
+                    firstTitle = title;
+                    titleAlpha = a;
+                }
+            }
+            // Add the largest zindex note to the titles list and remove it from the workingList
+            if(firstTag != null){
+                workingList.remove(firstTag);
+                noteTitles.add(firstTitle);
+                noteTagLookup.add(firstTag);
+            }
+
         }
     }
 

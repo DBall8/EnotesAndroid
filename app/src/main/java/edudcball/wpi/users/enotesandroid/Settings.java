@@ -45,7 +45,8 @@ public class Settings {
 
     public enum SortBy{
         RECENT((short)0),
-        COLOR((short)1);
+        COLOR((short)1),
+        ALPHA((short)2);
 
         short val;
         static Map<Short, SortBy> map = new HashMap();

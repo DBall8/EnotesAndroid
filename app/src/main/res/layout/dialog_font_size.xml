@@ -14,7 +14,7 @@
         android:layout_weight="1"
         android:gravity="center"
         android:padding="10dp"
-        android:text="Font Size"
+        android:text="@string/font_size"
         android:textSize="36sp"
         android:textStyle="bold" />
 
@@ -30,42 +30,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="10" />
+            android:text="@string/_10" />
 
         <RadioButton
             android:id="@+id/twelveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="12" />
+            android:text="@string/_12" />
 
         <RadioButton
             android:id="@+id/fourteenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="14" />
+            android:text="@string/_14" />
 
         <RadioButton
             android:id="@+id/eighteenButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="18" />
+            android:text="@string/_18" />
 
         <RadioButton
             android:id="@+id/twentyFourButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="24" />
+            android:text="@string/_24" />
 
         <RadioButton
             android:id="@+id/thirtyTwoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="32" />
+            android:text="@string/_32" />
 
     </RadioGroup>
 
@@ -86,16 +86,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:text="Save" />
+            android:text="@string/save" />
 
         <Button
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
     </LinearLayout>
 
 </LinearLayout>
