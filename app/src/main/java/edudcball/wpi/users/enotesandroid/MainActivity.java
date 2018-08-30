@@ -55,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
         noteAdapter = buildNotesAdapter();
         notesList.setAdapter(noteAdapter);
 
-        NoteManager.init(this, notesList);
-
         // Set up the floating button for adding notes
         FloatingActionButton fab = findViewById(R.id.newNoteFab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -66,8 +64,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // initialize the color conversion class
+        NoteManager.init(this, notesList);
         NoteLookupTable.init(this.getApplicationContext());
+        Settings.init(this.getApplicationContext());
     }
 
     /**
