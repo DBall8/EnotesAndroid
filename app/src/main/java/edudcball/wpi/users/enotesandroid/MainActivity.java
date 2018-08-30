@@ -112,9 +112,10 @@ public class MainActivity extends AppCompatActivity {
             case RECENT:
             default:
                 sortByMenu.findItem(R.id.action_recent).setChecked(true);
+                break;
             case ALPHA:
                 sortByMenu.findItem(R.id.action_alpha).setChecked(true);
-
+                break;
         }
 
         return true;
