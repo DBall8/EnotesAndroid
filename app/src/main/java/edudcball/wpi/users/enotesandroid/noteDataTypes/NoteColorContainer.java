@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.R;
 
-public class NoteColorContainer {
+class NoteColorContainer {
     JSONObject jsonVal;
     int intVal;
     String strVal;
