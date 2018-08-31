@@ -160,6 +160,9 @@ public class MainActivity extends AppCompatActivity {
                 });
                 settingsDialog.show();
                 return true;
+            case R.id.action_password:
+                startActivity(new Intent(this.getApplicationContext(), ChangePasswordActivity.class));
+                break;
             // Logout the user
             case R.id.action_logout:
                 final Activity activity = this;

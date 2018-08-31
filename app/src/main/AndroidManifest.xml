@@ -37,6 +37,14 @@
                 <action android:name="android.intent.action.LOGIN" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ChangePasswordActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.CHANGEPASSWORD" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

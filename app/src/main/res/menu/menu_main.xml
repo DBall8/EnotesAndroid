@@ -26,7 +26,11 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_logout"
+        android:id="@+id/action_password"
         android:orderInCategory="101"
+        android:title="Change Password" />
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="102"
         android:title="Logout" />
 </menu>

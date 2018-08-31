@@ -179,6 +179,8 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setText("Login");
                 loginButton.setEnabled(true);
 
+                Log.d("MYAPP", result);
+
                 // if no response, something went wrong, end now
                 if(result == null){
                     displayError("Could not connect to server. Please try again later.");
@@ -193,15 +195,15 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
 
-                        if(obj.getString("dFont") != null){
+                        if(!obj.isNull("dFont")){
                             Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dFont")));
                         }
 
-                        if(obj.getInt("dFontSize") > 0){
+                        if(!obj.isNull("dFontSize")){
                             Settings.setDefaultFontSize(obj.getInt("dFontSize"));
                         }
 
-                        if(obj.getString("dColor") != null){
+                        if(!obj.isNull("dColor")){
                             Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dColor")));
                         }
 
@@ -214,7 +216,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
                 catch(Exception e){
-                    Log.d("MYAPP", "Failed to parse JSON");
+                    Log.d("MYAPP", "Failed to parse JSON: " + result);
                     displayError("Error when connecting to server.");
                 }
             }
