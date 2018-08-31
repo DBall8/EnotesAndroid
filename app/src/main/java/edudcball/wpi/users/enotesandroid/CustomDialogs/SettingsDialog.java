@@ -223,7 +223,7 @@ public class SettingsDialog extends Dialog {
                 radioButton = findViewById(R.id.eighteenRadioButton);
                 break;
             case 24:
-                radioButton = findViewById(R.id.twelveRadioButton);
+                radioButton = findViewById(R.id.twentyFourRadioButton);
                 break;
             case 32:
                 radioButton = findViewById(R.id.thirtyTwoRadioButton);
