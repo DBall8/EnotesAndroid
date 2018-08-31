@@ -19,6 +19,7 @@ import java.net.HttpCookie;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.CreateUserTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LoginTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
  * Class for running the Login screen of the application
@@ -191,6 +192,18 @@ public class LoginActivity extends AppCompatActivity {
                     if(obj.getBoolean("successful")){
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
+
+                        if(obj.getString("dFont") != null){
+                            Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dFont")));
+                        }
+
+                        if(obj.getInt("dFontSize") > 0){
+                            Settings.setDefaultFontSize(obj.getInt("dFontSize"));
+                        }
+
+                        if(obj.getString("dColor") != null){
+                            Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dColor")));
+                        }
 
                         // move to login success method
                         loginSuccess();

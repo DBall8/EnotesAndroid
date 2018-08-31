@@ -22,7 +22,8 @@
             android:layout_height="wrap_content"
             android:background="@color/loginpurple"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme">
+            android:theme="?attr/actionBarTheme"
+            app:popupTheme="@style/menuStyle">
 
             <EditText
                 android:id="@+id/titleBar"

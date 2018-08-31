@@ -81,7 +81,10 @@ public class NoteManager {
 
             @Override
             protected void onPostExecute(String result) {
-                if(result == null) return;
+                if(result == null){
+                    sessionExpired(getInstance().mainActivity,"Session expired. Please log in again.");
+                    return;
+                }
                 getInstance().loadNotes(result);
             }
         }.execute();
@@ -133,6 +136,9 @@ public class NoteManager {
      * @param message the message to display once back on the login screen
      */
     public static void sessionExpired(Activity activity, String message){
+        if(activity == null){
+            activity = getInstance().mainActivity;
+        }
         Intent next = new Intent(activity, LoginActivity.class);
         next.putExtra("error", message);
         activity.startActivity(next);

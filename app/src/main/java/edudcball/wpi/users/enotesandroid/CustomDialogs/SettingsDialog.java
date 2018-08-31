@@ -136,6 +136,8 @@ public class SettingsDialog extends Dialog {
         } catch (Exception e){
             Log.d("MYAPP", "Could not parse integer: " + selectedRB.getText());
         }
+
+        Settings.updateSettingsServerSide();
     }
 
     private void setChecks(){

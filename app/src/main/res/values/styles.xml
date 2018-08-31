@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/loginpurple</item>
         <item name="colorPrimaryDark">@color/background</item>
         <item name="colorAccent">@color/lightpurple</item>
+
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -53,6 +54,7 @@
     <style name="menuStyle" parent="@android:style/Widget.ListView">
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@color/background</item>
+        <item name="android:textSize">24sp</item>
     </style>
 
     <style name="listViewStyle">

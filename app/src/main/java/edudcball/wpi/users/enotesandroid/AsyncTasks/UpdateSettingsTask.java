@@ -9,13 +9,15 @@ import org.json.JSONObject;
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class LoginTask extends HttpConnectionTask {
+public abstract class UpdateSettingsTask extends HttpConnectionTask {
 
-    private String username, password;
+    private String dFont, dColor;
+    private int dFontSize;
 
-    public LoginTask(String username, String password){
-        this.username = username;
-        this.password = password;
+    public UpdateSettingsTask(String dFont, int dFontSize, String dColor){
+        this.dFont = dFont;
+        this.dFontSize = dFontSize;
+        this.dColor = dColor;
     }
 
     /**
@@ -27,19 +29,16 @@ public abstract class LoginTask extends HttpConnectionTask {
     protected String doInBackground(String... vals) {
         try{
             // connect to the server
-            connect("/login", true, true, "POST");
+            connect("/user", true, true, "POST");
 
             // build the message
             JSONObject msg = new JSONObject();
-            msg.put("username", username);
-            msg.put("password", password);
-            msg.put("stayLoggedIn", false);
+            msg.put("dFont", dFont);
+            msg.put("dFontSize", dFontSize);
+            msg.put("dColor", dColor);
 
             // write the message
             writeMessage(msg.toString());
-
-            // save user session cookie
-            saveCookies();
 
             // read response
             String resp = readResponse();
@@ -47,14 +46,10 @@ public abstract class LoginTask extends HttpConnectionTask {
             // disconnect
             connection.disconnect();
 
-            // wipe login data just in case
-            username = null;
-            password = null;
-
             return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "ERROR WHEN LOGGIN IN: " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN UPDATING SETTINGS IN: " + e.toString());
             return null;
         }
     }

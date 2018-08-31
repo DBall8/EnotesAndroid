@@ -2,10 +2,14 @@ package edudcball.wpi.users.enotesandroid;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import edudcball.wpi.users.enotesandroid.AsyncTasks.UpdateSettingsTask;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {
@@ -18,7 +22,6 @@ public class Settings {
     private Size textSize = Size.MEDIUM;
 
     private SharedPreferences preferences;
-
 
     public enum Size{
         SMALL((short)0),
@@ -146,6 +149,32 @@ public class Settings {
     }
     // -----------------------------------
 
+    public static void updateSettingsServerSide(){
+        new UpdateSettingsTask(NoteLookupTable.getFontString(getInstance().defaultFont),
+                                getInstance().defaultFontSize,
+                                NoteLookupTable.getColorStr(getInstance().defaultColor)){
+            @Override
+            protected void onPostExecute(String result) {
+                if(result == null){
+                    NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+                    return;
+                }
+
+                try{
+                    // Convert response to a JSON object
+                    JSONObject obj = new JSONObject(result);
+                    // If successful flag received, save the session id on the phone for next time
+                    if(!obj.getBoolean("successful")){
+                        NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+                    }
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Failed to parse JSON");
+                    NoteManager.sessionExpired(null, "Problem communicating with server. Please try again later.");
+                }
+            }
+        }.execute();
+    }
     private Settings(){}
 
     private static class SingletonHelper{
