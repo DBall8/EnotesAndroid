@@ -13,6 +13,7 @@ import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Note {
     private String tag; // tag that uniquely identifies the note
+    private String pageID; // id of the note page the note belongs to
     private String title; // the optional title displayed at the top of the note
     private String content; // the text content of the note
     private JSONObject colors; // a JSON containing the colors used for the note
@@ -29,6 +30,7 @@ public class Note {
      */
     public Note(){
         this.tag = "note-" + System.currentTimeMillis(); // create a tag from the current time
+        this.pageID = NoteManager.getCurrentPageID();
         this.title = ""; // empty title
         this.content = ""; // empty content
         this.colors = NoteLookupTable.getColorJSON(Settings.getDefaultColor()); // default color
@@ -52,6 +54,7 @@ public class Note {
         try {
             // get each field from the JSON
             this.tag = json.getString("tag");
+            this.pageID = json.getString("pageid");
             String title = json.getString("title");
             if (title == null || title.equals("null")) {
                 this.title = "";
@@ -87,6 +90,7 @@ public class Note {
 
             JSONObject json = new JSONObject();
             json.put("tag", tag);
+            json.put("pageID", pageID);
             json.put("title", title);
             json.put("content", content);
             json.put("x", x);

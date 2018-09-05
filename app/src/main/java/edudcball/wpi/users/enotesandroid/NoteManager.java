@@ -41,6 +41,7 @@ public class NoteManager {
 
     private ArrayAdapter<String> noteAdapter; // The array adapter for displaying notes in the list view
     private String username = ""; // user's username
+    private String currentPageID = "";
 
     private CookieManager cookies = new CookieManager(); // manages cookies
 
@@ -122,6 +123,9 @@ public class NoteManager {
             }
             createNoteList();
             Log.d("MYAPP", "NOTES LOADED");
+
+            currentPageID = obj.getJSONArray("notePages").getJSONObject(0).getString("pageid");
+            Log.d("MYAPP", currentPageID);
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
@@ -432,6 +436,8 @@ public class NoteManager {
         getInstance().cookies.getCookieStore().add(null, HttpCookie.parse(cookie).get(0));
     }
     public static void resetCookies(){ getInstance().cookies = new CookieManager(); }
+
+    public static String getCurrentPageID(){ return getInstance().currentPageID; }
 
     // singleton methods
 
