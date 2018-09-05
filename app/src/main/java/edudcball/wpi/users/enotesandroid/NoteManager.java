@@ -39,6 +39,9 @@ public class NoteManager {
     private ArrayList<String> noteTagLookup = new ArrayList<>(); // Maps note tags to their index in the noteAdapter
     private ArrayList<String> noteTitles = new ArrayList<>(); // The list of note titles to display in the list view
 
+    private NotePage[] notePages;
+    private ArrayList<String> pageTitles = new ArrayList<>();
+
     private ArrayAdapter<String> noteAdapter; // The array adapter for displaying notes in the list view
     private String username = ""; // user's username
     private String currentPageID = "";
@@ -64,6 +67,7 @@ public class NoteManager {
 
         instance.noteAdapter = (ArrayAdapter<String>)lv.getAdapter();
 
+        /*
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
             @Override
@@ -72,6 +76,7 @@ public class NoteManager {
                 instance.switchToNote(n);
             }
         });
+        */
     }
 
     /**
@@ -86,17 +91,12 @@ public class NoteManager {
                     sessionExpired(getInstance().mainActivity,"Session expired. Please log in again.");
                     return;
                 }
-                getInstance().loadNotes(result);
+                getInstance().load(result);
             }
         }.execute();
     }
 
-    /**
-     * Load all notes for the user onto the screen
-     * @param res the string version of an http response from the server
-     */
-    private void loadNotes(String res){
-
+    private void load(String res){
         try{
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
@@ -105,14 +105,64 @@ public class NoteManager {
                 return;
             }
 
-            // Clear everything, start from empty, except the notes list to preserve their z index
-            notes.clear();
-
             // store the user's username
             username = obj.getString("username");
 
+            JSONArray pageArr = obj.getJSONArray("notePages");
+            loadNotePages(pageArr);
+
             // Load each note in the http response
-            JSONArray arr = obj.getJSONArray("notes");
+            JSONArray noteArr = obj.getJSONArray("notes");
+            loadNotes(noteArr);
+
+            currentPageID = pageArr.getJSONObject(0).getString("pageid");
+            Log.d("MYAPP", currentPageID);
+        }
+        catch(Exception e){
+            Log.d("MYAPP", "Unable to form response JSON for get notes");
+            Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
+            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
+        }
+    }
+
+    private void loadNotePages(JSONArray arr){
+        try{
+            // Clear everything, start from empty, except the notes list to preserve their z index
+            notePages = new NotePage[arr.length()];
+            pageTitles.clear();
+            // Load each note in the http response
+            for(int i=0; i<arr.length(); i++){
+                JSONObject pageJSON = arr.getJSONObject(i);
+                NotePage p = new NotePage(pageJSON);
+                if(p.getIndex() < notePages.length){
+                    notePages[p.getIndex()] = p;
+                }
+            }
+
+            for(NotePage p: notePages){
+                pageTitles.add(p.getName());
+            }
+
+            Log.d("MYAPP", "PAGES LOADED");
+        }
+        catch(Exception e){
+            Log.d("MYAPP", "Unable to form notes from response");
+            Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
+            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
+        }
+    }
+
+    /**
+     * Load all notes for the user onto the screen
+     * @param arr a json array of note json objects
+     */
+    private void loadNotes(JSONArray arr){
+
+        try{
+            // Clear everything, start from empty, except the notes list to preserve their z index
+            notes.clear();
+
+            // Load each note in the http response
             for(int i=0; i<arr.length(); i++){
                 JSONObject noteJSON = arr.getJSONObject(i);
                 Note n = new Note(noteJSON);
@@ -123,12 +173,9 @@ public class NoteManager {
             }
             createNoteList();
             Log.d("MYAPP", "NOTES LOADED");
-
-            currentPageID = obj.getJSONArray("notePages").getJSONObject(0).getString("pageid");
-            Log.d("MYAPP", currentPageID);
         }
         catch(Exception e){
-            Log.d("MYAPP", "Unable to form response JSON for get notes");
+            Log.d("MYAPP", "Unable to form notes from response");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
             sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
         }
@@ -421,8 +468,24 @@ public class NoteManager {
         mainActivity.startActivity(noteActivity);
     }
 
-    public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }
+    public static NotePage getPage(int index){
+        if(getInstance().notePages.length > index){
+            return getInstance().notePages[index];
+        }
+        return null;
+    }
 
+    public static NotePage getPage(String pageID){
+        for(NotePage p: getInstance().notePages){
+            if(p.getPageID().equals(pageID)){
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }
+    public static ArrayList<String> getPageTitles(){ return getInstance().pageTitles; }
     /**
      * Resorts the note list
      */

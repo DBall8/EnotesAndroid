@@ -7,18 +7,18 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,16 +26,17 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 
 /**
  * Class for creating the main view of the app, which is the list of notes
  */
-public class MainActivity extends AppCompatActivity {
+public class NotePageActivity extends AppCompatActivity {
 
-    private ArrayAdapter<String> pageAdapter;
+    private NotePage page;
+    private ArrayAdapter<String> noteAdapter;
     private Menu menu;
 
     /**
@@ -46,28 +47,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // setup layout
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_note_page);
+
+        String pageName = getIntent().getStringExtra("pageID");
+        page = NoteManager.getPage(pageName);
+        if(page == null){
+            finish();
+        }
 
         // setup toolbar
-        Toolbar toolbar = findViewById(R.id.pageToolbar);
+        Toolbar toolbar = findViewById(R.id.pageNameToolbar);
         setSupportActionBar(toolbar);
 
+        TextView pageTitle = findViewById(R.id.pageTitleBar);
+        pageTitle.setText(page.getName());
+
         // Initialize the static note handler with the notesList
-        ListView pageList = findViewById(R.id.PageList);
-        pageAdapter = buildPageAdapter();
-        pageList.setAdapter(pageAdapter);
-
-        final MainActivity self = this;
-
-        pageList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(self, NotePageActivity.class);
-                intent.putExtra("pageID", NoteManager.getPage(i).getPageID());
-                startActivity(intent);
-            }
-        });
+        ListView notesList = findViewById(R.id.NotesList);
+        noteAdapter = buildNotesAdapter();
+        notesList.setAdapter(noteAdapter);
 
         // Set up the floating button for adding notes
         FloatingActionButton fab = findViewById(R.id.newNoteFab);
@@ -77,10 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 NoteManager.newNote();
             }
         });
-
-        NoteManager.init(this, pageList);
-        NoteLookupTable.init(this.getApplicationContext());
-        Settings.init(this.getApplicationContext());
     }
 
     /**
@@ -89,21 +83,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-
-        // look for a saved session in on the phone
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        String session = sp.getString("session", null);
-
-        // if a session is saved, load the session into the cookie manager and load the user's notes
-        if(session != null){
-            NoteManager.resetCookies();
-            NoteManager.addCookies(session);
-            NoteManager.retrieveNotes();
-        }
-        // If no session is saved, move to login screen
-        else{
-            startActivity(new Intent(this, LoginActivity.class));
-        }
     }
 
     /**
@@ -167,10 +146,10 @@ public class MainActivity extends AppCompatActivity {
                 item.setChecked(true);
                 return true;
             case R.id.action_settings:
-                SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this, new EventHandler<Void>() {
+                SettingsDialog settingsDialog = new SettingsDialog(NotePageActivity.this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        pageAdapter.notifyDataSetChanged();
+                        noteAdapter.notifyDataSetChanged();
                     }
                 });
                 settingsDialog.show();
@@ -201,15 +180,15 @@ public class MainActivity extends AppCompatActivity {
      * Builds the array adapter for handling the list of notes on the main screen
      * @return an array adapter
      */
-    private ArrayAdapter<String> buildPageAdapter(){
+    private ArrayAdapter<String> buildNotesAdapter(){
 
         final Context context = this.getApplicationContext();
-        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getPageTitles()){
+        ArrayAdapter<String> noteAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getNoteTitles()){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
                 tv.setTextColor(ContextCompat.getColor(context, R.color.black));
-                Drawable bg = ContextCompat.getDrawable(context, R.drawable.note_icon);
+                GradientDrawable bg = (GradientDrawable) ContextCompat.getDrawable(context, R.drawable.note_icon);
 
                 tv.setBackground(bg);
 
@@ -226,10 +205,29 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
 
+                // Get the note by its position in the list
+                Note n = NoteManager.getNote(position);
+                // Set the background to match the note's color
+                JSONObject colors = n.getColors();
+
+                if(colors != null){
+                    try {
+                        bg.setColor(Color.parseColor(colors.getString("body")));
+                        //bg.setColorFilter(Color.parseColor(colors.getString("body")), PorterDuff.Mode.OVERLAY);
+                        //tv.setBackgroundColor(Color.parseColor(colors.getString("body")));
+                    }catch(Exception e){
+                        tv.setBackgroundColor(getResources().getColor(R.color.defaultNote));
+                    }
+                }
+                else{
+                    tv.setBackgroundColor(getResources().getColor(R.color.defaultNote));
+                }
+
+
                 return tv;
             }
         };
 
-        return pageAdapter;
+        return noteAdapter;
     }
 }
