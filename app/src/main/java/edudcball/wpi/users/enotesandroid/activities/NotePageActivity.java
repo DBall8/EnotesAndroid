@@ -77,7 +77,6 @@ public class NotePageActivity extends AppCompatActivity {
                 if(!hasFocus){
                     saveTitle();
                 }
-
             }
         });
 
@@ -125,24 +124,7 @@ public class NotePageActivity extends AppCompatActivity {
                 NoteManager.deletePage(activity, page.getPageID(), new EventHandler<String>() {
                     @Override
                     public void handle(String result) {
-                        if(result == null){
-                            NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
-                            return;
-                        }
-
-                        try{
-                            JSONObject obj = new JSONObject(result);
-                            if(obj.getBoolean("sessionExpired")){
-                                Log.d("MYAPP", "Session expired");
-                                NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
-                                return;
-                            }
-                            finish();
-                        }
-                        catch(Exception e){
-                            Log.d("MYAPP", "Unable to form response JSON for delete page");
-                            NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
-                        }
+                        finish();
                     }
                 });
             }
@@ -159,16 +141,21 @@ public class NotePageActivity extends AppCompatActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        String pageID = getIntent().getStringExtra("pageID");
-        page = NoteManager.getPage(pageID);
-        if(page == null){
-            finish();
-            return;
-        }
-        if(getIntent().getBooleanExtra("new", false)){
-            pageTitle.requestFocus();
-        }
-        pageTitle.setText(page.getName());
+        NoteManager.retrieveNotes(this, new EventHandler<Void>() {
+            @Override
+            public void handle(Void event) {
+                String pageID = getIntent().getStringExtra("pageID");
+                page = NoteManager.getPage(pageID);
+                if(page == null){
+                    finish();
+                    return;
+                }
+                if(getIntent().getBooleanExtra("new", false)){
+                    pageTitle.requestFocus();
+                }
+                pageTitle.setText(page.getName());
+            }
+        });
     }
 
     /**
@@ -324,12 +311,7 @@ public class NotePageActivity extends AppCompatActivity {
         if(page == null || page.getName().equals(pageTitle.getText().toString())) return;
         final Activity activity = this;
         page.setName(pageTitle.getText().toString());
-        NoteManager.updatePage(activity, page, new EventHandler<String>() {
-            @Override
-            public void handle(String event) {
-                finish();
-            }
-        });
+        NoteManager.updatePage(activity, page, null);
     }
 
     public static void updateNoteAdapter(){

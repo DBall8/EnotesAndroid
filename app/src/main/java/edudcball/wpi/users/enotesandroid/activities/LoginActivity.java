@@ -4,8 +4,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -70,6 +72,28 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchNewUser();
+            }
+        });
+
+        passwordField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if((i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_NEXT ) && !newUser){
+                    handleLoginClick();
+                }
+
+                return false;
+            }
+        });
+
+        passwordConfirm.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if((i == EditorInfo.IME_ACTION_DONE || i == EditorInfo.IME_ACTION_NEXT )&& newUser){
+                    handleLoginClick();
+                }
+
+                return false;
             }
         });
     }

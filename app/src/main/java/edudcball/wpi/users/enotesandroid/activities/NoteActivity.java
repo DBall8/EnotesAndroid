@@ -107,27 +107,10 @@ public class NoteActivity extends AppCompatActivity {
             note.setContent(contentView.getText().toString());
             note.setTitle(titleBar.getText().toString());
 
-            NoteManager.updateNote(note, new EventHandler<String>() {
+            NoteManager.updateNote(activity, note, new EventHandler<String>() {
                 @Override
                 public void handle(String event) {
-
-                    if(event == null){
-                        NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
-                        return;
-                    }
-
-                    try {
-                        JSONObject obj = new JSONObject(event);
-                        if (obj.getBoolean("sessionExpired")) {
-                            Log.d("MYAPP", "Session expired");
-                            NoteManager.sessionExpired(activity,"Session expired. Please log in again.");
-                            return;
-                        }
-                        finish();
-                    } catch (Exception e) {
-                        Log.d("MYAPP", "Unable to form response JSON for update notes");
-                        NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
-                    }
+                    finish();
                 }
             });
             }
@@ -148,28 +131,10 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-            NoteManager.deleteNote(note.getTag(), new EventHandler<String>() {
+            NoteManager.deleteNote(activity, note.getTag(), new EventHandler<String>() {
                 @Override
                 public void handle(String event) {
-
-                    if(event == null){
-                        NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
-                        return;
-                    }
-
-                    try{
-                        JSONObject obj = new JSONObject(event);
-                        if(obj.getBoolean("sessionExpired")){
-                            Log.d("MYAPP", "Session expired");
-                            NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
-                            return;
-                        }
-                        finish();
-                    }
-                    catch(Exception e){
-                        Log.d("MYAPP", "Unable to form response JSON for delete note");
-                        NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
-                    }
+                    finish();
                 }
             });
 

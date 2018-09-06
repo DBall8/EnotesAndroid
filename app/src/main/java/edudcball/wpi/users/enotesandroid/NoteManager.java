@@ -428,14 +428,31 @@ public class NoteManager {
      * @param n the note to update the server about
      * @param callback the function handler to call when the response is received
      */
-    public static void updateNote(Note n, final EventHandler<String> callback){
+    public static void updateNote(final Activity activity, Note n, final EventHandler<String> callback){
         // Call asynch update task
         new UpdateNoteTask(n){
 
             @Override
             protected void onPostExecute(String result) {
-                // asynch task finished, call callback
-                callback.handle(result);
+                if(result == null){
+                    NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                    return;
+                }
+
+                try {
+                    JSONObject obj = new JSONObject(result);
+                    if (obj.getBoolean("sessionExpired")) {
+                        Log.d("MYAPP", "Session expired");
+                        NoteManager.sessionExpired(activity,"Session expired. Please log in again.");
+                        return;
+                    }
+                    // asynch task finished, call callback
+                    if(callback != null) callback.handle(result);
+                } catch (Exception e) {
+                    Log.d("MYAPP", "Unable to form response JSON for update notes");
+                    NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                }
+
             }
         }.execute();
     }
@@ -445,13 +462,31 @@ public class NoteManager {
      * @param tag the tag of the note to delete
      * @param callback a funciton handler to call after the server responds
      */
-    public static void deleteNote(final String tag, final EventHandler<String> callback){
+    public static void deleteNote(final Activity activity, final String tag, final EventHandler<String> callback){
         // Call a delete asynch task
         new DeleteTask(tag){
             @Override
             protected void onPostExecute(String result) {
-                // task completed, call callback
-                callback.handle(result);
+                if(result == null){
+                    NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                    return;
+                }
+
+                try{
+                    JSONObject obj = new JSONObject(result);
+                    if(obj.getBoolean("sessionExpired")){
+                        Log.d("MYAPP", "Session expired");
+                        NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
+                        return;
+                    }
+                    // task completed, call callback
+                    if(callback != null) callback.handle(result);
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Unable to form response JSON for delete note");
+                    NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                }
+
             }
         }.execute();
     }
@@ -528,7 +563,7 @@ public class NoteManager {
         }.execute();
     }
 
-    public static void deletePage(Activity activity, String pageID, final EventHandler<String> callback){
+    public static void deletePage(final Activity activity, String pageID, final EventHandler<String> callback){
 
         int newIndex = 0;
         for(NotePage p: getInstance().notePages){
@@ -542,8 +577,26 @@ public class NoteManager {
         new DeletePageTask(pageID){
             @Override
             protected void onPostExecute(String result) {
-                // task completed, call callback
-                callback.handle(result);
+                if(result == null){
+                    NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                    return;
+                }
+
+                try{
+                    JSONObject obj = new JSONObject(result);
+                    if(obj.getBoolean("sessionExpired")){
+                        Log.d("MYAPP", "Session expired");
+                        NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
+                        return;
+                    }
+                    // task completed, call callback
+                    if(callback != null) callback.handle(result);
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Unable to form response JSON for delete page");
+                    NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                }
+
             }
         }.execute();
     }
@@ -625,15 +678,10 @@ public class NoteManager {
     private void switchToPage(final Activity a, final NotePage page, final boolean isNew){
 
         currentPageID = page.getPageID();
-        retrieveNotes(a, new EventHandler<Void>() {
-            @Override
-            public void handle(Void event) {
-                Intent intent = new Intent(a, NotePageActivity.class);
-                intent.putExtra("pageID", page.getPageID());
-                intent.putExtra("new", isNew);
-                a.startActivity(intent);
-            }
-        });
+        Intent intent = new Intent(a, NotePageActivity.class);
+        intent.putExtra("pageID", page.getPageID());
+        intent.putExtra("new", isNew);
+        a.startActivity(intent);
     }
 
     public static NotePage switchToPage(Activity a, int i){
