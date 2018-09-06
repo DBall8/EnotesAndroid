@@ -1,10 +1,12 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.objects;
 
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
@@ -38,9 +40,9 @@ public class Note {
         // default position of 200, 200
         this.x = 200;
         this.y = 200;
-        // default size of 300 x 400
-        this.width = 300;
-        this.height = 400;
+        // default size of 200 x 200
+        this.width = 200;
+        this.height = 200;
         this.font = NoteLookupTable.getFontString(Settings.getDefaultFont()); // default font of Arial
         this.fontSize = Settings.getDefaultFontSize(); //default size 12
         this.zindex = 9999; // starts on top (is quickly changed)
@@ -148,6 +150,8 @@ public class Note {
     public String getTag(){
         return this.tag;
     }
+
+    public String getPageID(){ return this.pageID; }
 
     public String getTitle(){ return this.title; }
 

@@ -3,8 +3,6 @@ package edudcball.wpi.users.enotesandroid;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -19,10 +17,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.DeleteTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.NewNoteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.DeleteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.NewNoteTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.RetrieveNotesTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.UpdateNoteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.UpdateNoteTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.DeletePageTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.NewPageTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.UpdatePageTask;
+import edudcball.wpi.users.enotesandroid.activities.LoginActivity;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
+import edudcball.wpi.users.enotesandroid.activities.NoteActivity;
+import edudcball.wpi.users.enotesandroid.activities.NotePageActivity;
+import edudcball.wpi.users.enotesandroid.objects.Note;
+import edudcball.wpi.users.enotesandroid.objects.NotePage;
 
 /**
  * Created by Owner on 1/5/2018.
@@ -33,7 +40,7 @@ public class NoteManager {
     private final static int TOPZ = 9999;
     private final static int BOTTOMZ = 100;
 
-    private MainActivity mainActivity;
+    private Activity mainActivity;
 
     private HashMap<String, Note> notes = new HashMap<>(); // Map of notes by their tag
     private ArrayList<String> noteTagLookup = new ArrayList<>(); // Maps note tags to their index in the noteAdapter
@@ -42,7 +49,6 @@ public class NoteManager {
     private NotePage[] notePages;
     private ArrayList<String> pageTitles = new ArrayList<>();
 
-    private ArrayAdapter<String> noteAdapter; // The array adapter for displaying notes in the list view
     private String username = ""; // user's username
     private String currentPageID = "";
 
@@ -65,7 +71,6 @@ public class NoteManager {
         // Load the noteAdapter used for displaying icons represeting notes that can be clicked on
         //instance.buildNoteAdapter();
 
-        instance.noteAdapter = (ArrayAdapter<String>)lv.getAdapter();
 
         /*
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -79,29 +84,31 @@ public class NoteManager {
         */
     }
 
+
     /**
      * Retrieve all notes for the user from the server and then load them
      */
-    public static void retrieveNotes(){
+    public static void retrieveNotes(final Activity a, final EventHandler<Void> callback){
         new RetrieveNotesTask(){
 
             @Override
             protected void onPostExecute(String result) {
                 if(result == null){
-                    sessionExpired(getInstance().mainActivity,"Session expired. Please log in again.");
+                    sessionExpired(a,"Session expired. Please log in again.");
                     return;
                 }
-                getInstance().load(result);
+                getInstance().load(a, result);
+                if(callback != null) callback.handle(null);
             }
         }.execute();
     }
 
-    private void load(String res){
+    private void load(Activity activity, String res){
         try{
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
                 Log.d("MYAPP", "Session expired");
-                sessionExpired(mainActivity,"Session expired. Please log in again.");
+                sessionExpired(activity,"Session expired. Please log in again.");
                 return;
             }
 
@@ -109,23 +116,20 @@ public class NoteManager {
             username = obj.getString("username");
 
             JSONArray pageArr = obj.getJSONArray("notePages");
-            loadNotePages(pageArr);
+            loadNotePages(activity, pageArr);
 
             // Load each note in the http response
             JSONArray noteArr = obj.getJSONArray("notes");
-            loadNotes(noteArr);
-
-            currentPageID = pageArr.getJSONObject(0).getString("pageid");
-            Log.d("MYAPP", currentPageID);
+            loadNotes(activity, noteArr);
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
-            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
+            sessionExpired(activity, "Error when contacting server. Please try again later.");
         }
     }
 
-    private void loadNotePages(JSONArray arr){
+    private void loadNotePages(Activity activity, JSONArray arr){
         try{
             // Clear everything, start from empty, except the notes list to preserve their z index
             notePages = new NotePage[arr.length()];
@@ -140,23 +144,74 @@ public class NoteManager {
             }
 
             for(NotePage p: notePages){
+                if(p == null){
+                    // Page indices got messed up, reset order
+                    Log.d("MYAPP", "RE_INDEXING PAGES");
+                    getInstance().notePages = getInstance().reSortPages(activity, arr);
+                    break;
+                }
                 pageTitles.add(p.getName());
             }
+
+            MainActivity.notifyAdatperChanged();
 
             Log.d("MYAPP", "PAGES LOADED");
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form notes from response");
-            Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
-            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
+            Log.d("MYAPP", "LOAD PAGES FAILED: " + e.getMessage());
+            sessionExpired(activity, "Error when contacting server. Please try again later.");
         }
+    }
+
+    /**
+     * Re-orders pages according to their index and sets their index equal to the new order
+     */
+    private NotePage[] reSortPages(Activity activity, JSONArray arr){
+        int len = arr.length();
+        notePages = new NotePage[len];
+        try {
+            // Create a list of each note page object
+            for (int i = 0; i < len; i++) {
+                JSONObject pageJSON = arr.getJSONObject(i);
+                NotePage p = new NotePage(pageJSON);
+                notePages[i] = p;
+            }
+
+            // Sort note pages by index
+            for (int i = 0; i < len-1; i++) {
+                for (int j = 0; j < len - i - 1; j++) {
+                    if (notePages[j].getIndex() > notePages[j + 1].getIndex()) {
+                        // swap temp and arr[i]
+                        NotePage temp = notePages[j];
+                        notePages[j] = notePages[j + 1];
+                        notePages[j + 1] = temp;
+                    }
+                }
+            }
+
+            // update all pages to have their index match their array position
+            for(int i=0; i<len; i++){
+                if(notePages[i].getIndex() != i){
+                    notePages[i].setIndex(i);
+                    updatePage(activity, notePages[i], null);
+                }
+            }
+        }
+        catch(Exception e){
+            Log.d("MYAPP", "Unable to form notes from response");
+            Log.d("MYAPP", "LOAD PAGES FAILED: " + e.getMessage());
+            sessionExpired(activity, "Error when contacting server. Please try again later.");
+        }
+
+        return notePages;
     }
 
     /**
      * Load all notes for the user onto the screen
      * @param arr a json array of note json objects
      */
-    private void loadNotes(JSONArray arr){
+    private void loadNotes(Activity activity, JSONArray arr){
 
         try{
             // Clear everything, start from empty, except the notes list to preserve their z index
@@ -177,7 +232,7 @@ public class NoteManager {
         catch(Exception e){
             Log.d("MYAPP", "Unable to form notes from response");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
-            sessionExpired(mainActivity, "Error when contacting server. Please try again later.");
+            sessionExpired(activity, "Error when contacting server. Please try again later.");
         }
 
     }
@@ -217,8 +272,8 @@ public class NoteManager {
                 getInstance().sortByAlpha();
         }
 
-        // Notify the adatper that the list has been changed
-        getInstance().noteAdapter.notifyDataSetChanged();
+        // Notify the adapter that the list has been changed
+        NotePageActivity.updateNoteAdapter();
     }
 
     /**
@@ -228,7 +283,9 @@ public class NoteManager {
         // Convert hashmap into a list
         ArrayList<String> workingList = new ArrayList<String>();
         for(Map.Entry<String, Note> cursor: notes.entrySet()){
-            workingList.add(cursor.getKey());
+            if(cursor.getValue().getPageID().equals(currentPageID)) {
+                workingList.add(cursor.getKey());
+            }
         }
 
         int len = workingList.size();
@@ -267,6 +324,7 @@ public class NoteManager {
         for(String color: colorOrder){
             // Go through hashmap and add all notes of the current color
             for(Map.Entry<String, Note> cursor: notes.entrySet()){
+                if(!cursor.getValue().getPageID().equals(currentPageID)) continue;
                 try {
                     Note n = cursor.getValue();
                     String noteColor = n.getColors().getString("body");
@@ -285,7 +343,9 @@ public class NoteManager {
         // Convert hashmap into a list
         ArrayList<String> workingList = new ArrayList<String>();
         for(Map.Entry<String, Note> cursor: notes.entrySet()){
-            workingList.add(cursor.getKey());
+            if(cursor.getValue().getPageID().equals(currentPageID)) {
+                workingList.add(cursor.getKey());
+            }
         }
 
         int len = workingList.size();
@@ -321,7 +381,7 @@ public class NoteManager {
     /**
      * Adds a new note, locally and server side, and opens the note
      */
-    public static void newNote(){
+    public static void newNote(final Activity activity){
 
         // create and add new note
         final Note n = new Note();
@@ -335,7 +395,7 @@ public class NoteManager {
 
                 // If connection lost, return to login
                 if(result == null) {
-                    sessionExpired(getInstance().mainActivity, "Connection to server lost, please login again.");
+                    sessionExpired(activity, "Connection to server lost, please login again.");
                     return;
                 }
 
@@ -345,19 +405,19 @@ public class NoteManager {
                     // if session expired, return to login
                     if(obj.getBoolean("sessionExpired")){
                         Log.d("MYAPP", "Session expired");
-                        sessionExpired(getInstance().mainActivity, "Session expired. Please log in again.");
+                        sessionExpired(activity, "Session expired. Please log in again.");
                         return;
                     }
                     else{
                         // Note addition succeeded! update the note's zindex and open the note
                         getInstance().topNoteZ++;
                         n.setZIndex(getInstance().topNoteZ);
-                        getInstance().switchToNote(n);
+                        getInstance().switchToNote(activity, n);
                     }
                 }
                 catch(Exception e){
                     Log.d("MYAPP", "Unable to form response JSON for update notes");
-                    sessionExpired(getInstance().mainActivity,"Error when contacting server. Please try again later.");
+                    sessionExpired(activity,"Error when contacting server. Please try again later.");
                 }
             }
         }.execute();
@@ -409,6 +469,95 @@ public class NoteManager {
         return getInstance().notes.get(getInstance().noteTagLookup.get(i));
     }
 
+    public static void newPage(final Activity activity){
+        final NotePage page = new NotePage("");
+
+        new NewPageTask(page){
+            @Override
+            protected void onPostExecute(String result) {
+                // If connection lost, return to login
+                if(result == null) {
+                    sessionExpired(activity, "Connection to server lost, please login again.");
+                    return;
+                }
+
+                try{
+                    // parse the server's response
+                    JSONObject obj = new JSONObject(result);
+                    // if session expired, return to login
+                    if(obj.getBoolean("sessionExpired")){
+                        Log.d("MYAPP", "Session expired");
+                        sessionExpired(activity, "Session expired. Please log in again.");
+                        return;
+                    }
+                    else{
+                        // Note addition succeeded! update the note's zindex and open the note
+                        getInstance().switchToPage(activity, page, true);
+                    }
+                }
+                catch(Exception e){
+                    Log.d("MYAPP", "Unable to form response JSON for create page");
+                    sessionExpired(activity,"Error when contacting server. Please try again later.");
+                }
+            }
+        }.execute();
+    }
+
+    public static void updatePage(final Activity activity, NotePage page, final EventHandler<String> callback){
+        new UpdatePageTask(page){
+            @Override
+            protected void onPostExecute(String result) {
+                if(result == null){
+                    NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                    return;
+                }
+
+                try {
+                    JSONObject obj = new JSONObject(result);
+                    if (obj.getBoolean("sessionExpired")) {
+                        Log.d("MYAPP", "Session expired");
+                        NoteManager.sessionExpired(activity,"Session expired. Please log in again.");
+                        return;
+                    }
+                    if(callback != null) callback.handle(result);
+                } catch (Exception e) {
+                    Log.d("MYAPP", "Unable to form response JSON for update pages");
+                    NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                }
+            }
+        }.execute();
+    }
+
+    public static void deletePage(Activity activity, String pageID, final EventHandler<String> callback){
+
+        int newIndex = 0;
+        for(NotePage p: getInstance().notePages){
+            if(p == null || p.getPageID().equals(pageID)) continue;
+            p.setIndex(newIndex);
+            updatePage(activity, p, null);
+            newIndex++;
+        }
+
+        // Call a delete asynch task
+        new DeletePageTask(pageID){
+            @Override
+            protected void onPostExecute(String result) {
+                // task completed, call callback
+                callback.handle(result);
+            }
+        }.execute();
+    }
+
+    public static NotePage getPage(String pageID){
+        for(NotePage p: getInstance().notePages){
+            if(p != null && p.getPageID().equals(pageID)){
+                return p;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Creates a title to display on the note icon
      * @param n the note to create the title from
@@ -451,7 +600,7 @@ public class NoteManager {
      * Starts a note activity
      * @param n the note to create the note activity for
      */
-    private void switchToNote(Note n){
+    private void switchToNote(Activity a, Note n){
 
         // restack zindex if the zindex has gotten too large
         if(topNoteZ >= TOPZ){
@@ -463,29 +612,43 @@ public class NoteManager {
         n.setZIndex(topNoteZ);
 
         // start the new note activity for the given note
-        Intent noteActivity = new Intent(mainActivity, NoteActivity.class);
+        Intent noteActivity = new Intent(a, NoteActivity.class);
         noteActivity.putExtra("Tag", n.getTag());
-        mainActivity.startActivity(noteActivity);
+        a.startActivity(noteActivity);
     }
 
-    public static NotePage getPage(int index){
-        if(getInstance().notePages.length > index){
-            return getInstance().notePages[index];
-        }
-        return null;
+    public static void switchToNote(Activity a, int i){
+        getInstance().switchToNote(a, getNote(i));
     }
 
-    public static NotePage getPage(String pageID){
-        for(NotePage p: getInstance().notePages){
-            if(p.getPageID().equals(pageID)){
-                return p;
+
+    private void switchToPage(final Activity a, final NotePage page, final boolean isNew){
+
+        currentPageID = page.getPageID();
+        retrieveNotes(a, new EventHandler<Void>() {
+            @Override
+            public void handle(Void event) {
+                Intent intent = new Intent(a, NotePageActivity.class);
+                intent.putExtra("pageID", page.getPageID());
+                intent.putExtra("new", isNew);
+                a.startActivity(intent);
             }
-        }
-        return null;
+        });
+    }
+
+    public static NotePage switchToPage(Activity a, int i){
+        if(i > getInstance().notePages.length) return null;
+
+        NotePage page = getInstance().notePages[i];
+
+        getInstance().switchToPage(a, page, false);
+
+        return page;
     }
 
     public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }
     public static ArrayList<String> getPageTitles(){ return getInstance().pageTitles; }
+    public static int getNumPages(){ return getInstance().notePages.length; }
     /**
      * Resorts the note list
      */

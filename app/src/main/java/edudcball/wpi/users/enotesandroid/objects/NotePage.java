@@ -1,8 +1,10 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.objects;
 
 import android.util.Log;
 
 import org.json.JSONObject;
+
+import edudcball.wpi.users.enotesandroid.NoteManager;
 
 public class NotePage {
     private String pageID;
@@ -12,7 +14,7 @@ public class NotePage {
     public NotePage(String name){
         this.pageID = "page-" + System.currentTimeMillis();
         this.name = name;
-        this.index = 0; // TODO make this the length of current pages
+        this.index = NoteManager.getNumPages();
     }
 
     public NotePage(JSONObject json){
@@ -40,6 +42,9 @@ public class NotePage {
 
         return json;
     }
+
+    public void setName(String name){ this.name = name; }
+    public void setIndex(int index){ this.index = index; }
 
     public String getPageID(){ return pageID; }
     public String getName() { return  name; }

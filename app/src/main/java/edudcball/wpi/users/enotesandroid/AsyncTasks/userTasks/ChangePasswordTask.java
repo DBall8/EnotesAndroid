@@ -1,8 +1,10 @@
-package edudcball.wpi.users.enotesandroid.AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks;
 
 import android.util.Log;
 
 import org.json.JSONObject;
+
+import edudcball.wpi.users.enotesandroid.AsyncTasks.HttpConnectionTask;
 
 /**
  * A task for logging in to a user account

@@ -1,33 +1,44 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.activities;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.DeletePageTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.UpdatePageTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.EventHandler;
+import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.objects.Note;
+import edudcball.wpi.users.enotesandroid.objects.NotePage;
 
 
 /**
@@ -36,45 +47,107 @@ import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 public class NotePageActivity extends AppCompatActivity {
 
     private NotePage page;
-    private ArrayAdapter<String> noteAdapter;
+    private static final class SingletonHelper{
+        private static ArrayAdapter<String> noteAdapter;
+    }
     private Menu menu;
+    private AlertDialog.Builder confirmDialog;
+    EditText pageTitle;
 
     /**
      * Gets called the first time the main activity is created
      * @param savedInstanceState
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // setup layout
         setContentView(R.layout.activity_note_page);
-
-        String pageName = getIntent().getStringExtra("pageID");
-        page = NoteManager.getPage(pageName);
-        if(page == null){
-            finish();
-        }
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.pageNameToolbar);
         setSupportActionBar(toolbar);
 
-        TextView pageTitle = findViewById(R.id.pageTitleBar);
-        pageTitle.setText(page.getName());
+        final Activity activity = this;
+
+        pageTitle = findViewById(R.id.pageTitleBar);
+        pageTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    saveTitle();
+                }
+
+            }
+        });
 
         // Initialize the static note handler with the notesList
         ListView notesList = findViewById(R.id.NotesList);
-        noteAdapter = buildNotesAdapter();
-        notesList.setAdapter(noteAdapter);
+        SingletonHelper.noteAdapter = buildNotesAdapter();
+        notesList.setAdapter(SingletonHelper.noteAdapter);
+
+        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                saveTitle();
+                NoteManager.switchToNote(activity, i);
+            }
+        });
+
+        // Set up back button
+        Button backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveTitle();
+                finish();
+            }
+        });
 
         // Set up the floating button for adding notes
         FloatingActionButton fab = findViewById(R.id.newNoteFab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NoteManager.newNote();
+                saveTitle();
+                NoteManager.newNote(activity);
             }
         });
+
+        // Create a dialog for confirming that the user wants to delete a note
+        confirmDialog = new AlertDialog.Builder(this);
+        confirmDialog.setTitle("Delete Page");
+        confirmDialog.setMessage("Are you sure you want to delete this page?\nAll notes in this page will be deleted and cannot be recovered.");
+        confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+                NoteManager.deletePage(activity, page.getPageID(), new EventHandler<String>() {
+                    @Override
+                    public void handle(String result) {
+                        if(result == null){
+                            NoteManager.sessionExpired(activity, "Connection to server lost, please login again.");
+                            return;
+                        }
+
+                        try{
+                            JSONObject obj = new JSONObject(result);
+                            if(obj.getBoolean("sessionExpired")){
+                                Log.d("MYAPP", "Session expired");
+                                NoteManager.sessionExpired(activity, "Session expired. Please log in again.");
+                                return;
+                            }
+                            finish();
+                        }
+                        catch(Exception e){
+                            Log.d("MYAPP", "Unable to form response JSON for delete page");
+                            NoteManager.sessionExpired(activity, "Error when contacting server. Please try again later.");
+                        }
+                    }
+                });
+            }
+        });
+        confirmDialog.setNegativeButton(android.R.string.no, null);
     }
 
     /**
@@ -83,6 +156,19 @@ public class NotePageActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+
+        String pageID = getIntent().getStringExtra("pageID");
+        page = NoteManager.getPage(pageID);
+        if(page == null){
+            finish();
+            return;
+        }
+        if(getIntent().getBooleanExtra("new", false)){
+            pageTitle.requestFocus();
+        }
+        pageTitle.setText(page.getName());
     }
 
     /**
@@ -145,11 +231,14 @@ public class NotePageActivity extends AppCompatActivity {
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
+            case R.id.action_deletePage:
+                confirmDialog.show();
+                break;
             case R.id.action_settings:
                 SettingsDialog settingsDialog = new SettingsDialog(NotePageActivity.this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        noteAdapter.notifyDataSetChanged();
+                        updateNoteAdapter();
                     }
                 });
                 settingsDialog.show();
@@ -230,4 +319,20 @@ public class NotePageActivity extends AppCompatActivity {
 
         return noteAdapter;
     }
+
+    private void saveTitle(){
+        if(page == null || page.getName().equals(pageTitle.getText().toString())) return;
+        final Activity activity = this;
+        page.setName(pageTitle.getText().toString());
+        NoteManager.updatePage(activity, page, new EventHandler<String>() {
+            @Override
+            public void handle(String event) {
+                finish();
+            }
+        });
+    }
+
+    public static void updateNoteAdapter(){
+        if(SingletonHelper.noteAdapter != null)
+            SingletonHelper.noteAdapter.notifyDataSetChanged(); }
 }

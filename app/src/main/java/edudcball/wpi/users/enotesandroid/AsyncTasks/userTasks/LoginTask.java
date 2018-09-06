@@ -1,53 +1,52 @@
-package edudcball.wpi.users.enotesandroid.AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks;
 
 import android.util.Log;
 
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.AsyncTasks.HttpConnectionTask;
+
 /**
- * A task for creating a new user account
+ * A task for logging in to a user account
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class CreateUserTask extends HttpConnectionTask {
+public abstract class LoginTask extends HttpConnectionTask {
 
     private String username, password;
 
-    public CreateUserTask(String username, String password){
+    public LoginTask(String username, String password){
         this.username = username;
         this.password = password;
     }
 
-    private CreateUserTask(){}
-
     /**
-     * Runs when the the task is executed
+     * Runs on the task's execution
      * @param vals unused
-     * @return returns the string response from the server
+     * @return
      */
     @Override
     protected String doInBackground(String... vals) {
         try{
-            // Connect to the server
-            connect("/newuser", true, true, "POST");
+            // connect to the server
+            connect("/login", true, true, "POST");
 
-            // Build the message
+            // build the message
             JSONObject msg = new JSONObject();
             msg.put("username", username);
             msg.put("password", password);
             msg.put("stayLoggedIn", false);
 
-
             // write the message
             writeMessage(msg.toString());
 
-            // Save the user session
+            // save user session cookie
             saveCookies();
 
-            // read the response
+            // read response
             String resp = readResponse();
 
-            // stop the connection
+            // disconnect
             connection.disconnect();
 
             // wipe login data just in case
@@ -57,7 +56,7 @@ public abstract class CreateUserTask extends HttpConnectionTask {
             return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "ERROR WHEN CREATING USER: " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN LOGGIN IN: " + e.toString());
             return null;
         }
     }

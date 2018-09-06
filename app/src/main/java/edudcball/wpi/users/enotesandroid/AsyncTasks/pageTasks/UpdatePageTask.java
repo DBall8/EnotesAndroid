@@ -1,22 +1,23 @@
-package edudcball.wpi.users.enotesandroid.AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks;
 
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Note;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.HttpConnectionTask;
+import edudcball.wpi.users.enotesandroid.objects.NotePage;
 
 /**
- * A task for sending a new note event to the server
+ * A task for updating the server of the new state of a note
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class NewNoteTask extends HttpConnectionTask {
+public abstract class UpdatePageTask extends HttpConnectionTask {
 
-    private Note n; // the new note being added
+    private NotePage p; // the note to update the server about
 
-    public NewNoteTask(Note n) {
-        this.n = n;
+    public UpdatePageTask(NotePage p) {
+        this.p = p;
     }
 
     /**
@@ -29,15 +30,15 @@ public abstract class NewNoteTask extends HttpConnectionTask {
         try{
 
             // connect to the server
-            connect(apiURL, true, true, "POST");
+            connect("/notepage", true, true, "PUT");
 
             // create the message from the note
-            JSONObject msg = n.toJSON();
+            JSONObject msg = p.toJSON();
 
             // write the message
             writeMessage(msg.toString());
 
-            // get the response
+            // read the response
             String resp = readResponse();
 
             // disconnect
@@ -46,8 +47,9 @@ public abstract class NewNoteTask extends HttpConnectionTask {
             return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "ERROR WHEN CREATING A NEW NOTE: " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN UPDATING PAGE: " + e.toString());
             return null;
         }
     }
+
 }

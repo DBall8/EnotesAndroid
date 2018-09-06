@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.UpdateSettingsTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.UpdateSettingsTask;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {
@@ -29,7 +29,7 @@ public class Settings {
         LARGE((short)2);
 
         short val;
-        static Map<Short, Size> map = new HashMap();
+        static Map<Short, Size> map = new HashMap<>();
         static{
             for(Size s: Size.values()){
                 map.put(s.getVal(), s);
@@ -52,7 +52,7 @@ public class Settings {
         ALPHA((short)2);
 
         short val;
-        static Map<Short, SortBy> map = new HashMap();
+        static Map<Short, SortBy> map = new HashMap<>();
         static{
             for(SortBy s: SortBy.values()){
                 map.put(s.getVal(), s);

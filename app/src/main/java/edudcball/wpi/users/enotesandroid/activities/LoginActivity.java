@@ -1,6 +1,5 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.activities;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +12,11 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import java.net.CookieManager;
-import java.net.HttpCookie;
-
-import edudcball.wpi.users.enotesandroid.AsyncTasks.CreateUserTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.LoginTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.CreateUserTask;
+import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LoginTask;
+import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**

@@ -1,6 +1,8 @@
-package edudcball.wpi.users.enotesandroid.AsyncTasks;
+package edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks;
 
 import android.util.Log;
+
+import edudcball.wpi.users.enotesandroid.AsyncTasks.HttpConnectionTask;
 
 /**
  * A task for loggin out of a user account

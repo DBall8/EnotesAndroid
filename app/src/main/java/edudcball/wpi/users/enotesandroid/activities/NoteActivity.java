@@ -1,4 +1,4 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.activities;
 
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -22,12 +22,15 @@ import android.widget.EditText;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Set;
-
+import edudcball.wpi.users.enotesandroid.EventHandler;
+import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontSizeDialog;
+import edudcball.wpi.users.enotesandroid.objects.Note;
 
 /**
  * Activity for displaying a single note
