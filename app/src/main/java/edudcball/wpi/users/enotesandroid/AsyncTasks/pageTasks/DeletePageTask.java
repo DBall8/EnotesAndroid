@@ -32,7 +32,7 @@ public abstract class DeletePageTask extends HttpConnectionTask {
 
             // build message
             JSONObject msg = new JSONObject();
-            msg.put("pageID", pageID);
+            msg.put("pageid", pageID);
 
             // write the message
             writeMessage(msg.toString());

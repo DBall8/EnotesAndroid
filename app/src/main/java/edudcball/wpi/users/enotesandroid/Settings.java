@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.UpdateSettingsTask;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {

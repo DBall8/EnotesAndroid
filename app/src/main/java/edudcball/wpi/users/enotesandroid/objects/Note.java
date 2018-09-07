@@ -5,7 +5,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
@@ -92,7 +92,7 @@ public class Note {
 
             JSONObject json = new JSONObject();
             json.put("tag", tag);
-            json.put("pageID", pageID);
+            json.put("pageid", pageID);
             json.put("title", title);
             json.put("content", content);
             json.put("x", x);
@@ -100,22 +100,10 @@ public class Note {
             json.put("width", width);
             json.put("height", height);
             json.put("font", font);
-            json.put("fontSize", fontSize);
+            json.put("fontsize", fontSize);
             json.put("zindex", zindex);
             json.put("colors", colors);
-                /*
-                json.put("tag", tag);
-                json.put("newtitle", title);
-                json.put("newcontent", content);
-                json.put("newx", x);
-                json.put("newy", y);
-                json.put("newW", width);
-                json.put("newH", height);
-                json.put("newFont", font);
-                json.put("newFontSize", fontSize);
-                json.put("newZ", zindex);
-                json.put("newColors", colors);
-                */
+            json.put("socketid", NoteManager.getSocketID());
             return json;
 
         } catch(JSONException e){
@@ -124,6 +112,27 @@ public class Note {
         }
     }
 
+    /**
+     * Creates a title to display on the note icon
+     * @return a title to display on the note icon
+     */
+    public String getTitleForDisplay(){
+
+        // If the note has a title, use that
+        if(!title.equals("")){
+            return title;
+        }
+
+        // Otherwise, create a dummy title from the first 100 characters in its content's first line
+        int end = content.length()<100? content.length(): 100;
+        for(int i=0; i<end; i++){
+            if(content.charAt(i) == '\n'){
+                end = i;
+                break;
+            }
+        }
+        return content.substring(0, end);
+    }
 
     public void setColor(JSONObject colors){ this.colors = colors; }
 

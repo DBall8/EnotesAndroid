@@ -20,10 +20,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
@@ -104,6 +103,7 @@ public class NoteActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
             // update text
+
             note.setContent(contentView.getText().toString());
             note.setTitle(titleBar.getText().toString());
 

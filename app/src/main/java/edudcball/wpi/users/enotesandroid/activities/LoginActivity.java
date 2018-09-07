@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.CreateUserTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LoginTask;
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;

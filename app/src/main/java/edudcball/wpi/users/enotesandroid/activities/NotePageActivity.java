@@ -1,7 +1,6 @@
 package edudcball.wpi.users.enotesandroid.activities;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,12 +27,10 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.DeletePageTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.UpdatePageTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.objects.Note;
@@ -140,22 +136,19 @@ public class NotePageActivity extends AppCompatActivity {
         super.onResume();
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        String pageID = getIntent().getStringExtra("pageID");
+        page = NoteManager.getPage(pageID);
 
-        NoteManager.retrieveNotes(this, new EventHandler<Void>() {
-            @Override
-            public void handle(Void event) {
-                String pageID = getIntent().getStringExtra("pageID");
-                page = NoteManager.getPage(pageID);
-                if(page == null){
-                    finish();
-                    return;
-                }
-                if(getIntent().getBooleanExtra("new", false)){
-                    pageTitle.requestFocus();
-                }
-                pageTitle.setText(page.getName());
-            }
-        });
+        if(page == null){
+            finish();
+        }
+
+        if(getIntent().getBooleanExtra("new", false)){
+            pageTitle.requestFocus();
+        }
+        pageTitle.setText(page.getName());
+
+
     }
 
     /**

@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     }
     private Menu menu;
 
+    private boolean loaded = false;
+
     /**
      * Gets called the first time the main activity is created
      * @param savedInstanceState
@@ -46,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        NoteLookupTable.init(this.getApplicationContext());
+        Settings.init(this.getApplicationContext());
+
         // setup layout
         setContentView(R.layout.activity_main);
 
@@ -76,10 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 NoteManager.newPage(self);
             }
         });
-
-        NoteManager.init(this);
-        NoteLookupTable.init(this.getApplicationContext());
-        Settings.init(this.getApplicationContext());
     }
 
     /**
@@ -88,20 +90,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
+        if(!loaded){
+            // look for a saved session in on the phone
+            SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+            String session = sp.getString("session", null);
 
-        // look for a saved session in on the phone
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        String session = sp.getString("session", null);
-
-        // if a session is saved, load the session into the cookie manager and load the user's notes
-        if(session != null){
-            NoteManager.resetCookies();
-            NoteManager.addCookies(session);
-            NoteManager.retrieveNotes(this, null);
-        }
-        // If no session is saved, move to login screen
-        else{
-            startActivity(new Intent(this, LoginActivity.class));
+            // if a session is saved, load the session into the cookie manager and load the user's notes
+            if(session != null){
+                NoteManager.resetCookies();
+                NoteManager.addCookies(session);
+                NoteManager.retrieveNotes(this, new EventHandler<Void>() {
+                    @Override
+                    public void handle(Void event) {
+                        loaded = true;
+                    }
+                });
+            }
+            // If no session is saved, move to login screen
+            else{
+                startActivity(new Intent(this, LoginActivity.class));
+            }
         }
     }
 

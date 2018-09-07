@@ -4,9 +4,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,7 +14,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 
 
 /**
@@ -27,7 +25,7 @@ import edudcball.wpi.users.enotesandroid.NoteManager;
 public abstract class HttpConnectionTask extends AsyncTask<String, Integer, String> {
 
     // URL of the server
-    protected static final String baseURL = "http://10.0.2.2:8080";//"https://enotes.site";//
+    protected static final String baseURL = "https://enotes.site";//"http://10.0.2.2:8080";//
     protected static final String apiURL = "/api"; // path that all note requests are sent to
     protected static final String COOKIES_HEADER = "Set-Cookie"; // header to look for new cookies to save
     private static final int TIMEOUT = 5000; // Timeout time for connection in milliseconds

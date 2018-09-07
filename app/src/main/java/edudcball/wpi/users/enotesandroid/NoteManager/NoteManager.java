@@ -1,10 +1,8 @@
-package edudcball.wpi.users.enotesandroid;
+package edudcball.wpi.users.enotesandroid.NoteManager;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +22,8 @@ import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.UpdateNoteTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.DeletePageTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.NewPageTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.pageTasks.UpdatePageTask;
+import edudcball.wpi.users.enotesandroid.EventHandler;
+import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.activities.LoginActivity;
 import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 import edudcball.wpi.users.enotesandroid.activities.NoteActivity;
@@ -58,20 +58,11 @@ public class NoteManager {
 
     private int topNoteZ = BOTTOMZ;
 
-    /**
-     * Initializes the NoteManager and attaches it to a list view for displaying notes
-     * @param mainActivity the calling activity
-     */
-    public static void init(final MainActivity mainActivity){
-        getInstance().mainActivity = mainActivity;
-        getInstance().socket = new SocketConnection();
-    }
-
 
     /**
      * Retrieve all notes for the user from the server and then load them
      */
-    public static void retrieveNotes(final Activity a, final EventHandler<Void> callback){
+    public synchronized static void retrieveNotes(final Activity a, final EventHandler<Void> callback){
         new RetrieveNotesTask(){
 
             @Override
@@ -81,6 +72,9 @@ public class NoteManager {
                     return;
                 }
                 getInstance().load(a, result);
+                getInstance().mainActivity = a;
+                getInstance().socket = new SocketConnection(getInstance().notes, getInstance().noteTagLookup, getInstance().noteTitles, getInstance().pageTitles);
+
                 if(callback != null) callback.handle(null);
             }
         }.execute();
@@ -118,7 +112,7 @@ public class NoteManager {
             notePages = new NotePage[arr.length()];
             pageTitles.clear();
             // Load each note in the http response
-            for(int i=0; i<arr.length(); i++){
+            for(int i=0; i<notePages.length; i++){
                 JSONObject pageJSON = arr.getJSONObject(i);
                 NotePage p = new NotePage(pageJSON);
                 if(p.getIndex() < notePages.length){
@@ -173,13 +167,7 @@ public class NoteManager {
                 }
             }
 
-            // update all pages to have their index match their array position
-            for(int i=0; i<len; i++){
-                if(notePages[i].getIndex() != i){
-                    notePages[i].setIndex(i);
-                    updatePage(activity, notePages[i], null);
-                }
-            }
+            reIndexPages(activity);
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form notes from response");
@@ -251,6 +239,7 @@ public class NoteManager {
             case RECENT:
             default:
                 getInstance().sortByRecent();
+                break;
             case ALPHA:
                 getInstance().sortByAlpha();
         }
@@ -288,7 +277,7 @@ public class NoteManager {
             if(maxTag != null){
                 workingList.remove(maxTag);
                 Note note = getNote(maxTag);
-                noteTitles.add(getTitleFromNote(note));
+                noteTitles.add(note.getTitleForDisplay());
                 noteTagLookup.add(maxTag);
             }
 
@@ -312,7 +301,7 @@ public class NoteManager {
                     Note n = cursor.getValue();
                     String noteColor = n.getColors().getString("body");
                     if(color.equals(noteColor)){
-                        noteTitles.add(getTitleFromNote(n));
+                        noteTitles.add(n.getTitleForDisplay());
                         noteTagLookup.add(cursor.getKey());
                     }
                 } catch (JSONException e) {
@@ -340,10 +329,10 @@ public class NoteManager {
         for(int i=0; i<len; i++){
 
             String firstTag = workingList.get(0);
-            firstTitle = getTitleFromNote(getNote(firstTag));
+            firstTitle = getNote(firstTag).getTitleForDisplay();
             titleAlpha = Character.toLowerCase(firstTitle.charAt(0));
             for(int j=1; j<workingList.size(); j++){
-                String title = getTitleFromNote(getNote(workingList.get(j)));
+                String title = getNote(workingList.get(j)).getTitleForDisplay();
                 a = Character.toLowerCase(title.charAt(0));
                 if(a < titleAlpha){
                     firstTag = workingList.get(j);
@@ -369,6 +358,7 @@ public class NoteManager {
         // create and add new note
         final Note n = new Note();
         getInstance().notes.put(n.getTag(), n);
+        reSort();
 
         // Send message to server about the new note
         new NewNoteTask(n){
@@ -412,6 +402,9 @@ public class NoteManager {
      * @param callback the function handler to call when the response is received
      */
     public static void updateNote(final Activity activity, Note n, final EventHandler<String> callback){
+
+        reSort();
+
         // Call asynch update task
         new UpdateNoteTask(n){
 
@@ -446,6 +439,12 @@ public class NoteManager {
      * @param callback a funciton handler to call after the server responds
      */
     public static void deleteNote(final Activity activity, final String tag, final EventHandler<String> callback){
+
+        if(getInstance().notes.containsKey(tag)){
+            getInstance().notes.remove(tag);
+            reSort();
+        }
+
         // Call a delete asynch task
         new DeleteTask(tag){
             @Override
@@ -510,6 +509,7 @@ public class NoteManager {
                     }
                     else{
                         // Note addition succeeded! update the note's zindex and open the note
+                        addPageToArray(page);
                         getInstance().switchToPage(activity, page, true);
                     }
                 }
@@ -521,7 +521,22 @@ public class NoteManager {
         }.execute();
     }
 
+    synchronized static void addPageToArray(NotePage page){
+        NotePage[] newPages = new NotePage[getInstance().notePages.length+1];
+        for(int i=0; i<getInstance().notePages.length; i++){
+            newPages[i] = getInstance().notePages[i];
+        }
+        newPages[newPages.length-1] = page;
+
+        getInstance().notePages = newPages;
+        getInstance().pageTitles.add(page.getName());
+    }
+
     public static void updatePage(final Activity activity, NotePage page, final EventHandler<String> callback){
+
+        updatePageArray(page);
+        MainActivity.notifyAdatperChanged();
+
         new UpdatePageTask(page){
             @Override
             protected void onPostExecute(String result) {
@@ -546,15 +561,40 @@ public class NoteManager {
         }.execute();
     }
 
+    static synchronized void updatePageArray(NotePage page){
+        Log.d("MYAPP", "START UPDATE");
+        NotePage[] notePages = getInstance().notePages;
+        NotePage oldPage = null;
+        // Does the page at this page's index match the page?
+        if(page.getIndex() < notePages.length && notePages[page.getIndex()].getPageID().equals(page.getPageID())){
+            oldPage = notePages[page.getIndex()];
+        }
+        // The page wasnt at the same index, search the list instead
+        else{
+            for(int i=0; i< notePages.length; i++){
+                if(notePages[i].getPageID().equals(page.getPageID())){
+                    oldPage = notePages[i];
+                    break;
+                }
+            }
+        }
+        // If the index of the page to be updated was found, update that page.
+        if(oldPage != null){
+            oldPage.setIndex(page.getIndex());
+            oldPage.setName(page.getName());
+
+            getInstance().pageTitles.clear();
+            for(NotePage p: notePages){
+                getInstance().pageTitles.add(p.getName());
+            }
+            MainActivity.notifyAdatperChanged();
+        }
+        Log.d("MYAPP", "END UPDATE");
+    }
+
     public static void deletePage(final Activity activity, String pageID, final EventHandler<String> callback){
 
-        int newIndex = 0;
-        for(NotePage p: getInstance().notePages){
-            if(p == null || p.getPageID().equals(pageID)) continue;
-            p.setIndex(newIndex);
-            updatePage(activity, p, null);
-            newIndex++;
-        }
+        removePageFromArray(activity, pageID);
 
         // Call a delete asynch task
         new DeletePageTask(pageID){
@@ -584,6 +624,32 @@ public class NoteManager {
         }.execute();
     }
 
+    synchronized static void removePageFromArray(Activity activity,String pageID){
+
+        NotePage[] newPages = new NotePage[getInstance().notePages.length-1];
+        int index = 0;
+        for(NotePage p: getInstance().notePages){
+            if(p != null && !p.getPageID().equals(pageID) && index <= newPages.length){
+                newPages[index] = p;
+                index++;
+            }
+        }
+
+        getInstance().notePages = newPages;
+        if(activity != null){
+            getInstance().reIndexPages(activity);
+        }
+        else{
+            getInstance().reIndexPages(getInstance().mainActivity);
+        }
+
+        getInstance().pageTitles.clear();
+        for(NotePage p: newPages){
+            getInstance().pageTitles.add(p.getName());
+        }
+        MainActivity.notifyAdatperChanged();
+    }
+
     public static NotePage getPage(String pageID){
         for(NotePage p: getInstance().notePages){
             if(p != null && p.getPageID().equals(pageID)){
@@ -592,30 +658,6 @@ public class NoteManager {
         }
 
         return null;
-    }
-
-    /**
-     * Creates a title to display on the note icon
-     * @param n the note to create the title from
-     * @return a title to display on the note icon
-     */
-    private String getTitleFromNote(Note n){
-
-        // If the note has a title, use that
-        if(!n.getTitle().equals("")){
-            return n.getTitle();
-        }
-
-        // Otherwise, create a dummy title from the first 100 characters in its content's first line
-        String content = n.getContent();
-        int end = content.length()<100? content.length(): 100;
-        for(int i=0; i<end; i++){
-            if(content.charAt(i) == '\n'){
-                end = i;
-                break;
-            }
-        }
-        return n.getContent().substring(0, end);
     }
 
     /**
@@ -631,6 +673,18 @@ public class NoteManager {
 
         topNoteZ = BOTTOMZ + len;
     }
+
+
+    private void reIndexPages(Activity activity){
+        // update all pages to have their index match their array position
+        for(int i=0; i<notePages.length; i++){
+            if(notePages[i].getIndex() != i){
+                notePages[i].setIndex(i);
+                updatePage(activity, notePages[i], null);
+            }
+        }
+    }
+
 
     /**
      * Starts a note activity
@@ -661,6 +715,7 @@ public class NoteManager {
     private void switchToPage(final Activity a, final NotePage page, final boolean isNew){
 
         currentPageID = page.getPageID();
+        reSort();
         Intent intent = new Intent(a, NotePageActivity.class);
         intent.putExtra("pageID", page.getPageID());
         intent.putExtra("new", isNew);
@@ -668,7 +723,7 @@ public class NoteManager {
     }
 
     public static NotePage switchToPage(Activity a, int i){
-        if(i > getInstance().notePages.length) return null;
+        if(i >= getInstance().notePages.length) return null;
 
         NotePage page = getInstance().notePages[i];
 
@@ -677,9 +732,14 @@ public class NoteManager {
         return page;
     }
 
+
+
     public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }
     public static ArrayList<String> getPageTitles(){ return getInstance().pageTitles; }
+    static NotePage[] getCurrentNotePages(){ return getInstance().notePages; }
     public static int getNumPages(){ return getInstance().notePages.length; }
+    public static String getUsername(){ return getInstance().username; }
+    public static String getSocketID(){ return getInstance().socket.getID(); }
     /**
      * Resorts the note list
      */

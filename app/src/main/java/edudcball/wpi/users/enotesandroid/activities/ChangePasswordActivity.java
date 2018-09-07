@@ -13,7 +13,7 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.ChangePasswordTask;
-import edudcball.wpi.users.enotesandroid.NoteManager;
+import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 
 public class ChangePasswordActivity extends AppCompatActivity {
