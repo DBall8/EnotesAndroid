@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setText("Login");
                 loginButton.setEnabled(true);
 
-                Log.d("MYAPP", result);
+                Log.d("MYAPP", "RESULT: " + result);
 
                 // if no response, something went wrong, end now
                 if(result == null){

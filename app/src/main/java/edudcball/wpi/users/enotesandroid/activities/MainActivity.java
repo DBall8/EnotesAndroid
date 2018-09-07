@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        NoteManager.init(this, pageList);
+        NoteManager.init(this);
         NoteLookupTable.init(this.getApplicationContext());
         Settings.init(this.getApplicationContext());
     }

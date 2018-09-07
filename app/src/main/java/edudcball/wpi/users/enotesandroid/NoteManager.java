@@ -49,6 +49,8 @@ public class NoteManager {
     private NotePage[] notePages;
     private ArrayList<String> pageTitles = new ArrayList<>();
 
+    private SocketConnection socket;
+
     private String username = ""; // user's username
     private String currentPageID = "";
 
@@ -59,29 +61,10 @@ public class NoteManager {
     /**
      * Initializes the NoteManager and attaches it to a list view for displaying notes
      * @param mainActivity the calling activity
-     * @param lv the list view for displaying notes
      */
-    public static void init(final MainActivity mainActivity, ListView lv){
-
-        final NoteManager instance = getInstance();
-
-        // save mainActivity for screen switching
-        instance.mainActivity = mainActivity;
-
-        // Load the noteAdapter used for displaying icons represeting notes that can be clicked on
-        //instance.buildNoteAdapter();
-
-
-        /*
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Note n = getNote(i);
-                instance.switchToNote(n);
-            }
-        });
-        */
+    public static void init(final MainActivity mainActivity){
+        getInstance().mainActivity = mainActivity;
+        getInstance().socket = new SocketConnection();
     }
 
 
