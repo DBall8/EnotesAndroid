@@ -37,4 +37,8 @@
         android:id="@+id/action_logout"
         android:orderInCategory="103"
         android:title="Logout" />
+    <item
+        android:id="@+id/action_help"
+        android:orderInCategory="104"
+        android:title="Help" />
 </menu>

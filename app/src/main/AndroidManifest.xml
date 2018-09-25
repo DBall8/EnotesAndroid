@@ -53,6 +53,10 @@
                 <action android:name="android.intent.action.CHANGEPASSWORD" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.HelpActivity"
+            android:label="@string/title_activity_help"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

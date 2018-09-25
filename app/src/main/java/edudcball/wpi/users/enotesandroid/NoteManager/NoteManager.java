@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import edudcball.wpi.users.enotesandroid.AsyncTasks.ConnectionTestTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.DeleteTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.noteTasks.NewNoteTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.RetrieveNotesTask;
@@ -68,25 +69,27 @@ public class NoteManager {
             @Override
             protected void onPostExecute(String result) {
                 if(result == null){
+                    Log.d("MYAPP", "Empty result");
                     sessionExpired(a,"Session expired. Please log in again.");
                     return;
                 }
-                getInstance().load(a, result);
                 getInstance().mainActivity = a;
-                getInstance().socket = new SocketConnection(getInstance().notes, getInstance().noteTagLookup, getInstance().noteTitles, getInstance().pageTitles);
-
-                if(callback != null) callback.handle(null);
+                if(getInstance().load(a, result)) {
+                    if(getInstance().socket != null) getInstance().socket.disconnect();
+                    getInstance().socket = new SocketConnection(getInstance().notes);
+                    if (callback != null) callback.handle(null);
+                }
             }
         }.execute();
     }
 
-    private void load(Activity activity, String res){
+    private boolean load(Activity activity, String res){
         try{
             JSONObject obj = new JSONObject(res);
             if(obj.getBoolean("sessionExpired")){
                 Log.d("MYAPP", "Session expired");
                 sessionExpired(activity,"Session expired. Please log in again.");
-                return;
+                return false;
             }
 
             // store the user's username
@@ -98,11 +101,13 @@ public class NoteManager {
             // Load each note in the http response
             JSONArray noteArr = obj.getJSONArray("notes");
             loadNotes(activity, noteArr);
+            return true;
         }
         catch(Exception e){
             Log.d("MYAPP", "Unable to form response JSON for get notes");
             Log.d("MYAPP", "LOAD NOTES FAILED: " + e.getMessage());
             sessionExpired(activity, "Error when contacting server. Please try again later.");
+            return false;
         }
     }
 
@@ -692,6 +697,8 @@ public class NoteManager {
      */
     private void switchToNote(Activity a, Note n){
 
+        checkConnection(a);
+
         // restack zindex if the zindex has gotten too large
         if(topNoteZ >= TOPZ){
             restackNotes();
@@ -714,6 +721,8 @@ public class NoteManager {
 
     private void switchToPage(final Activity a, final NotePage page, final boolean isNew){
 
+        checkConnection(a);
+
         currentPageID = page.getPageID();
         reSort();
         Intent intent = new Intent(a, NotePageActivity.class);
@@ -732,6 +741,16 @@ public class NoteManager {
         return page;
     }
 
+    private void checkConnection(final Activity activity){
+        new ConnectionTestTask(){
+            @Override
+            protected void onPostExecute(Boolean success) {
+                if(!success){
+                    sessionExpired(activity, "Session expired. Please log in again.");
+                }
+            }
+        }.execute();
+    }
 
 
     public static ArrayList<String> getNoteTitles(){ return getInstance().noteTitles; }

@@ -223,6 +223,9 @@ public class NotePageActivity extends AppCompatActivity {
                 });
                 settingsDialog.show();
                 return true;
+            case R.id.action_help:
+                startActivity(new Intent(this.getApplicationContext(), HelpActivity.class));
+                break;
             case R.id.action_password:
                 startActivity(new Intent(this.getApplicationContext(), ChangePasswordActivity.class));
                 break;

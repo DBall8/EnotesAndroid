@@ -15,6 +15,8 @@ import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {
 
+    public static final String baseURL = "https://enotes.site";//"http://10.0.2.2:8080";//
+
     private NoteLookupTable.NoteFont defaultFont = NoteLookupTable.NoteFont.ARIAL;
     private NoteLookupTable.NoteColor defaultColor = NoteLookupTable.NoteColor.YELLOW;
     private int defaultFontSize = 12;

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 import edudcball.wpi.users.enotesandroid.objects.Note;
 import edudcball.wpi.users.enotesandroid.objects.NotePage;
@@ -16,7 +17,7 @@ import io.socket.emitter.Emitter;
 
 public class SocketConnection {
 
-    private static final String URL = "https://enotes.site";//"http://10.0.2.2:8080";//
+    private static final String URL = Settings.baseURL;
 
     private Socket socket;
     private String id = null;
@@ -24,18 +25,11 @@ public class SocketConnection {
 
     // References to NoteManager's lists -----------------
     private HashMap<String, Note> notes;
-    private ArrayList<String> noteTagLookup;
-    private ArrayList<String> noteTitles;
-
-    private ArrayList<String> pageTitles;
     // ---------------------------------------------------
 
-    public SocketConnection(HashMap<String, Note> notes, ArrayList<String> noteTagLookup, ArrayList<String> noteTitles, ArrayList<String> pageTitles){
+    public SocketConnection(HashMap<String, Note> notes){
 
         this.notes = notes;
-        this.noteTagLookup = noteTagLookup;
-        this.noteTitles = noteTitles;
-        this.pageTitles = pageTitles;
 
         try {
             socket = IO.socket(URL);
@@ -44,7 +38,13 @@ public class SocketConnection {
                 @Override
                 public void call(Object... args) {
                     id = (String)args[0];
-                    socket.emit("ready", NoteManager.getUsername());
+                    String username = NoteManager.getUsername();
+                    if(username.equals("")){
+                        Log.d("MYAPP", "SOCKET FAILED TO START: no username.");
+                        return;
+                    }
+
+                    socket.emit("ready", username);
                     //Log.d("MYAPP", "SOCKET ID: " + id);
                 }
             });
@@ -163,6 +163,10 @@ public class SocketConnection {
         }catch(Exception e){
             Log.d("MYAPP","FAILED TO PARSE SOCKET PAGE JSON: " + e.getMessage());
         }
+    }
+
+    public void disconnect(){
+        socket.disconnect();
     }
 
     public String getID(){ return id; }

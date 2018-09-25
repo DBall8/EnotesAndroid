@@ -308,7 +308,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void loginSuccess(){
         // start main activity
-        //startActivity(new Intent(this, MainActivity.class));
+        MainActivity.unLoad();
         finish();
     }
 

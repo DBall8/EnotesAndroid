@@ -36,10 +36,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final class SingletonHelper{
         private static ArrayAdapter<String> pageAdapter;
+        private static boolean loaded = false;
     }
     private Menu menu;
-
-    private boolean loaded = false;
 
     /**
      * Gets called the first time the main activity is created
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        if(!loaded){
+        if(!SingletonHelper.loaded){
             // look for a saved session in on the phone
             SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
             String session = sp.getString("session", null);
@@ -102,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 NoteManager.retrieveNotes(this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        loaded = true;
+                        SingletonHelper.loaded = true;
                     }
                 });
             }
@@ -151,7 +150,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 settingsDialog.show();
-                return true;
+                break;
+            case R.id.action_help:
+                startActivity(new Intent(this.getApplicationContext(), HelpActivity.class));
+                break;
             case R.id.action_password:
                 startActivity(new Intent(this.getApplicationContext(), ChangePasswordActivity.class));
                 break;
@@ -208,6 +210,10 @@ public class MainActivity extends AppCompatActivity {
         };
 
         return pageAdapter;
+    }
+
+    public static void unLoad(){
+        SingletonHelper.loaded = false;
     }
 
     public static void notifyAdatperChanged(){
