@@ -39,7 +39,7 @@
 
     <string name="help_overview">   \tThe most important thing to know about ENotes is that ENotes consists of Pages
         and Notes, where each Page holds a collection of Notes. ENotes also has a web application located at
-        https://enotes.site. If you log into https://enotes.site with the same account you used in this application,
+        www.enotes.site. If you log into www.enotes.site with the same account you used in this application,
         you will see all your Notes and Pages online as well!</string>
     <string name="help_page_description">
             \tThe first screen you will see after logging in to ENotes is the Pages screen. Here you will see a list of
