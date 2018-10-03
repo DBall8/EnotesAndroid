@@ -36,4 +36,27 @@
     <string name="_32">32</string>
     <string name="pages">Pages</string>
     <string name="title_activity_help">helpActivity</string>
+
+    <string name="help_overview">   \tThe most important thing to know about ENotes is that ENotes consists of Pages
+        and Notes, where each Page holds a collection of Notes. ENotes also has a web application located at
+        https://enotes.site. If you log into https://enotes.site with the same account you used in this application,
+        you will see all your Notes and Pages online as well!</string>
+    <string name="help_page_description">
+            \tThe first screen you will see after logging in to ENotes is the Pages screen. Here you will see a list of
+        all the Pages you have created. To open a page, simple click on its name. To create a page, click the plus
+        button floating near the bottom right corner of the screen when on the screen
+        labeled "Pages" at the top. This will automatically open up the page in the next screen. First, give the Page
+        a name by clicking in the purple bar at the top and typing in a name. Then you can create Notes in this Page by
+        clicking the plus symbol by the bottom right of the screen. You can return to the list of your Pages at any time
+        by clicking the Back button. You can also delete a Page, or change the way the Notes are sorted by clicking the
+        three dots at the top right of the screen and selecting the corresponding option.</string>
+    <string name="help_note_description">
+            \tTo open a Note, click on the icon with its title or the first few words of the Note. This will open a screen
+        where you can edit the contents of the Note. To change the title of the Note, click in the top colored bar of
+        the Note screen and start typing. To change the contents, click anywhere in the gray and begin typing. You can
+        further customize your note by clicking the three little dots at the top right of the screen which will open a
+        menu in which you can choose to change the Note's color, font, or font size. When you are done editing your Note,
+        you can either click the Save button to save your changes, the Cancel button to exit and discard all changes, or
+        the Delete button to delete the entire note. These buttons are found at the bottom of the Note screen.
+    </string>
 </resources>
