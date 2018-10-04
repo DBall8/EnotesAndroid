@@ -4,7 +4,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 public class NotePage {
     private String pageID;
@@ -14,7 +14,7 @@ public class NotePage {
     public NotePage(String name){
         this.pageID = "page-" + System.currentTimeMillis();
         this.name = name;
-        this.index = NoteManager.getNumPages();
+        this.index = MainActivity.getDataManager().getNumPages();
     }
 
     public NotePage(JSONObject json){
@@ -35,7 +35,7 @@ public class NotePage {
             json.put("pageid", pageID);
             json.put("name", name);
             json.put("index", index);
-            json.put("socketid", NoteManager.getSocketID());
+            json.put("socketid", MainActivity.getDataManager().getSocketID());
         }
         catch (Exception e){
             Log.d("MYAPP", "Could not form json for note page: " + e.getMessage());

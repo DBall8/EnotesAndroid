@@ -13,7 +13,6 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.ChangePasswordTask;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 
 public class ChangePasswordActivity extends AppCompatActivity {
@@ -71,7 +70,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                         @Override
                         protected void onPostExecute(String result) {
                             if(result == null){
-                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
+                                MainActivity.getDataManager().sessionExpired(activity, "Problem communicating with server. Please try again later.");
                                 return;
                             }
 
@@ -88,7 +87,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                             }
                             catch(Exception e){
                                 Log.d("MYAPP", "Failed to parse JSON");
-                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
+                                MainActivity.getDataManager().sessionExpired(activity, "Problem communicating with server. Please try again later.");
                             }
                         }
                     }.execute();

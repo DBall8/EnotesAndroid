@@ -16,9 +16,7 @@ import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.CreateUserTask;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LoginTask;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
-import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
@@ -109,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         // Wipe any saved session info
-        NoteManager.resetCookies();
+        MainActivity.getDataManager().resetCookies();
         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
         sp.edit().putString("session", null).commit();
 
@@ -215,18 +213,18 @@ public class LoginActivity extends AppCompatActivity {
                     // If successful flag received, save the session id on the phone for next time
                     if(obj.getBoolean("successful")){
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
+                        sp.edit().putString("session", MainActivity.getDataManager().getCookies().getCookies().get(0).toString()).commit();
 
                         if(!obj.isNull("dfont")){
-                            Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dfont")));
+                            MainActivity.getSettings().setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dfont")));
                         }
 
                         if(!obj.isNull("dfontsize")){
-                            Settings.setDefaultFontSize(obj.getInt("dfontsize"));
+                            MainActivity.getSettings().setDefaultFontSize(obj.getInt("dfontsize"));
                         }
 
                         if(!obj.isNull("dcolor")){
-                            Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dcolor")));
+                            MainActivity.getSettings().setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dcolor")));
                         }
 
                         // move to login success method
@@ -286,7 +284,7 @@ public class LoginActivity extends AppCompatActivity {
                     if(!obj.getBoolean("userAlreadyExists")){
                         // save user session on phone for next time
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
+                        sp.edit().putString("session", MainActivity.getDataManager().getCookies().getCookies().get(0).toString()).commit();
 
                         // move to login success method
                         loginSuccess();

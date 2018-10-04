@@ -1,10 +1,9 @@
-package edudcball.wpi.users.enotesandroid.NoteManager;
+package edudcball.wpi.users.enotesandroid.dataManagers;
 
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import edudcball.wpi.users.enotesandroid.Settings;
@@ -38,7 +37,7 @@ public class SocketConnection {
                 @Override
                 public void call(Object... args) {
                     id = (String)args[0];
-                    String username = NoteManager.getUsername();
+                    String username = MainActivity.getDataManager().getUsername();
                     if(username.equals("")){
                         Log.d("MYAPP", "SOCKET FAILED TO START: no username.");
                         return;
@@ -104,7 +103,7 @@ public class SocketConnection {
             Note note = new Note(json);
 
             notes.put(note.getTag(), note);
-            NoteManager.reSort();
+            MainActivity.getDataManager().reSort();
         }catch(Exception e){
             Log.d("MYAPP","FAILED TO PARSE SOCKET NOTE JSON: " + e.getMessage());
         }
@@ -120,7 +119,7 @@ public class SocketConnection {
             notes.remove(note.getTag());
             notes.put(note.getTag(), note);
 
-            NoteManager.reSort();
+            MainActivity.getDataManager().reSort();
 
         } catch(Exception e){
             Log.d("MYAPP","FAILED TO PARSE SOCKET NOTE JSON: " + e.getMessage());
@@ -131,7 +130,7 @@ public class SocketConnection {
     private void deleteNote(String tag){
 
         if(notes.containsKey(tag)) notes.remove(tag);
-        NoteManager.reSort();
+        MainActivity.getDataManager().reSort();
     }
 
     private void createPage(String msg){
@@ -139,7 +138,7 @@ public class SocketConnection {
             JSONObject json = new JSONObject(msg);
             NotePage page = new NotePage(json);
 
-            NoteManager.addPageToArray(page);
+            MainActivity.getDataManager().addPageToArray(page);
             MainActivity.notifyAdatperChanged();
         }catch(Exception e){
             Log.d("MYAPP","FAILED TO PARSE SOCKET PAGE JSON: " + e.getMessage());
@@ -150,7 +149,7 @@ public class SocketConnection {
         try{
             JSONObject json = new JSONObject(msg);
             NotePage page = new NotePage(json);
-            NoteManager.updatePageArray(page);
+            MainActivity.getDataManager().updatePageArray(page);
         }
         catch(Exception e){
             Log.d("MYAPP", "FAILED TO PARSE SOCKET PAGE UPDATE: " + e.getMessage());
@@ -159,7 +158,7 @@ public class SocketConnection {
 
     private void deletePage(String pageID){
         try{
-            NoteManager.removePageFromArray(null, pageID);
+            MainActivity.getDataManager().removePageFromArray(null, pageID);
         }catch(Exception e){
             Log.d("MYAPP","FAILED TO PARSE SOCKET PAGE JSON: " + e.getMessage());
         }

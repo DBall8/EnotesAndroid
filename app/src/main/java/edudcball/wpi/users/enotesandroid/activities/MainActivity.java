@@ -22,7 +22,8 @@ import android.widget.TextView;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.dataManagers.DataManager;
+import edudcball.wpi.users.enotesandroid.dataManagers.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
@@ -35,10 +36,17 @@ import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 public class MainActivity extends AppCompatActivity {
 
     private static final class SingletonHelper{
-        private static ArrayAdapter<String> pageAdapter;
-        private static boolean loaded = false;
+        private static MainActivity instance;
     }
-    private Menu menu;
+
+    private static MainActivity getInstance(){ return SingletonHelper.instance; }
+
+    private ArrayAdapter<String> pageAdapter;
+    private boolean loaded = false;
+
+    private DataManager dataManager = new DataManager();
+    private Settings settings;
+
 
     /**
      * Gets called the first time the main activity is created
@@ -48,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SingletonHelper.instance = this;
+
         NoteLookupTable.init(this.getApplicationContext());
-        Settings.init(this.getApplicationContext());
+        settings = new Settings(this.getApplicationContext());
 
         // setup layout
         setContentView(R.layout.activity_main);
@@ -60,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the static note handler with the notesList
         ListView pageList = findViewById(R.id.PageList);
-        SingletonHelper.pageAdapter = buildPageAdapter();
-        pageList.setAdapter(SingletonHelper.pageAdapter);
+        pageAdapter = buildPageAdapter();
+        pageList.setAdapter(pageAdapter);
 
         final MainActivity self = this;
 
@@ -69,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                NoteManager.switchToPage(self, i);
+                dataManager.switchToPage(self, i);
             }
         });
 
@@ -78,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NoteManager.newPage(self);
+                dataManager.newPage(self);
             }
         });
     }
@@ -89,19 +99,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        if(!SingletonHelper.loaded){
+        if(!loaded){
             // look for a saved session in on the phone
             SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
             String session = sp.getString("session", null);
 
             // if a session is saved, load the session into the cookie manager and load the user's notes
             if(session != null){
-                NoteManager.resetCookies();
-                NoteManager.addCookies(session);
-                NoteManager.retrieveNotes(this, new EventHandler<Void>() {
+                dataManager.resetCookies();
+                dataManager.addCookies(session);
+                dataManager.retrieveData(this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        SingletonHelper.loaded = true;
+                        loaded = true;
                     }
                 });
             }
@@ -119,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        this.menu = menu;
 
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -146,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                 SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        SingletonHelper.pageAdapter.notifyDataSetChanged();
+                        pageAdapter.notifyDataSetChanged();
                     }
                 });
                 settingsDialog.show();
@@ -183,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> buildPageAdapter(){
 
         final Context context = this.getApplicationContext();
-        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getPageTitles()){
+        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, dataManager.getPageTitles()){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
@@ -192,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
 
                 tv.setBackground(bg);
 
-                switch(Settings.getIconSize()){
+                switch(settings.getIconSize()){
                     case SMALL:
                         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_small));
                         break;
@@ -213,11 +222,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void unLoad(){
-        SingletonHelper.loaded = false;
+        getInstance().loaded = false;
     }
 
     public static void notifyAdatperChanged(){
-        if(SingletonHelper.pageAdapter != null)
-            SingletonHelper.pageAdapter.notifyDataSetChanged();
+        if(getInstance().pageAdapter != null)
+            getInstance().pageAdapter.notifyDataSetChanged();
     }
+
+    public static DataManager getDataManager(){ return getInstance().dataManager; }
+    public static Settings getSettings(){ return getInstance().settings; }
 }

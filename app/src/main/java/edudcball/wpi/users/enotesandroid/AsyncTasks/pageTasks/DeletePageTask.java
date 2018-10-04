@@ -5,7 +5,7 @@ import android.util.Log;
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.AsyncTasks.HttpConnectionTask;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 /**
  * A task for sending a note deleting to the server
@@ -34,7 +34,7 @@ public abstract class DeletePageTask extends HttpConnectionTask {
             // build message
             JSONObject msg = new JSONObject();
             msg.put("pageid", pageID);
-            msg.put("socketid", NoteManager.getSocketID());
+            msg.put("socketid", MainActivity.getDataManager().getSocketID());
 
             // write the message
             writeMessage(msg.toString());

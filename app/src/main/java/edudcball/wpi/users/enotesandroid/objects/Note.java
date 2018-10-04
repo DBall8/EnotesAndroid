@@ -5,8 +5,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
-import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
@@ -32,10 +31,10 @@ public class Note {
      */
     public Note(){
         this.tag = "note-" + System.currentTimeMillis(); // create a tag from the current time
-        this.pageID = NoteManager.getCurrentPageID();
+        this.pageID = MainActivity.getDataManager().getCurrentPageID();
         this.title = ""; // empty title
         this.content = ""; // empty content
-        this.colors = NoteLookupTable.getColorJSON(Settings.getDefaultColor()); // default color
+        this.colors = NoteLookupTable.getColorJSON(MainActivity.getSettings().getDefaultColor()); // default color
 
         // default position of 200, 200
         this.x = 200;
@@ -43,8 +42,8 @@ public class Note {
         // default size of 200 x 200
         this.width = 200;
         this.height = 200;
-        this.font = NoteLookupTable.getFontString(Settings.getDefaultFont()); // default font of Arial
-        this.fontSize = Settings.getDefaultFontSize(); //default size 12
+        this.font = NoteLookupTable.getFontString(MainActivity.getSettings().getDefaultFont()); // default font of Arial
+        this.fontSize = MainActivity.getSettings().getDefaultFontSize(); //default size 12
         this.zindex = 9999; // starts on top (is quickly changed)
     }
 
@@ -103,7 +102,7 @@ public class Note {
             json.put("fontsize", fontSize);
             json.put("zindex", zindex);
             json.put("colors", colors);
-            json.put("socketid", NoteManager.getSocketID());
+            json.put("socketid", MainActivity.getDataManager().getSocketID());
             return json;
 
         } catch(JSONException e){

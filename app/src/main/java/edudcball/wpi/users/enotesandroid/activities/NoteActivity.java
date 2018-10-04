@@ -22,9 +22,7 @@ import android.widget.EditText;
 import org.json.JSONException;
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
-import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
@@ -65,7 +63,7 @@ public class NoteActivity extends AppCompatActivity {
 
         // get the tag from the calling activity
         String tag = getIntent().getStringExtra("Tag");
-        note = NoteManager.getNote(tag);
+        note = MainActivity.getDataManager().getNote(tag);
 
         // find all the views
         noteToolbar = findViewById(R.id.noteToolbar);
@@ -107,7 +105,7 @@ public class NoteActivity extends AppCompatActivity {
             note.setContent(contentView.getText().toString());
             note.setTitle(titleBar.getText().toString());
 
-            NoteManager.updateNote(activity, note, new EventHandler<String>() {
+                MainActivity.getDataManager().updateNote(activity, note, new EventHandler<String>() {
                 @Override
                 public void handle(String event) {
                     finish();
@@ -131,7 +129,7 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-            NoteManager.deleteNote(activity, note.getTag(), new EventHandler<String>() {
+                MainActivity.getDataManager().deleteNote(activity, note.getTag(), new EventHandler<String>() {
                 @Override
                 public void handle(String event) {
                     finish();
@@ -258,7 +256,7 @@ public class NoteActivity extends AppCompatActivity {
      * @param size the size tos et to
      */
     private void setFontSize(int size){
-        switch(Settings.getTextSize()){
+        switch(MainActivity.getSettings().getTextSize()){
             case SMALL:
                 break;
             default:

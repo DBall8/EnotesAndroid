@@ -14,8 +14,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 
 /**
@@ -50,8 +50,8 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
             connection.setDoInput(doInput);
 
             // add any cookies that are saved
-            if (NoteManager.getCookies().getCookies().size() > 0) {
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.getCookies().getCookies()));
+            if (MainActivity.getDataManager().getCookies().getCookies().size() > 0) {
+                connection.setRequestProperty("Cookie", TextUtils.join(";", MainActivity.getDataManager().getCookies().getCookies()));
             }
 
             // set method
@@ -115,7 +115,7 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
 
         if (cookiesHeader != null) {
             for (String cookie : cookiesHeader) {
-                NoteManager.getCookies().add(null, HttpCookie.parse(cookie).get(0));
+                MainActivity.getDataManager().getCookies().add(null, HttpCookie.parse(cookie).get(0));
             }
         }
     }

@@ -11,6 +11,7 @@ import java.util.Map;
 
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 /**
  * A class for converting between color id codes and their JSON forms used on the web version
@@ -100,7 +101,7 @@ public class NoteLookupTable {
                 return cursor.getKey();
             }
         }
-        return Settings.getDefaultColor();
+        return MainActivity.getSettings().getDefaultColor();
     }
 
     public static NoteColor getColorFromStr(String color){
@@ -109,7 +110,7 @@ public class NoteLookupTable {
                 return cursor.getKey();
             }
         }
-        return Settings.getDefaultColor();
+        return MainActivity.getSettings().getDefaultColor();
     }
 
     public static String getFontString(NoteFont font){

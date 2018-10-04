@@ -9,8 +9,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 public class ConnectionTestTask extends AsyncTask<Void, Integer, Boolean> {
 
@@ -26,8 +26,8 @@ public class ConnectionTestTask extends AsyncTask<Void, Integer, Boolean> {
             connection.setDoInput(true);
 
             // add any cookies that are saved
-            if (NoteManager.getCookies().getCookies().size() > 0) {
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.getCookies().getCookies()));
+            if (MainActivity.getDataManager().getCookies().getCookies().size() > 0) {
+                connection.setRequestProperty("Cookie", TextUtils.join(";", MainActivity.getDataManager().getCookies().getCookies()));
             }
 
             // set method

@@ -30,7 +30,6 @@ import org.json.JSONObject;
 import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.objects.Note;
@@ -86,7 +85,7 @@ public class NotePageActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 saveTitle();
-                NoteManager.switchToNote(activity, i);
+                MainActivity.getDataManager().switchToNote(activity, i);
             }
         });
 
@@ -106,7 +105,7 @@ public class NotePageActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveTitle();
-                NoteManager.newNote(activity);
+                MainActivity.getDataManager().newNote(activity);
             }
         });
 
@@ -117,7 +116,7 @@ public class NotePageActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                NoteManager.deletePage(activity, page.getPageID(), new EventHandler<String>() {
+                MainActivity.getDataManager().deletePage(activity, page.getPageID(), new EventHandler<String>() {
                     @Override
                     public void handle(String result) {
                         finish();
@@ -137,7 +136,7 @@ public class NotePageActivity extends AppCompatActivity {
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         String pageID = getIntent().getStringExtra("pageID");
-        page = NoteManager.getPage(pageID);
+        page = MainActivity.getDataManager().getPage(pageID);
 
         if(page == null){
             finish();
@@ -164,7 +163,7 @@ public class NotePageActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         Menu sortByMenu = menu.findItem(R.id.action_sortBy).getSubMenu();
-        switch(Settings.getSortBy()){
+        switch(MainActivity.getSettings().getSortBy()){
             case COLOR:
                 sortByMenu.findItem(R.id.action_color).setChecked(true);
                 break;
@@ -197,17 +196,17 @@ public class NotePageActivity extends AppCompatActivity {
         // Get the id of the menu item that was selected
         switch(item.getItemId()){
             case R.id.action_color:
-                Settings.setSortBy(Settings.SortBy.COLOR);
+                MainActivity.getSettings().setSortBy(Settings.SortBy.COLOR);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_recent:
-                Settings.setSortBy(Settings.SortBy.RECENT);
+                MainActivity.getSettings().setSortBy(Settings.SortBy.RECENT);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_alpha:
-                Settings.setSortBy(Settings.SortBy.ALPHA);
+                MainActivity.getSettings().setSortBy(Settings.SortBy.ALPHA);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
@@ -255,7 +254,7 @@ public class NotePageActivity extends AppCompatActivity {
     private ArrayAdapter<String> buildNotesAdapter(){
 
         final Context context = this.getApplicationContext();
-        ArrayAdapter<String> noteAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getNoteTitles()){
+        ArrayAdapter<String> noteAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, MainActivity.getDataManager().getNoteTitles()){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
@@ -264,7 +263,7 @@ public class NotePageActivity extends AppCompatActivity {
 
                 tv.setBackground(bg);
 
-                switch(Settings.getIconSize()){
+                switch(MainActivity.getSettings().getIconSize()){
                     case SMALL:
                         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, parent.getResources().getInteger(R.integer.font_small));
                         break;
@@ -278,7 +277,7 @@ public class NotePageActivity extends AppCompatActivity {
                 }
 
                 // Get the note by its position in the list
-                Note n = NoteManager.getNote(position);
+                Note n = MainActivity.getDataManager().getNote(position);
                 // Set the background to match the note's color
                 JSONObject colors = n.getColors();
 
@@ -307,7 +306,7 @@ public class NotePageActivity extends AppCompatActivity {
         if(page == null || page.getName().equals(pageTitle.getText().toString())) return;
         final Activity activity = this;
         page.setName(pageTitle.getText().toString());
-        NoteManager.updatePage(activity, page, null);
+        MainActivity.getDataManager().updatePage(activity, page, null);
     }
 
     public static void updateNoteAdapter(){

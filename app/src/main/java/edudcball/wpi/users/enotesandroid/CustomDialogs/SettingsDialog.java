@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -14,8 +13,7 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import java.util.Set;
-
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
@@ -34,9 +32,13 @@ public class SettingsDialog extends Dialog {
 
     private EventHandler<Void> finishedEvent;
 
+    private Settings settings;
+
 
     public SettingsDialog(Context context, EventHandler<Void> finishedEvent) {
         super(context);
+
+        settings = MainActivity.getSettings();
 
         this.finishedEvent = finishedEvent;
         this.context = context;
@@ -99,50 +101,50 @@ public class SettingsDialog extends Dialog {
         RadioButton selectedRB = findViewById(iconSizeGroup.getCheckedRadioButtonId());
         switch(selectedRB.getText().toString()){
             case "Small":
-                Settings.setIconSize(Settings.Size.SMALL);
+                settings.setIconSize(Settings.Size.SMALL);
                 break;
             case "Medium":
             default:
-                Settings.setIconSize(Settings.Size.MEDIUM);
+                settings.setIconSize(Settings.Size.MEDIUM);
                 break;
             case "Large":
-                Settings.setIconSize(Settings.Size.LARGE);
+                settings.setIconSize(Settings.Size.LARGE);
                 break;
         }
 
         selectedRB = findViewById(textSizeGroup.getCheckedRadioButtonId());
         switch(selectedRB.getText().toString()){
             case "Small":
-                Settings.setTextSize(Settings.Size.SMALL);
+                settings.setTextSize(Settings.Size.SMALL);
                 break;
             case "Medium":
             default:
-                Settings.setTextSize(Settings.Size.MEDIUM);
+                settings.setTextSize(Settings.Size.MEDIUM);
                 break;
             case "Large":
-                Settings.setTextSize(Settings.Size.LARGE);
+                settings.setTextSize(Settings.Size.LARGE);
                 break;
         }
 
         selectedRB = findViewById(dColorGroup.getCheckedRadioButtonId());
-        Settings.setDefaultColor(NoteLookupTable.getColorFromStr(selectedRB.getText().toString()));
+        settings.setDefaultColor(NoteLookupTable.getColorFromStr(selectedRB.getText().toString()));
 
         selectedRB = findViewById(dFontGroup.getCheckedRadioButtonId());
-        Settings.setDefaultFont(NoteLookupTable.getFontFromStr(selectedRB.getText().toString()));
+        settings.setDefaultFont(NoteLookupTable.getFontFromStr(selectedRB.getText().toString()));
 
         selectedRB = findViewById(dFontSizeGroup.getCheckedRadioButtonId());
         try{
-            Settings.setDefaultFontSize(Integer.parseInt(selectedRB.getText().toString()));
+            settings.setDefaultFontSize(Integer.parseInt(selectedRB.getText().toString()));
         } catch (Exception e){
             Log.d("MYAPP", "Could not parse integer: " + selectedRB.getText());
         }
 
-        Settings.updateSettingsServerSide();
+        settings.updateSettingsServerSide();
     }
 
     private void setChecks(){
         RadioButton radioButton;
-        switch(Settings.getIconSize()){
+        switch(settings.getIconSize()){
             case SMALL:
                 radioButton = findViewById(R.id.smallIconRB);
                 break;
@@ -156,7 +158,7 @@ public class SettingsDialog extends Dialog {
         }
         radioButton.setChecked(true);
 
-        switch(Settings.getTextSize()){
+        switch(settings.getTextSize()){
             case SMALL:
                 radioButton = findViewById(R.id.smallTextRB );
                 break;
@@ -170,7 +172,7 @@ public class SettingsDialog extends Dialog {
         }
         radioButton.setChecked(true);
 
-        switch (Settings.getDefaultColor()){
+        switch (settings.getDefaultColor()){
             default:
             case YELLOW:
                 radioButton = findViewById(R.id.yellowButton);
@@ -193,7 +195,7 @@ public class SettingsDialog extends Dialog {
         }
         radioButton.setChecked(true);
 
-        switch(Settings.getDefaultFont()){
+        switch(settings.getDefaultFont()){
             default:
             case ARIAL:
                 radioButton = findViewById(R.id.arialRadioButton);
@@ -208,7 +210,7 @@ public class SettingsDialog extends Dialog {
 
         radioButton.setChecked(true);
 
-        switch (Settings.getDefaultFontSize()){
+        switch (settings.getDefaultFontSize()){
             case 10:
                 radioButton = findViewById(R.id.tenRadioButton);
                 break;
