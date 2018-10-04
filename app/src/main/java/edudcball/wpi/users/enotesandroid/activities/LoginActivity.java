@@ -217,16 +217,16 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
                         sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
 
-                        if(!obj.isNull("dFont")){
-                            Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dFont")));
+                        if(!obj.isNull("dfont")){
+                            Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dfont")));
                         }
 
-                        if(!obj.isNull("dFontSize")){
-                            Settings.setDefaultFontSize(obj.getInt("dFontSize"));
+                        if(!obj.isNull("dfontsize")){
+                            Settings.setDefaultFontSize(obj.getInt("dfontsize"));
                         }
 
-                        if(!obj.isNull("dColor")){
-                            Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dColor")));
+                        if(!obj.isNull("dcolor")){
+                            Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dcolor")));
                         }
 
                         // move to login success method

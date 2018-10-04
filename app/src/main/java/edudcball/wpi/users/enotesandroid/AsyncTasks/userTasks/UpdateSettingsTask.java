@@ -35,9 +35,9 @@ public abstract class UpdateSettingsTask extends HttpConnectionTask {
 
             // build the message
             JSONObject msg = new JSONObject();
-            msg.put("dFont", dFont);
-            msg.put("dFontSize", dFontSize);
-            msg.put("dColor", dColor);
+            msg.put("dfont", dFont);
+            msg.put("dfontsize", dFontSize);
+            msg.put("dcolor", dColor);
 
             // write the message
             writeMessage(msg.toString());

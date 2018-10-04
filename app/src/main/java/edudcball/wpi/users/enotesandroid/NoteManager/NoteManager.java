@@ -535,6 +535,7 @@ public class NoteManager {
 
         getInstance().notePages = newPages;
         getInstance().pageTitles.add(page.getName());
+        MainActivity.notifyAdatperChanged();
     }
 
     public static void updatePage(final Activity activity, NotePage page, final EventHandler<String> callback){
@@ -567,7 +568,6 @@ public class NoteManager {
     }
 
     static synchronized void updatePageArray(NotePage page){
-        Log.d("MYAPP", "START UPDATE");
         NotePage[] notePages = getInstance().notePages;
         NotePage oldPage = null;
         // Does the page at this page's index match the page?
@@ -594,7 +594,6 @@ public class NoteManager {
             }
             MainActivity.notifyAdatperChanged();
         }
-        Log.d("MYAPP", "END UPDATE");
     }
 
     public static void deletePage(final Activity activity, String pageID, final EventHandler<String> callback){
@@ -634,7 +633,7 @@ public class NoteManager {
         NotePage[] newPages = new NotePage[getInstance().notePages.length-1];
         int index = 0;
         for(NotePage p: getInstance().notePages){
-            if(p != null && !p.getPageID().equals(pageID) && index <= newPages.length){
+            if(p != null && !p.getPageID().equals(pageID) && index < newPages.length){
                 newPages[index] = p;
                 index++;
             }
