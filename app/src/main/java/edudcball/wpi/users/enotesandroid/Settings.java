@@ -9,8 +9,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.UpdateSettingsTask;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.UpdateSettingsTask;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {
@@ -109,7 +108,7 @@ public class Settings {
     public static void setSortBy(SortBy sortBy){
         if(getInstance().sortBy == sortBy) return;
         getInstance().sortBy = sortBy;
-        NoteManager.reSort();
+//        NoteManager.reSort(); TODO trigger new sort
         if(getInstance().preferences != null) getInstance().preferences.edit().putInt("SortBy", sortBy.getVal()).commit();
     }
 
@@ -158,23 +157,23 @@ public class Settings {
                                 NoteLookupTable.getColorStr(getInstance().defaultColor)){
             @Override
             protected void onPostExecute(String result) {
-                if(result == null){
-                    NoteManager.sessionExpired(null, "Session expired. Please log in again.");
-                    return;
-                }
-
-                try{
-                    // Convert response to a JSON object
-                    JSONObject obj = new JSONObject(result);
-                    // If successful flag received, save the session id on the phone for next time
-                    if(!obj.getBoolean("successful")){
-                        NoteManager.sessionExpired(null, "Session expired. Please log in again.");
-                    }
-                }
-                catch(Exception e){
-                    Log.d("MYAPP", "Failed to parse JSON");
-                    NoteManager.sessionExpired(null, "Problem communicating with server. Please try again later.");
-                }
+//                if(result == null){
+//                    NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+//                    return;
+//                }
+//
+//                try{
+//                    // Convert response to a JSON object
+//                    JSONObject obj = new JSONObject(result);
+//                    // If successful flag received, save the session id on the phone for next time
+//                    if(!obj.getBoolean("successful")){
+//                        NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+//                    }
+//                }
+//                catch(Exception e){
+//                    Log.d("MYAPP", "Failed to parse JSON");
+//                    NoteManager.sessionExpired(null, "Problem communicating with server. Please try again later.");
+//                }
             }
         }.execute();
     }

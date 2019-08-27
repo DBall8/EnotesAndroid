@@ -11,22 +11,22 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LogoutTask;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Old.AsyncTasks.userTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.Old.CustomDialogs.SettingsDialog;
+import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Old.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
-import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
 
 
 /**

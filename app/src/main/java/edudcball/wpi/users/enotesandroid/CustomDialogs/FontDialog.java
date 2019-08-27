@@ -8,8 +8,8 @@ import android.widget.RadioButton;
 import java.util.HashMap;
 
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.R;
 
 /**
  * A dialog for selecting the font of a note

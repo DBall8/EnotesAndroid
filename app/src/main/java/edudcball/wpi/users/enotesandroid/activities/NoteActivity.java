@@ -21,21 +21,25 @@ import android.widget.EditText;
 
 import org.json.JSONException;
 
-import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
-import edudcball.wpi.users.enotesandroid.R;
-import edudcball.wpi.users.enotesandroid.Settings;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontSizeDialog;
-import edudcball.wpi.users.enotesandroid.objects.Note;
+import edudcball.wpi.users.enotesandroid.EventHandler;
+import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
+import edudcball.wpi.users.enotesandroid.data.classes.Note;
+import edudcball.wpi.users.enotesandroid.data.classes.Page;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 /**
  * Activity for displaying a single note
  */
 
 public class NoteActivity extends AppCompatActivity {
+
+    private final static int MEDIUM_FONT_SIZE_ADJUSTMENT = 8;
+    private final static int LARGE_FONT_SIZE_ADJUSTMENT = 16;
 
     // Views
     private Button saveButton;
@@ -46,6 +50,7 @@ public class NoteActivity extends AppCompatActivity {
     private EditText titleBar;
 
     private Note note; // the note that this activity is currently displaying
+    private Page page; // page that contains the displayed note
     private int color; // the color of this note as a color ID
 
     private AlertDialog.Builder confirmDialog; // builder for a delete confirmation dialog
@@ -64,8 +69,8 @@ public class NoteActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         // get the tag from the calling activity
-        String tag = getIntent().getStringExtra("Tag");
-        note = NoteManager.getNote(tag);
+        page = UserManager.getInstance().getPageManager().getActivePage();
+        note = page.getActiveNote();
 
         // find all the views
         noteToolbar = findViewById(R.id.noteToolbar);
@@ -107,12 +112,7 @@ public class NoteActivity extends AppCompatActivity {
             note.setContent(contentView.getText().toString());
             note.setTitle(titleBar.getText().toString());
 
-            NoteManager.updateNote(activity, note, new EventHandler<String>() {
-                @Override
-                public void handle(String event) {
-                    finish();
-                }
-            });
+            finish();
             }
         });
 
@@ -131,13 +131,8 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-            NoteManager.deleteNote(activity, note.getTag(), new EventHandler<String>() {
-                @Override
-                public void handle(String event) {
-                    finish();
-                }
-            });
-
+                page.deleteNote(note.getTag());
+                finish();
             }
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
@@ -263,10 +258,10 @@ public class NoteActivity extends AppCompatActivity {
                 break;
             default:
             case MEDIUM:
-                size += 8;
+                size += MEDIUM_FONT_SIZE_ADJUSTMENT;
                 break;
             case LARGE:
-                size += 16;
+                size += LARGE_FONT_SIZE_ADJUSTMENT;
                 break;
         }
         contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);

@@ -14,12 +14,13 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.CreateUserTask;
-import edudcball.wpi.users.enotesandroid.AsyncTasks.userTasks.LoginTask;
-import edudcball.wpi.users.enotesandroid.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Callback;
+import edudcball.wpi.users.enotesandroid.Old.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.CreateUserTask;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.LoginTask;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
 
 /**
  * Class for running the Login screen of the application
@@ -37,6 +38,8 @@ public class LoginActivity extends AppCompatActivity {
 
     // True when in new user mode, false when in log in mode
     private Boolean newUser = false;
+
+    private UserManager userManager;
 
     /**
      * Runs when the login activity is first opened
@@ -96,6 +99,8 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        userManager = UserManager.getInstance();
     }
 
     /**
@@ -109,9 +114,7 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
         // Wipe any saved session info
-        NoteManager.resetCookies();
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        sp.edit().putString("session", null).commit();
+        resetStoredLoginInfo();
 
         // Get any error message text that might have been provided if an error caused te
         String error = getIntent().getStringExtra("error");
@@ -149,6 +152,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+        sp.edit().putString("username", usernameAttempt);
+        sp.edit().putString("password", usernameAttempt);
+        sp.edit().commit();
 
         // if in new user mode
         if(newUser){
@@ -164,152 +171,113 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
+            // clear any previous error
+            hideError();
+
+            // Show on the login button that the account is being created
+            loginButton.setEnabled(false);
+            loginButton.setText("Creating account...");
+
             // create the new user account
-            createNewUser(usernameAttempt, passwordAttempt);
+            new CreateUserTask(usernameAttempt, passwordAttempt, new Callback<String>() {
+                @Override
+                public void run(String param) {
+                    handleNewUserResponse(param);
+                }
+            }).execute();
         }
         else{
+            // hide any previous error message
+            hideError();
+
+            // hide the login button and display that login is in progress
+            loginButton.setEnabled(false);
+            loginButton.setText("Logging in...");
+
             // attempt to log in
-            login(usernameAttempt, passwordAttempt);
+            new LoginTask(usernameAttempt, passwordAttempt, new Callback<String>(){
+                @Override
+                public void run(String param){
+                    handleLoginResponse(param);
+                }
+            }).execute();
         }
     }
 
-    /**
-     * Attempts to log in the user
-     * @param usernameAttempt the username the user is attempting to login with
-     * @param passwordAttempt the password the user is attempting to login with
-     */
-    private void login(final String usernameAttempt, final String passwordAttempt){
+    private void handleLoginResponse(String response){
 
-        // hide any previous error message
-        hideError();
+        // return login button to its normal state
+        loginButton.setText("Login");
+        loginButton.setEnabled(true);
 
-        // hide the login button and display that login is in progress
-        loginButton.setEnabled(false);
-        loginButton.setText("Logging in...");
+        Log.d("MYAPP", "RESULT: " + response);
 
-        // Create a background task that contacts the server for a user session
-        new LoginTask(usernameAttempt, passwordAttempt){
+        // if no response, something went wrong, end now
+        if (response == null) {
+            displayError("Could not connect to server. Please try again later.");
+            return;
+        }
 
-            /**
-             * CALLBACK - this method is called after the server responds
-             * @param result the server's response body as a string
-             */
-            @Override
-            protected void onPostExecute(String result) {
-
-                // return login button to its normal state
-                loginButton.setText("Login");
-                loginButton.setEnabled(true);
-
-                Log.d("MYAPP", "RESULT: " + result);
-
-                // if no response, something went wrong, end now
-                if(result == null){
-                    displayError("Could not connect to server. Please try again later.");
-                    return;
+        try {
+            // Convert response to a JSON object
+            JSONObject obj = new JSONObject(response);
+            // If successful flag received, save the session id on the phone for next time
+            if (obj.getBoolean("successful")) {
+                if (!obj.isNull("dfont")) {
+                    Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dfont")));
                 }
 
-                try{
-                    // Convert response to a JSON object
-                    JSONObject obj = new JSONObject(result);
-                    // If successful flag received, save the session id on the phone for next time
-                    if(obj.getBoolean("successful")){
-                        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
-
-                        if(!obj.isNull("dfont")){
-                            Settings.setDefaultFont(NoteLookupTable.getFontFromStr(obj.getString("dfont")));
-                        }
-
-                        if(!obj.isNull("dfontsize")){
-                            Settings.setDefaultFontSize(obj.getInt("dfontsize"));
-                        }
-
-                        if(!obj.isNull("dcolor")){
-                            Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dcolor")));
-                        }
-
-                        // move to login success method
-                        loginSuccess();
-                    }
-                    else{
-                        // If no successful flag, show an error
-                        displayError("Login failed. Incorrect username or password.");
-                    }
+                if (!obj.isNull("dfontsize")) {
+                    Settings.setDefaultFontSize(obj.getInt("dfontsize"));
                 }
-                catch(Exception e){
-                    Log.d("MYAPP", "Failed to parse JSON: " + result);
-                    displayError("Error when connecting to server.");
+
+                if (!obj.isNull("dcolor")) {
+                    Settings.setDefaultColor(NoteLookupTable.getColorFromStr(obj.getString("dcolor")));
                 }
+
+                // Login successful, finish this activity
+                finish();
+            } else {
+                // If no successful flag, show an error
+                displayError("Login failed. Incorrect username or password.");
+                resetStoredLoginInfo();
             }
-        }.execute();
+        } catch (Exception e) {
+            Log.d("MYAPP", "Failed to parse JSON: " + response);
+            displayError("Error when connecting to server.");
+        }
     }
 
     /**
      * Contacts the server to attempt to create a new user account
-     * @param usernameAttempt the username to use for the new account
-     * @param passwordAttempt the password to use for the new account
      */
-    private void createNewUser(final String usernameAttempt, final String passwordAttempt){
+    private void handleNewUserResponse(String response){
 
-        // clear any previous error
-        hideError();
+        // return login button back to normal
+        loginButton.setText("Create Account");
+        loginButton.setEnabled(true);
 
-        // Show on the login button that the account is being created
-        loginButton.setEnabled(false);
-        loginButton.setText("Creating account...");
+        // if no response, something went wrong, end early
+        if (response == null) {
+            displayError("Could not connect to server. Please try again later.");
+            return;
+        }
 
-        // Create a background task that attempts to create the new account
-        new CreateUserTask(usernameAttempt, passwordAttempt){
-
-            /**
-             * CALLBACK - gets called after the server responds
-             * @param result the server's response body as a string
-             */
-            @Override
-            protected void onPostExecute(String result) {
-
-                // return login button back to normal
-                loginButton.setText("Create Account");
-                loginButton.setEnabled(true);
-
-                // if no response, something went wrong, end early
-                if(result == null){
-                    displayError("Could not connect to server. Please try again later.");
-                    return;
-                }
-
-                try{
-                    // convert response to a JSON object
-                    JSONObject obj = new JSONObject(result);
-                    // If server indicates that the user did not already exist, then success!!
-                    if(!obj.getBoolean("userAlreadyExists")){
-                        // save user session on phone for next time
-                        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-                        sp.edit().putString("session", NoteManager.getCookies().getCookies().get(0).toString()).commit();
-
-                        // move to login success method
-                        loginSuccess();
-                    }
-                    else{
-                        // Display an error showing the user already exists
-                        displayError("User already exists, please choose a different username.");
-                    }
-                }
-                catch(Exception e){
-                    Log.d("MYAPP", "Failed to parse JSON");
-                }
+        try {
+            // convert response to a JSON object
+            JSONObject obj = new JSONObject(response);
+            // If server indicates that the user did not already exist, then success!!
+            if (!obj.getBoolean("userAlreadyExists")) {
+                // User creation successful, return to main activity
+                finish();
+            } else {
+                // Display an error showing the user already exists
+                displayError("User already exists, please choose a different username.");
+                resetStoredLoginInfo();
             }
-        }.execute();
-    }
-
-    /**
-     * Moves to the main activity once successfully logged in
-     */
-    private void loginSuccess(){
-        // start main activity
-        MainActivity.unLoad();
-        finish();
+        } catch (Exception e) {
+            Log.d("MYAPP", "Failed to parse JSON");
+        }
     }
 
     /**
@@ -349,5 +317,12 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void hideError(){
         messageText.setVisibility(View.GONE);
+    }
+
+    private void resetStoredLoginInfo(){
+        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
+        sp.edit().putString("username", null);
+        sp.edit().putString("password", null);
+        sp.edit().commit();
     }
 }
