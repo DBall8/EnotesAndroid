@@ -3,7 +3,6 @@ package edudcball.wpi.users.enotesandroid.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,24 +19,25 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.EventHandler;
-import edudcball.wpi.users.enotesandroid.Old.AsyncTasks.userTasks.LogoutTask;
-import edudcball.wpi.users.enotesandroid.Old.CustomDialogs.SettingsDialog;
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
-import edudcball.wpi.users.enotesandroid.Old.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.CustomDialogs.SettingsDialog;
+import edudcball.wpi.users.enotesandroid.data.classes.Page;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.data.PageManager;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
+import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 
 
 /**
  * Class for creating the main view of the app, which is the list of notes
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends EnotesActivity implements IObserver {
 
-    private static final class SingletonHelper{
-        private static ArrayAdapter<String> pageAdapter;
-        private static boolean loaded = false;
-    }
+    PageManager pages;
+    private static ArrayAdapter<String> pageAdapter;
     private Menu menu;
 
     /**
@@ -47,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setMainActivity(this);
+
+        pages = UserManager.getInstance().getPageManager();
 
         NoteLookupTable.init(this.getApplicationContext());
         Settings.init(this.getApplicationContext());
@@ -60,8 +63,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the static note handler with the notesList
         ListView pageList = findViewById(R.id.PageList);
-        SingletonHelper.pageAdapter = buildPageAdapter();
-        pageList.setAdapter(SingletonHelper.pageAdapter);
+        pageAdapter = buildPageAdapter();
+        pageList.setAdapter(pageAdapter);
+        pages.subscribe(this);
 
         final MainActivity self = this;
 
@@ -69,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                NoteManager.switchToPage(self, i);
+                pages.selectPage(i);
+                launchActivity(self, PageActivity.class);
             }
         });
 
@@ -78,9 +83,22 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NoteManager.newPage(self);
+                pages.createPage(new Callback<Page>() {
+                    @Override
+                    public void run(Page param) {
+                        if (param == null){
+                            showErrorAndLogout("Error communicating with server.");
+                        }
+                        else{
+                            pages.selectPage(param.getId());
+                            launchActivity(getApplicationContext(), PageActivity.class);
+                        }
+                    }
+                });
             }
         });
+
+        UserManager.getInstance().getConnectionManager().startUpdateDaemon(this);
     }
 
     /**
@@ -89,26 +107,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        if(!SingletonHelper.loaded){
-            // look for a saved session in on the phone
-            SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-            String session = sp.getString("session", null);
 
-            // if a session is saved, load the session into the cookie manager and load the user's notes
-            if(session != null){
-                NoteManager.resetCookies();
-                NoteManager.addCookies(session);
-                NoteManager.retrieveNotes(this, new EventHandler<Void>() {
-                    @Override
-                    public void handle(Void event) {
-                        SingletonHelper.loaded = true;
-                    }
-                });
-            }
-            // If no session is saved, move to login screen
-            else{
-                startActivity(new Intent(this, LoginActivity.class));
-            }
+        if(!UserManager.getInstance().isUserSignedIn()){
+            launchActivity(this, LoginActivity.class);
         }
     }
 
@@ -146,30 +147,28 @@ public class MainActivity extends AppCompatActivity {
                 SettingsDialog settingsDialog = new SettingsDialog(MainActivity.this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        SingletonHelper.pageAdapter.notifyDataSetChanged();
+                        pageAdapter.notifyDataSetChanged();
                     }
                 });
                 settingsDialog.show();
                 break;
             case R.id.action_help:
-                startActivity(new Intent(this.getApplicationContext(), HelpActivity.class));
+                launchActivity(this.getApplicationContext(), HelpActivity.class);
                 break;
             case R.id.action_password:
-                startActivity(new Intent(this.getApplicationContext(), ChangePasswordActivity.class));
+                launchActivity(this.getApplicationContext(), ChangePasswordActivity.class);
                 break;
             // Logout the user
             case R.id.action_logout:
-                final Activity activity = this;
+                final EnotesActivity activity = this;
 
                 // create a background task that logs out the user
-                new LogoutTask(){
-
+                UserManager.getInstance().logOut(this.getApplicationContext(), new Callback<String>() {
                     @Override
-                    protected void onPostExecute(String result) {
-                        if(result == null) return;
-                        activity.startActivity(new Intent(activity, LoginActivity.class));
+                    public void run(String param) {
+                        activity.launchActivity(activity, LoginActivity.class);
                     }
-                }.execute();
+                });
                 break;
         }
 
@@ -183,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> buildPageAdapter(){
 
         final Context context = this.getApplicationContext();
-        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, NoteManager.getPageTitles()){
+        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, pages.getPageTitles()){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
@@ -212,12 +211,7 @@ public class MainActivity extends AppCompatActivity {
         return pageAdapter;
     }
 
-    public static void unLoad(){
-        SingletonHelper.loaded = false;
-    }
-
-    public static void notifyAdatperChanged(){
-        if(SingletonHelper.pageAdapter != null)
-            SingletonHelper.pageAdapter.notifyDataSetChanged();
+    public void update(){
+        pageAdapter.notifyDataSetChanged();
     }
 }

@@ -4,19 +4,22 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.objects.NotePage;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
+import edudcball.wpi.users.enotesandroid.data.classes.Page;
 
 /**
  * A task for updating the server of the new state of a note
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class UpdatePageTask extends HttpConnectionTask {
+public class UpdatePageTask extends HttpConnectionTask {
 
-    private NotePage p; // the note to update the server about
+    private Page p; // the note to update the server about
+    private Callback<String> callback;
 
-    public UpdatePageTask(NotePage p) {
+    public UpdatePageTask(Page p, Callback<String> callback) {
+        this.callback = callback;
         this.p = p;
     }
 
@@ -52,4 +55,8 @@ public abstract class UpdatePageTask extends HttpConnectionTask {
         }
     }
 
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
+    }
 }

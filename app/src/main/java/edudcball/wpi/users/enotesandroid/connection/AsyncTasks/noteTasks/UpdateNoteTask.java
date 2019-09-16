@@ -1,22 +1,26 @@
 package edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks;
 
+import android.telecom.Call;
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.objects.Note;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
+import edudcball.wpi.users.enotesandroid.data.classes.Note;
 
 /**
  * A task for updating the server of the new state of a note
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class UpdateNoteTask extends HttpConnectionTask {
+public class UpdateNoteTask extends HttpConnectionTask {
 
     private Note n; // the note to update the server about
+    private Callback<String> callback;
 
-    public UpdateNoteTask(Note n) {
+    public UpdateNoteTask(Note n, Callback<String> callback) {
+        this.callback = callback;
         this.n = n;
     }
 
@@ -52,4 +56,8 @@ public abstract class UpdateNoteTask extends HttpConnectionTask {
         }
     }
 
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
+    }
 }

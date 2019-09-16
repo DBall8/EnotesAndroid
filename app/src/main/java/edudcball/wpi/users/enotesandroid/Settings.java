@@ -14,6 +14,8 @@ import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 
 public class Settings {
 
+    private final static boolean DEBUG = true;
+
     public static final String baseURL = "https://enotes.site";//"http://10.0.2.2:8080";//
 
     private NoteLookupTable.NoteFont defaultFont = NoteLookupTable.NoteFont.ARIAL;
@@ -152,32 +154,36 @@ public class Settings {
     // -----------------------------------
 
     public static void updateSettingsServerSide(){
-        new UpdateSettingsTask(NoteLookupTable.getFontString(getInstance().defaultFont),
-                                getInstance().defaultFontSize,
-                                NoteLookupTable.getColorStr(getInstance().defaultColor)){
-            @Override
-            protected void onPostExecute(String result) {
-//                if(result == null){
-//                    NoteManager.sessionExpired(null, "Session expired. Please log in again.");
-//                    return;
-//                }
+        new UpdateSettingsTask(NoteLookupTable.getFontString(
+                getInstance().defaultFont),
+                getInstance().defaultFontSize,
+                NoteLookupTable.getColorStr(getInstance().defaultColor),
+                new Callback<String>() {
+                    @Override
+                    public void run(String param) {
+//                        if(result == null){
+//                            NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+//                            return;
+//                        }
 //
-//                try{
-//                    // Convert response to a JSON object
-//                    JSONObject obj = new JSONObject(result);
-//                    // If successful flag received, save the session id on the phone for next time
-//                    if(!obj.getBoolean("successful")){
-//                        NoteManager.sessionExpired(null, "Session expired. Please log in again.");
-//                    }
-//                }
-//                catch(Exception e){
-//                    Log.d("MYAPP", "Failed to parse JSON");
-//                    NoteManager.sessionExpired(null, "Problem communicating with server. Please try again later.");
-//                }
-            }
-        }.execute();
+//                        try{
+//                            // Convert response to a JSON object
+//                            JSONObject obj = new JSONObject(result);
+//                            // If successful flag received, save the session id on the phone for next time
+//                            if(!obj.getBoolean("successful")){
+//                                NoteManager.sessionExpired(null, "Session expired. Please log in again.");
+//                            }
+//                        }
+//                        catch(Exception e){
+//                            Log.d("MYAPP", "Failed to parse JSON");
+//                            NoteManager.sessionExpired(null, "Problem communicating with server. Please try again later.");
+//                        }
+                    }
+                }).execute();
     }
     private Settings(){}
+
+    public static boolean isDebug(){ return DEBUG; }
 
     private static class SingletonHelper{
         private static final Settings _instance = new Settings();

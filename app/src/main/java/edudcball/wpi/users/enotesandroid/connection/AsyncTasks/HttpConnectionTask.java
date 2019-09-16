@@ -8,14 +8,16 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
 
 
 /**
@@ -50,8 +52,9 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
             connection.setDoInput(doInput);
 
             // add any cookies that are saved
-            if (NoteManager.getCookies().getCookies().size() > 0) {
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.getCookies().getCookies()));
+            CookieStore cookies = UserManager.getInstance().getConnectionManager().getCookies();
+            if (cookies.getCookies().size() > 0) {
+                connection.setRequestProperty("Cookie", TextUtils.join(";", cookies.getCookies()));
             }
 
             // set method
@@ -113,9 +116,10 @@ public abstract class HttpConnectionTask extends AsyncTask<String, Integer, Stri
         Map<String, List<String>> headerFields = connection.getHeaderFields();
         List<String> cookiesHeader = headerFields.get(COOKIES_HEADER);
 
+        CookieStore cookies = UserManager.getInstance().getConnectionManager().getCookies();
         if (cookiesHeader != null) {
             for (String cookie : cookiesHeader) {
-                NoteManager.getCookies().add(null, HttpCookie.parse(cookie).get(0));
+                cookies.add(null, HttpCookie.parse(cookie).get(0));
             }
         }
     }

@@ -5,12 +5,16 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.Callback;
+import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks.UpdateNoteTask;
+
 /**
  * Class for containing all the data needed for a single Note
  */
 
-public class Note {
-    private String tag;         // tag that uniquely identifies the note
+public class Note implements Sortable {
+    private String id;         // id that uniquely identifies the note
     private String pageID;      // id of the note page the note belongs to
     private String title;       // the optional title displayed at the top of the note
     private String content;     // the text content of the note
@@ -23,11 +27,13 @@ public class Note {
     private int fontSize;       // the size of the note's text
     private int zindex;         // the depth of the note used for stacking and ordering
 
+    private boolean hasChanged; // True when the note has changed but the server has not been updated
+
     /**
      * Constructor for a new empty note
      */
     public Note(String ownerPageId, JSONObject colors, String font, int fontSize){
-        this.tag = "note-" + System.currentTimeMillis(); // create a tag from the current time
+        this.id = "note-" + System.currentTimeMillis(); // create a id from the current time
         this.title = "";        // empty title
         this.content = "";      // empty content
 
@@ -44,6 +50,8 @@ public class Note {
         this.fontSize = fontSize;
         this.colors = colors;
         this.zindex = 9999; // starts on top (is quickly changed)
+
+        this.hasChanged = false;
     }
 
     /**
@@ -53,7 +61,7 @@ public class Note {
     public Note(JSONObject json) {
         try {
             // get each field from the JSON
-            this.tag = json.getString("tag");
+            this.id = json.getString("tag");
             this.pageID = json.getString("pageid");
             String title = json.getString("title");
             if (title == null || title.equals("null")) {
@@ -70,10 +78,16 @@ public class Note {
             this.fontSize = json.getInt("fontsize");
             this.zindex = json.getInt("zindex");
 
+            this.hasChanged = false;
+
             try {
                 this.colors = new JSONObject(json.getString("colors"));
             } catch (Exception e) {
                 this.colors = null;
+            }
+
+            if(Settings.isDebug()){
+                Log.d("MYAPP", "Created Note " + id + " in page " + pageID);
             }
         }
         catch(JSONException e){
@@ -89,7 +103,7 @@ public class Note {
         try {
 
             JSONObject json = new JSONObject();
-            json.put("tag", tag);
+            json.put("tag", id);
             json.put("pageid", pageID);
             json.put("title", title);
             json.put("content", content);
@@ -113,7 +127,7 @@ public class Note {
      * Creates a title to display on the note icon
      * @return a title to display on the note icon
      */
-    public String getTitleForDisplay(){
+    public String getDisplayTitle(){
 
         // If the note has a title, use that
         if(!title.equals("")){
@@ -131,30 +145,65 @@ public class Note {
         return content.substring(0, end);
     }
 
-    public void setColor(JSONObject colors){ this.colors = colors; }
+    public void update(final Callback<Boolean> callback){
+        if (hasChanged) {
+            new UpdateNoteTask(this, new Callback<String>() {
+                @Override
+                public void run(String param) {
+                    if (param == null) {
+                        Log.d("MYAPP", "Update note returned null");
+                        callback.run(false);
+                    }
+
+                    try {
+                        JSONObject json = new JSONObject(param);
+                        if (json.getBoolean("successful")) {
+                            hasChanged = false;
+                            callback.run(true);
+                        } else {
+                            callback.run(false);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.run(false);
+                    }
+                }
+            }).execute();
+        }
+    }
+
+    public void setColor(JSONObject colors){
+        this.colors = colors;
+        this.hasChanged = true;
+    }
 
     public void setFont(String font){
         this.font = font;
+        this.hasChanged = true;
     }
 
     public void setFontSize(int fontSize){
         this.fontSize = fontSize;
+        this.hasChanged = true;
     }
 
     public void setContent(String c){
         this.content = c;
+        this.hasChanged = true;
     }
 
     public void setTitle(String title){
         this.title = title;
+        this.hasChanged = true;
     }
 
     public void setZIndex(int z){
         this.zindex = z;
+        this.hasChanged = true;
     }
 
-    public String getTag(){
-        return this.tag;
+    public String getId(){
+        return this.id;
     }
 
     public String getPageID(){ return this.pageID; }
@@ -172,5 +221,7 @@ public class Note {
     public int getZ() { return this.zindex; }
 
     public JSONObject getColors() { return this.colors; }
+
+    public boolean hasNoteChanged(){ return hasChanged; }
 }
 

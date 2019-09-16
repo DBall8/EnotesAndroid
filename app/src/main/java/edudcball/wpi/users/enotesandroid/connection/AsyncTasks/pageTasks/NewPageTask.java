@@ -4,19 +4,22 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.objects.NotePage;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
+import edudcball.wpi.users.enotesandroid.data.classes.Page;
 
 /**
  * A task for sending a new note event to the server
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class NewPageTask extends HttpConnectionTask {
+public class NewPageTask extends HttpConnectionTask {
 
-    private NotePage p; // the new note being added
+    private Page p; // the new note being added
+    private Callback<String> callback;
 
-    public NewPageTask(NotePage p) {
+    public NewPageTask(Page p, Callback<String> callback) {
+        this.callback = callback;
         this.p = p;
     }
 
@@ -50,5 +53,10 @@ public abstract class NewPageTask extends HttpConnectionTask {
             Log.d("MYAPP", "ERROR WHEN CREATING A NEW PAGE: " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

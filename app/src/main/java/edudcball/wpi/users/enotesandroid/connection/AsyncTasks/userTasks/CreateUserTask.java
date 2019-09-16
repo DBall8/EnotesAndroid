@@ -18,12 +18,10 @@ public class CreateUserTask extends HttpConnectionTask {
     private Callback<String> callback;
 
     public CreateUserTask(String username, String password, Callback<String> callback){
+        this.callback = callback;
         this.username = username;
         this.password = password;
-        this.callback = callback;
     }
-
-    private CreateUserTask(){}
 
     /**
      * Runs when the the task is executed

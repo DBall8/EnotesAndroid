@@ -36,14 +36,13 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.LogoutT
 import edudcball.wpi.users.enotesandroid.data.UserManager;
 import edudcball.wpi.users.enotesandroid.data.classes.Note;
 import edudcball.wpi.users.enotesandroid.data.classes.Page;
-import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 
 
 /**
  * Class for creating the main view of the app, which is the list of notes
  */
-public class PageActivity extends AppCompatActivity implements IObserver {
+public class PageActivity extends EnotesActivity implements IObserver {
 
     private Page page;
     private ArrayAdapter<String> noteAdapter;
@@ -75,20 +74,6 @@ public class PageActivity extends AppCompatActivity implements IObserver {
             }
         });
 
-        // Initialize the static note handler with the notesList
-        ListView notesList = findViewById(R.id.NotesList);
-        noteAdapter = buildNotesAdapter();
-        notesList.setAdapter(noteAdapter);
-
-        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                saveTitle();
-//               page.selectNote(); TODO select note
-            }
-        });
-
         // Set up back button
         Button backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -105,9 +90,18 @@ public class PageActivity extends AppCompatActivity implements IObserver {
             @Override
             public void onClick(View view) {
                 saveTitle();
-                NoteLookupTable.NoteColor color = Settings.getDefaultColor();
-                NoteLookupTable.NoteFont font = Settings.getDefaultFont();
-                page.addNote(new Note(page.getPageID(), NoteLookupTable.getColorJSON(color), NoteLookupTable.getFontString(font), Settings.getDefaultFontSize()));
+                page.createNote(new Callback<Note>() {
+                    @Override
+                    public void run(Note note) {
+                        if (note == null){
+                            showErrorAndLogout("Error communicating with server.");
+                        }
+                        else {
+                            page.selectNote(note.getId());
+                            launchActivity(getApplicationContext(), NoteActivity.class);
+                        }
+                    }
+                });
             }
         });
 
@@ -118,8 +112,17 @@ public class PageActivity extends AppCompatActivity implements IObserver {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                UserManager.getInstance().getPageManager().deletePage(page.getPageID());
-                finish();
+                UserManager.getInstance().getPageManager().deletePage(page.getId(), new Callback<Boolean>() {
+                    @Override
+                    public void run(Boolean successful) {
+                        if(successful){
+                            finish();
+                        }
+                        else{
+                            showErrorAndLogout("Problem communicating with server.");
+                        }
+                    }
+                });
             }
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
@@ -138,6 +141,24 @@ public class PageActivity extends AppCompatActivity implements IObserver {
         if(page == null){
             finish();
         }
+
+        // Initialize the static note handler with the notesList
+        ListView notesList = findViewById(R.id.NotesList);
+        noteAdapter = buildNotesAdapter();
+        notesList.setAdapter(noteAdapter);
+
+        page.subscribe(this);
+
+        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            saveTitle();
+            page.selectNote(i);
+            launchActivity(getApplicationContext(), NoteActivity.class);
+
+            }
+        });
 
         if(getIntent().getBooleanExtra("new", false)){
             pageTitle.requestFocus();
@@ -214,27 +235,28 @@ public class PageActivity extends AppCompatActivity implements IObserver {
                 SettingsDialog settingsDialog = new SettingsDialog(PageActivity.this, new EventHandler<Void>() {
                     @Override
                     public void handle(Void event) {
-                        updateNoteAdapter();
+                        // TODO re-implement
+//                        updateNoteAdapter();
                     }
                 });
                 settingsDialog.show();
                 return true;
             case R.id.action_help:
-                startActivity(new Intent(this.getApplicationContext(), HelpActivity.class));
+                launchActivity(this.getApplicationContext(), HelpActivity.class);
                 break;
             case R.id.action_password:
-                startActivity(new Intent(this.getApplicationContext(), ChangePasswordActivity.class));
+                launchActivity(this.getApplicationContext(), ChangePasswordActivity.class);
                 break;
             // Logout the user
             case R.id.action_logout:
-                final Activity activity = this;
+                final EnotesActivity activity = this;
 
                 // create a background task that logs out the user
                 new LogoutTask(new Callback<String>(){
                     @Override
                     public void run(String param){
                         if(param == null) return;
-                        activity.startActivity(new Intent(activity, LoginActivity.class));
+                        activity.launchActivity(activity, LoginActivity.class);
                     }
                 }).execute();
                 break;
@@ -273,7 +295,7 @@ public class PageActivity extends AppCompatActivity implements IObserver {
                 }
 
                 // Get the note by its position in the list
-                Note n = NoteManager.getNote(position);
+                Note n = page.getNote(position);
                 // Set the background to match the note's color
                 JSONObject colors = n.getColors();
 

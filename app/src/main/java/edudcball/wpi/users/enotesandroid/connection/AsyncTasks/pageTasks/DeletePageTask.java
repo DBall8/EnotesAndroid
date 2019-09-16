@@ -4,7 +4,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
 
 /**
@@ -12,11 +12,13 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTas
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class DeletePageTask extends HttpConnectionTask {
+public class DeletePageTask extends HttpConnectionTask {
 
     private String pageID; // the tag of the note to be deleted
+    private Callback<String> callback;
 
-    public DeletePageTask(String pageID) {
+    public DeletePageTask(String pageID, Callback<String> callback) {
+        this.callback = callback;
         this.pageID = pageID;
     }
 
@@ -34,7 +36,7 @@ public abstract class DeletePageTask extends HttpConnectionTask {
             // build message
             JSONObject msg = new JSONObject();
             msg.put("pageid", pageID);
-            msg.put("socketid", NoteManager.getSocketID());
+//            msg.put("socketid", NoteManager.getSocketID());
 
             // write the message
             writeMessage(msg.toString());
@@ -51,5 +53,10 @@ public abstract class DeletePageTask extends HttpConnectionTask {
             Log.d("MYAPP", "ERROR WHEN DELETING PAGE:  " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import edudcball.wpi.users.enotesandroid.R;
 
-public class HelpActivity extends AppCompatActivity {
+public class HelpActivity extends EnotesActivity {
 
     private Button backButton;
 

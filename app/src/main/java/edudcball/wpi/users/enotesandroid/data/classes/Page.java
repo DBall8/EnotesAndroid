@@ -2,29 +2,38 @@ package edudcball.wpi.users.enotesandroid.data.classes;
 
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
+import edudcball.wpi.users.enotesandroid.Callback;
+import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks.DeleteNoteTask;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks.NewNoteTask;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.UpdatePageTask;
+import edudcball.wpi.users.enotesandroid.data.SortedList;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
+import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 
-public class Page extends Observable {
+public class Page implements Sortable {
 
     private String pageID;      // Unique identifier
     private String name;        // Page's name
     private int index;          // Index for ordering
 
-    private HashMap<String, Note> notes;
-    private String activeNoteId = "";
+    private SortedList<Note> notes;
+    private int activeNoteIndex = 0;
+    private boolean hasChanged;
 
-    public Page(String name, int index){
+    public Page(){
         this.pageID = "page-" + System.currentTimeMillis();
-        this.name = name;
-        this.index = index;
+        this.name = "";
+        this.index = 0;
 
-        notes = new HashMap<>();
+        this.hasChanged = false;
+
+        notes = new SortedList();
     }
 
     public Page(JSONObject json){
@@ -33,7 +42,13 @@ public class Page extends Observable {
             this.name = json.getString("name");
             this.index = json.getInt("index");
 
-            notes = new HashMap<>();
+            this.hasChanged = false;
+
+            notes = new SortedList();
+
+            if(Settings.isDebug()){
+                Log.d("MYAPP", "Created Page " + pageID);
+            }
         }
         catch (Exception e){
             Log.d("MYAPP", "Could not parse note page json: " + e.getMessage());
@@ -58,57 +73,154 @@ public class Page extends Observable {
     // PUBLIC METHODS ------------------------------------------------------------------------------
 
     public Note getNote(String noteId){
-        return notes.get(noteId);
+        return notes.getItem(noteId);
+    }
+    public Note getNote(int index){
+        return notes.getItem(index);
     }
 
-    public boolean loadNote(Note newNote){
-        if(notes.containsKey(newNote.getTag())){
+    public void addNote(Note newNote){
+        if(notes.containsItemWithId(newNote.getId())){
             Log.d("MYAPP", "Duplicate note ID.");
-            return false;
+            return;
         }
 
-        notes.put(newNote.getTag(), newNote);
-        return true;
+        notes.add(newNote);
     }
 
-    public boolean addNote(Note newNote){
-        return loadNote(newNote);
+    public void createNote(final Callback<Note> callback){
+
+        NoteLookupTable.NoteColor color = Settings.getDefaultColor();
+        NoteLookupTable.NoteFont font = Settings.getDefaultFont();
+        final Note newNote = new Note(pageID, NoteLookupTable.getColorJSON(color), NoteLookupTable.getFontString(font), Settings.getDefaultFontSize());
+
+        new NewNoteTask(newNote, new Callback<String>() {
+            @Override
+            public void run(String param) {
+                if (param == null){
+                    // Todo error handle
+                    Log.d("MYAPP", "Response is null");
+                    callback.run(null);
+                    return;
+                }
+
+                try{
+                    JSONObject json = new JSONObject(param);
+                    if(json.getBoolean("successful")){
+                        addNote(newNote);
+                        callback.run(newNote);
+                    }
+                }
+                catch (JSONException e){
+                    // TODO error handle
+                    e.printStackTrace();
+                    callback.run(null);
+                }
+            }
+        }).execute();
     }
 
-    public boolean deleteNote(String noteId){
-        if(!notes.containsKey(noteId)){
+    public void deleteNote(final String noteId, final Callback<Boolean> callback){
+        if(!notes.containsItemWithId(noteId)){
             Log.d("MYAPP", "Attempted to delete note that does not exist.");
-            return false;
+            callback.run(false);
+            return;
         }
 
-        notes.remove(noteId);
-        return true;
+        new DeleteNoteTask(noteId, new Callback<String>() {
+            @Override
+            public void run(String param) {
+                if (param == null){
+                    Log.d("MYAPP", "Delete note returned null");
+                    callback.run(false);
+                }
+
+                try{
+                    JSONObject json = new JSONObject(param);
+                    if(json.getBoolean("successful")){
+                        notes.remove(noteId);
+                        callback.run(true);
+                    }
+                }
+                catch(JSONException e){
+                    e.printStackTrace();
+                    callback.run(false);
+                }
+            }
+        }).execute();
     }
 
-    public void setName(String name){ this.name = name; }
-    public void setIndex(int index){ this.index = index; }
+    public void update(final Callback<Boolean> callback){
 
-    public String getPageID(){ return pageID; }
+        for (int i=0; i<notes.size(); i++){
+            notes.getItem(i).update(callback);
+        }
+
+        if (hasChanged) {
+            new UpdatePageTask(this, new Callback<String>() {
+                @Override
+                public void run(String param) {
+                    if (param == null) {
+                        Log.d("MYAPP", "Update page returned null");
+                        callback.run(false);
+                    }
+
+                    try {
+                        JSONObject json = new JSONObject(param);
+                        if (json.getBoolean("successful")) {
+                            hasChanged = false;
+                            callback.run(true);
+                        } else {
+                            callback.run(false);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.run(false);
+                    }
+                }
+            }).execute();
+        }
+    }
+
+    public void setName(String name){
+        this.name = name;
+        this.hasChanged = true;
+    }
+    public void setIndex(int index){ this.index = index;
+        this.hasChanged = true; }
+
+    public String getId(){ return pageID; }
     public String getName() { return  name; }
     public int getIndex(){ return index; }
 
-    public void selectNote(String noteId){
-        activeNoteId = noteId;
+    public void selectNote(int index){
+        activeNoteIndex = index;
+    }
+
+    public void selectNote(String id){
+        activeNoteIndex = notes.getItemIndex(id);
+    }
+
+    public void subscribe(IObserver observer){
+        notes.clearObservers();
+        notes.subscribe(observer);
     }
 
     public List<String> getNoteTitleList(){
-        return null;
+        return notes.getTitleList();
     }
-
 
     public Note getActiveNote(){
-        return notes.get(activeNoteId);
+        return notes.getItem(activeNoteIndex);
     }
+
+    public String getDisplayTitle(){ return name; }
 
     // DEBUG ---------------------------------------------------------------------------------------
     public void printNotes(){
-        for (Map.Entry<String, Note> entry: notes.entrySet()){
-            Log.d("MYAPP", "Tag: " + entry.getValue().getTag() + " Title: " + entry.getValue().getTitleForDisplay());
+        for (int i=0; i<notes.size(); i++){
+            Note note = notes.getItem(i);
+            Log.d("MYAPP", "Tag: " + note.getId() + " Title: " + note.getDisplayTitle());
         }
     }
 }

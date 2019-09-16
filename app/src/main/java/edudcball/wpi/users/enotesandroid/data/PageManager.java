@@ -3,22 +3,26 @@ package edudcball.wpi.users.enotesandroid.data;
 import android.util.Log;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+import edudcball.wpi.users.enotesandroid.Callback;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.DeletePageTask;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.NewPageTask;
 import edudcball.wpi.users.enotesandroid.data.classes.Note;
 import edudcball.wpi.users.enotesandroid.data.classes.Page;
 import edudcball.wpi.users.enotesandroid.exceptions.CustomException;
+import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 
 public class PageManager {
 
-    private HashMap<String, Page> pages;
-    private String activePageId = "";
+    private SortedList<Page> pages;
+    private int activePageIndex = 0;
 
-    public PageManager(JSONArray pageArray, JSONArray noteArray) throws CustomException{
-        load(pageArray, noteArray);
+    public PageManager(){
+        pages = new SortedList<>();
     }
 
     // PRIVATE METHODS -----------------------------------------------------------------------------
@@ -28,14 +32,14 @@ public class PageManager {
      * @param pageArray array of pages obtained from server
      * @return True if successful
      */
-    private void load(JSONArray pageArray, JSONArray noteArray) throws CustomException{
-        pages = new HashMap<>();
+    public void load(JSONArray pageArray, JSONArray noteArray) throws CustomException{
+        pages.clear();
 
         try{
             for(int i=0; i<pageArray.length(); i++){
                 JSONObject pageJSON = pageArray.getJSONObject(i);
                 Page page = new Page(pageJSON);
-                pages.put(page.getPageID(), page);
+                pages.add(page);
             }
 
             Log.d("MYAPP", "PAGES LOADED");
@@ -52,13 +56,13 @@ public class PageManager {
                 JSONObject noteJSON = noteArray.getJSONObject(i);
                 Note note = new Note(noteJSON);
 
-                if (!pages.containsKey(note.getPageID())){
+                if (!pages.containsItemWithId(note.getPageID())){
                     Log.d("MYAPP", "Note with Page ID that does not exist");
                     throw new CustomException("Error when contacting server. Please try again later.", "Note with Page ID that does not exist");
                 }
 
                 // Place note into page's list
-                pages.get(note.getPageID()).loadNote(note);
+                pages.getItem(note.getPageID()).addNote(note);
             }
             Log.d("MYAPP", "NOTES LOADED");
         }
@@ -87,12 +91,46 @@ public class PageManager {
     }
 
     /**
-     * Adds a new page to the user's account
-     * @param newPage page to add
-     * @return true if successful
+     * Creates and adds a new page to the user's account
+     * @param callback Code to run on completion
+     * @return Callback returns the page if successful, or null if failed
      */
-    public boolean addPage(Page newPage){
-        return true;
+    public void createPage(final Callback<Page> callback){
+        final Page newPage = new Page();
+
+        new NewPageTask(newPage, new Callback<String>() {
+            @Override
+            public void run(String param) {
+                if(param == null){
+                    Log.d("MYAPP", "Error when creating new Page.");
+                    callback.run(null);
+                }
+
+                try{
+                    JSONObject json = new JSONObject(param);
+                    if(json.getBoolean("successful")){
+                        addPage(newPage);
+                        callback.run(newPage);
+                    }
+                    else{
+                        callback.run(null);
+                    }
+                }
+                catch(JSONException e){
+                    e.printStackTrace();
+                    callback.run(null);
+                }
+            }
+        }).execute();
+    }
+
+    private void addPage(Page page){
+        if (pages.containsItemWithId(page.getId())){
+            Log.d("MYAPP", "Tried to add page with duplicate ID");
+            return;
+        }
+
+        pages.add(page);
     }
 
     /**
@@ -100,23 +138,66 @@ public class PageManager {
      * @param pageId ID of page to delete
      * @return true if successful
      */
-    public boolean deletePage(String pageId){
-        return true;
+    public void deletePage(final String pageId, final Callback<Boolean> callback){
+        if(!pages.containsItemWithId(pageId)){
+            Log.d("MYAPP", "Attempted to delete page that does not exist.");
+            callback.run(false);
+            return;
+        }
+
+        new DeletePageTask(pageId, new Callback<String>() {
+            @Override
+            public void run(String param) {
+                if (param == null){
+                    Log.d("MYAPP", "Delete note returned null");
+                    callback.run(false);
+                }
+
+                try{
+                    JSONObject json = new JSONObject(param);
+                    if(json.getBoolean("successful")){
+                        pages.remove(pageId);
+                        callback.run(true);
+                    }
+                }
+                catch(JSONException e){
+                    e.printStackTrace();
+                    callback.run(false);
+                }
+            }
+        }).execute();
     }
 
-    public void selectPage(String pageId){
-        this.activePageId = pageId;
+    public void update(Callback<Boolean> callback){
+        for(int i=0; i<pages.size(); i++){
+            pages.getItem(i).update(callback);
+        }
+    }
+
+    public void selectPage(int index){
+        this.activePageIndex = index;
+    }
+
+    public void selectPage(String id){
+        this.activePageIndex = pages.getItemIndex(id);
     }
 
     public Page getActivePage(){
-        return pages.get(activePageId);
+        return pages.getItem(activePageIndex);
     }
+
+    public List<String> getPageTitles(){ return pages.getTitleList(); }
+
+    public void subscribe(IObserver observer){
+        pages.clearObservers();
+        pages.subscribe(observer);}
 
     // DEBUG ---------------------------------------------------------------------------------------
     public void printPages(){
-        for (Map.Entry<String, Page> entry: pages.entrySet()){
-            Log.d("MYAPP", entry.getValue().getPageID());
-            entry.getValue().printNotes();
+        for (int i=0; i<pages.size(); i++){
+            Page page = pages.getItem(i);
+            Log.d("MYAPP", page.getId());
+            page.printNotes();
         }
     }
 }

@@ -12,11 +12,11 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.AsyncTasks.userTasks.ChangePasswordTask;
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.R;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
 
-public class ChangePasswordActivity extends AppCompatActivity {
+public class ChangePasswordActivity extends EnotesActivity {
 
     private TextView messageView;
     private Button applyButton, backButton;
@@ -67,11 +67,16 @@ public class ChangePasswordActivity extends AppCompatActivity {
                     displayMessage("New passwords do not match!");
                 }
                 else{
-                    new ChangePasswordTask(oldPass, newPass){
+                    UserManager.getInstance().changePassword(
+                            oldPass,
+                            newPass,
+                            getApplicationContext(),
+                            new Callback<String>() {
                         @Override
-                        protected void onPostExecute(String result) {
+                        public void run(String result) {
                             if(result == null){
-                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
+                                // TODO return to login
+//                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
                                 return;
                             }
 
@@ -88,10 +93,11 @@ public class ChangePasswordActivity extends AppCompatActivity {
                             }
                             catch(Exception e){
                                 Log.d("MYAPP", "Failed to parse JSON");
-                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
+                                // TODO go to Login
+//                                NoteManager.sessionExpired(activity, "Problem communicating with server. Please try again later.");
                             }
                         }
-                    }.execute();
+                    });
                 }
             }
         });

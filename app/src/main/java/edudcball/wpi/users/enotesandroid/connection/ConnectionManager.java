@@ -3,15 +3,24 @@ package edudcball.wpi.users.enotesandroid.connection;
 import java.net.CookieManager;
 import java.net.CookieStore;
 import java.net.HttpCookie;
+import java.util.Timer;
+
+import edudcball.wpi.users.enotesandroid.activities.MainActivity;
 
 public class ConnectionManager {
 
-    private SocketConnection socketConnection;
-    private CookieManager cookies = new CookieManager(); // manages cookies
+    private final static int UPDATE_PERIOD_MS = 5000;
 
-    public ConnectionManager(String username){
-        socketConnection = new SocketConnection(username);
+    private SocketConnection socketConnection;
+    private CookieManager cookies ; // manages cookies
+    private Timer updateDaemonTimer = null;
+
+    public ConnectionManager(){
         cookies = new CookieManager();
+    }
+
+    public void connectSocket(String username){
+        socketConnection = new SocketConnection(username);
     }
 
     public void addCookie(String cookie){
@@ -20,5 +29,17 @@ public class ConnectionManager {
 
     public CookieStore getCookies(){ return cookies.getCookieStore(); }
 
+    public void resetCookies(){
+        cookies.getCookieStore().removeAll();
+    }
+
+    public void startUpdateDaemon(MainActivity mainActivity){
+        updateDaemonTimer = new Timer();
+        updateDaemonTimer.schedule(new UpdateDaemon(mainActivity), 0, UPDATE_PERIOD_MS);
+    }
+
+    public void stopUpdateDaemon(){
+        updateDaemonTimer.cancel();
+    }
 
 }

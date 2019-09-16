@@ -4,19 +4,22 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.objects.Note;
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
+import edudcball.wpi.users.enotesandroid.data.classes.Note;
 
 /**
  * A task for sending a new note event to the server
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class NewNoteTask extends HttpConnectionTask {
+public class NewNoteTask extends HttpConnectionTask {
 
     private Note n; // the new note being added
+    private Callback<String> callback;
 
-    public NewNoteTask(Note n) {
+    public NewNoteTask(Note n, Callback<String> callback) {
+        this.callback = callback;
         this.n = n;
     }
 
@@ -30,7 +33,7 @@ public abstract class NewNoteTask extends HttpConnectionTask {
         try{
 
             // connect to the server
-            connect(apiURL, true, true, "POST");
+             connect("/api", true, true, "POST");
 
             // create the message from the note
             JSONObject msg = n.toJSON();
@@ -50,5 +53,10 @@ public abstract class NewNoteTask extends HttpConnectionTask {
             Log.d("MYAPP", "ERROR WHEN CREATING A NEW NOTE: " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

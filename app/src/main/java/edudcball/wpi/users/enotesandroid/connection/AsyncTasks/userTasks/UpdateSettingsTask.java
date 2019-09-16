@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
 
 /**
@@ -11,12 +12,14 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTas
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class UpdateSettingsTask extends HttpConnectionTask {
+public class UpdateSettingsTask extends HttpConnectionTask {
 
     private String dFont, dColor;
     private int dFontSize;
+    private Callback<String> callback;
 
-    public UpdateSettingsTask(String dFont, int dFontSize, String dColor){
+    public UpdateSettingsTask(String dFont, int dFontSize, String dColor, Callback<String> callback){
+        this.callback = callback;
         this.dFont = dFont;
         this.dFontSize = dFontSize;
         this.dColor = dColor;
@@ -54,5 +57,10 @@ public abstract class UpdateSettingsTask extends HttpConnectionTask {
             Log.d("MYAPP", "ERROR WHEN UPDATING SETTINGS IN: " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

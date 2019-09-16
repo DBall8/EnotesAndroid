@@ -1,23 +1,25 @@
-package edudcball.wpi.users.enotesandroid.Old.AsyncTasks.pageTasks;
+package edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks;
 
 import android.util.Log;
 
 import org.json.JSONObject;
 
-import edudcball.wpi.users.enotesandroid.Old.AsyncTasks.HttpConnectionTask;
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
+import edudcball.wpi.users.enotesandroid.Callback;
+import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
 
 /**
  * A task for sending a note deleting to the server
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class DeletePageTask extends HttpConnectionTask {
+public class DeleteNoteTask extends HttpConnectionTask {
 
-    private String pageID; // the tag of the note to be deleted
+    private String tag; // the tag of the note to be deleted
+    private Callback<String> callback;
 
-    public DeletePageTask(String pageID) {
-        this.pageID = pageID;
+    public DeleteNoteTask(String tag, Callback<String> callback) {
+        this.callback = callback;
+        this.tag = tag;
     }
 
     /**
@@ -29,12 +31,11 @@ public abstract class DeletePageTask extends HttpConnectionTask {
     protected String doInBackground(String... vals) {
         try{
             // connect to server
-            connect("/notepage", true, true, "DELETE");
+            connect(apiURL, true, true, "DELETE");
 
             // build message
             JSONObject msg = new JSONObject();
-            msg.put("pageid", pageID);
-            msg.put("socketid", NoteManager.getSocketID());
+            msg.put("tag", tag);
 
             // write the message
             writeMessage(msg.toString());
@@ -48,8 +49,13 @@ public abstract class DeletePageTask extends HttpConnectionTask {
             return resp;
 
         }catch(Exception e){
-            Log.d("MYAPP", "ERROR WHEN DELETING PAGE:  " + e.toString());
+            Log.d("MYAPP", "ERROR WHEN DELETING NOTE:  " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

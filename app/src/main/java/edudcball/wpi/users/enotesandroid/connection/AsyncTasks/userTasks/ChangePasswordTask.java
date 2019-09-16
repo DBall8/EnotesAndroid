@@ -4,6 +4,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTask;
 
 /**
@@ -11,11 +12,13 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.HttpConnectionTas
  * Override the onPostExecute method to activate after completion
  */
 
-public abstract class ChangePasswordTask extends HttpConnectionTask {
+public class ChangePasswordTask extends HttpConnectionTask {
 
     private String oldPassword, newPassword;
+    private Callback<String> callback;
 
-    public ChangePasswordTask(String oldPassword, String newPassword){
+    public ChangePasswordTask(String oldPassword, String newPassword, Callback<String> callback){
+        this.callback = callback;
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
     }
@@ -54,5 +57,10 @@ public abstract class ChangePasswordTask extends HttpConnectionTask {
             Log.d("MYAPP", "ERROR WHEN UPDATING SETTINGS IN: " + e.toString());
             return null;
         }
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        callback.run(result);
     }
 }

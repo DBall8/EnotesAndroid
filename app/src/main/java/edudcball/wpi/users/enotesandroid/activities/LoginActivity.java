@@ -1,6 +1,5 @@
 package edudcball.wpi.users.enotesandroid.activities;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,9 +14,7 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import edudcball.wpi.users.enotesandroid.Callback;
-import edudcball.wpi.users.enotesandroid.Old.noteDataTypes.NoteLookupTable;
-import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.CreateUserTask;
-import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.LoginTask;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.data.UserManager;
@@ -26,7 +23,7 @@ import edudcball.wpi.users.enotesandroid.data.UserManager;
  * Class for running the Login screen of the application
  */
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends EnotesActivity {
 
     // Screen fields and buttons
     private EditText usernameField;
@@ -38,8 +35,6 @@ public class LoginActivity extends AppCompatActivity {
 
     // True when in new user mode, false when in log in mode
     private Boolean newUser = false;
-
-    private UserManager userManager;
 
     /**
      * Runs when the login activity is first opened
@@ -99,8 +94,6 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        userManager = UserManager.getInstance();
     }
 
     /**
@@ -113,13 +106,17 @@ public class LoginActivity extends AppCompatActivity {
         // remove keyboard at the start
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        // Wipe any saved session info
-        resetStoredLoginInfo();
+        UserManager.getInstance().attemptSavedLogin(getApplicationContext(), new Callback<String>() {
+            @Override
+            public void run(String param) {
+                handleLoginResponse(param);
+            }
+        });
 
         // Get any error message text that might have been provided if an error caused te
-        String error = getIntent().getStringExtra("error");
-        if(error != null){
-            displayError(error);
+        if(hasErroredOccurred()){
+            displayError(getErrorMessage());
+            clearError();
         }
         else{
             hideError();
@@ -152,11 +149,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        sp.edit().putString("username", usernameAttempt);
-        sp.edit().putString("password", usernameAttempt);
-        sp.edit().commit();
-
         // if in new user mode
         if(newUser){
             // make sure the confirm field isn't blank
@@ -179,12 +171,16 @@ public class LoginActivity extends AppCompatActivity {
             loginButton.setText("Creating account...");
 
             // create the new user account
-            new CreateUserTask(usernameAttempt, passwordAttempt, new Callback<String>() {
-                @Override
-                public void run(String param) {
-                    handleNewUserResponse(param);
-                }
-            }).execute();
+            UserManager.getInstance().newUser(
+                    usernameAttempt,
+                    passwordAttempt,
+                    this.getApplicationContext(),
+                    new Callback<String>(){
+                        @Override
+                        public void run(String param){
+                            handleNewUserResponse(param);
+                        }
+                    });
         }
         else{
             // hide any previous error message
@@ -195,12 +191,16 @@ public class LoginActivity extends AppCompatActivity {
             loginButton.setText("Logging in...");
 
             // attempt to log in
-            new LoginTask(usernameAttempt, passwordAttempt, new Callback<String>(){
+            UserManager.getInstance().logIn(
+                    usernameAttempt,
+                    passwordAttempt,
+                    this.getApplicationContext(),
+                    new Callback<String>(){
                 @Override
                 public void run(String param){
                     handleLoginResponse(param);
                 }
-            }).execute();
+            });
         }
     }
 
@@ -236,11 +236,11 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 // Login successful, finish this activity
+                UserManager.getInstance().loadUser();
                 finish();
             } else {
                 // If no successful flag, show an error
                 displayError("Login failed. Incorrect username or password.");
-                resetStoredLoginInfo();
             }
         } catch (Exception e) {
             Log.d("MYAPP", "Failed to parse JSON: " + response);
@@ -269,11 +269,11 @@ public class LoginActivity extends AppCompatActivity {
             // If server indicates that the user did not already exist, then success!!
             if (!obj.getBoolean("userAlreadyExists")) {
                 // User creation successful, return to main activity
+                UserManager.getInstance().loadUser();
                 finish();
             } else {
                 // Display an error showing the user already exists
                 displayError("User already exists, please choose a different username.");
-                resetStoredLoginInfo();
             }
         } catch (Exception e) {
             Log.d("MYAPP", "Failed to parse JSON");
@@ -317,12 +317,5 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void hideError(){
         messageText.setVisibility(View.GONE);
-    }
-
-    private void resetStoredLoginInfo(){
-        SharedPreferences sp = getSharedPreferences("Login", MODE_PRIVATE);
-        sp.edit().putString("username", null);
-        sp.edit().putString("password", null);
-        sp.edit().commit();
     }
 }

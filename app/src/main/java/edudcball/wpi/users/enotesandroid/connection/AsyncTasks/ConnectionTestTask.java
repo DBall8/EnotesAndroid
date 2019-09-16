@@ -6,11 +6,12 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.CookieStore;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import edudcball.wpi.users.enotesandroid.Old.NoteManager.NoteManager;
 import edudcball.wpi.users.enotesandroid.Settings;
+import edudcball.wpi.users.enotesandroid.data.UserManager;
 
 public class ConnectionTestTask extends AsyncTask<Void, Integer, Boolean> {
 
@@ -26,8 +27,9 @@ public class ConnectionTestTask extends AsyncTask<Void, Integer, Boolean> {
             connection.setDoInput(true);
 
             // add any cookies that are saved
-            if (NoteManager.getCookies().getCookies().size() > 0) {
-                connection.setRequestProperty("Cookie", TextUtils.join(";", NoteManager.getCookies().getCookies()));
+            CookieStore cookies = UserManager.getInstance().getConnectionManager().getCookies();
+            if (cookies.getCookies().size() > 0) {
+                connection.setRequestProperty("Cookie", TextUtils.join(";", cookies.getCookies()));
             }
 
             // set method

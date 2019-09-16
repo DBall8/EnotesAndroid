@@ -21,6 +21,7 @@ import android.widget.EditText;
 
 import org.json.JSONException;
 
+import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.ColorDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontDialog;
 import edudcball.wpi.users.enotesandroid.CustomDialogs.FontSizeDialog;
@@ -36,7 +37,7 @@ import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
  * Activity for displaying a single note
  */
 
-public class NoteActivity extends AppCompatActivity {
+public class NoteActivity extends EnotesActivity {
 
     private final static int MEDIUM_FONT_SIZE_ADJUSTMENT = 8;
     private final static int LARGE_FONT_SIZE_ADJUSTMENT = 16;
@@ -101,8 +102,6 @@ public class NoteActivity extends AppCompatActivity {
 
         setColors();
 
-        final Activity activity = this;
-
         // Set the save button to save changes
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -131,8 +130,17 @@ public class NoteActivity extends AppCompatActivity {
         confirmDialog.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                page.deleteNote(note.getTag());
-                finish();
+                page.deleteNote(note.getId(), new Callback<Boolean>() {
+                    @Override
+                    public void run(Boolean successful) {
+                        if (successful){
+                            finish();
+                        }
+                        else{
+                            showErrorAndLogout("Problem communicating with server.");
+                        }
+                    }
+                });
             }
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
