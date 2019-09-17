@@ -15,8 +15,9 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.UpdateP
 import edudcball.wpi.users.enotesandroid.data.SortedList;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
+import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
-public class Page implements Sortable {
+public class Page extends Sortable {
 
     private String pageID;      // Unique identifier
     private String name;        // Page's name
@@ -26,10 +27,10 @@ public class Page implements Sortable {
     private int activeNoteIndex = 0;
     private boolean hasChanged;
 
-    public Page(){
+    public Page(int index){
         this.pageID = "page-" + System.currentTimeMillis();
         this.name = "";
-        this.index = 0;
+        this.index = index;
 
         this.hasChanged = false;
 
@@ -185,6 +186,7 @@ public class Page implements Sortable {
     public void setName(String name){
         this.name = name;
         this.hasChanged = true;
+        notifyObservers();
     }
     public void setIndex(int index){ this.index = index;
         this.hasChanged = true; }
@@ -201,7 +203,7 @@ public class Page implements Sortable {
         activeNoteIndex = notes.getItemIndex(id);
     }
 
-    public void subscribe(IObserver observer){
+    public void subscribeToNoteList(IObserver observer){
         notes.clearObservers();
         notes.subscribe(observer);
     }

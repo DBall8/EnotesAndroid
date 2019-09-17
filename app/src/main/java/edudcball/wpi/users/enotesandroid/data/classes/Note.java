@@ -8,12 +8,13 @@ import org.json.JSONObject;
 import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks.UpdateNoteTask;
+import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
 /**
  * Class for containing all the data needed for a single Note
  */
 
-public class Note implements Sortable {
+public class Note extends Sortable {
     private String id;         // id that uniquely identifies the note
     private String pageID;      // id of the note page the note belongs to
     private String title;       // the optional title displayed at the top of the note
@@ -195,11 +196,13 @@ public class Note implements Sortable {
     public void setTitle(String title){
         this.title = title;
         this.hasChanged = true;
+        notifyObservers();
     }
 
     public void setZIndex(int z){
         this.zindex = z;
         this.hasChanged = true;
+        notifyObservers();
     }
 
     public String getId(){
@@ -221,7 +224,5 @@ public class Note implements Sortable {
     public int getZ() { return this.zindex; }
 
     public JSONObject getColors() { return this.colors; }
-
-    public boolean hasNoteChanged(){ return hasChanged; }
 }
 

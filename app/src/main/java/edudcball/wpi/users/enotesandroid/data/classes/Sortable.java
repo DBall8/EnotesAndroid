@@ -1,6 +1,8 @@
 package edudcball.wpi.users.enotesandroid.data.classes;
 
-public interface Sortable {
-    String getDisplayTitle();
-    String getId();
+import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
+
+public abstract class Sortable extends Observable {
+    public abstract String getDisplayTitle();
+    public abstract String getId();
 }

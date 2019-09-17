@@ -96,7 +96,7 @@ public class PageManager {
      * @return Callback returns the page if successful, or null if failed
      */
     public void createPage(final Callback<Page> callback){
-        final Page newPage = new Page();
+        final Page newPage = new Page(pages.size());
 
         new NewPageTask(newPage, new Callback<String>() {
             @Override

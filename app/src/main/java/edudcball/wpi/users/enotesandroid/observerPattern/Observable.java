@@ -17,6 +17,10 @@ public class Observable {
         observers.add(observer);
     }
 
+    public void unSubscribe(IObserver observer){
+        observers.remove(observer);
+    }
+
     public void clearObservers(){
         observers.clear();
     }

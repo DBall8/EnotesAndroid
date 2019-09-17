@@ -147,7 +147,7 @@ public class PageActivity extends EnotesActivity implements IObserver {
         noteAdapter = buildNotesAdapter();
         notesList.setAdapter(noteAdapter);
 
-        page.subscribe(this);
+        page.subscribeToNoteList(this);
 
         notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 

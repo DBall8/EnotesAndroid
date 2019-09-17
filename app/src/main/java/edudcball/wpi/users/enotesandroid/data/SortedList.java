@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edudcball.wpi.users.enotesandroid.data.classes.Sortable;
+import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
-public class SortedList<T extends Sortable> extends Observable {
+public class SortedList<T extends Sortable> extends Observable implements IObserver {
 
     private List<T> items = new ArrayList<>();
     private List<String> titles = new ArrayList<>();
@@ -44,12 +45,14 @@ public class SortedList<T extends Sortable> extends Observable {
         items.add(item);
         titles.add(item.getDisplayTitle());
 
+        item.subscribe(this);
         notifyObservers();
     }
 
     public void remove(int index){
+        items.get(index).unSubscribe(this);
         items.remove(index);
-        items.remove(index);
+        titles.remove(index);
 
         notifyObservers();
     }
@@ -89,7 +92,16 @@ public class SortedList<T extends Sortable> extends Observable {
 
     private void reSort(){
         // TODO fill in
+        titles.clear();
+        for(Sortable item: items){
+            titles.add(item.getDisplayTitle());
+        }
 
         notifyObservers();
+    }
+
+    @Override
+    public void update() {
+        reSort();
     }
 }
