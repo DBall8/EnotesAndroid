@@ -94,6 +94,13 @@ public class NoteLookupTable {
         return null;
     }
 
+    public static int getColorOrder(NoteColor color){
+        if(getInstance().colorTable.containsKey(color)) {
+            return getInstance().colorTable.get(color).orderVal;
+        }
+        return 0;
+    }
+
     public static NoteColor getColorFromInt(int color){
         for(Map.Entry<NoteColor, NoteColorContainer> cursor: getInstance().colorTable.entrySet()){
             if(cursor.getValue().intVal == color){
@@ -108,6 +115,20 @@ public class NoteLookupTable {
             if(cursor.getValue().strVal.equals(color)){
                 return cursor.getKey();
             }
+        }
+        return Settings.getDefaultColor();
+    }
+
+    public static NoteColor getColorFromJson(JSONObject json){
+        try {
+            for (Map.Entry<NoteColor, NoteColorContainer> cursor : getInstance().colorTable.entrySet()) {
+                if (cursor.getValue().jsonVal.get("body").equals(json.get("body"))) {
+                    return cursor.getKey();
+                }
+            }
+        }
+        catch(JSONException e){
+            return Settings.getDefaultColor();
         }
         return Settings.getDefaultColor();
     }

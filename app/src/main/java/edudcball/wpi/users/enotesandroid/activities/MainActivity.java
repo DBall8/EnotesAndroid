@@ -108,6 +108,9 @@ public class MainActivity extends EnotesActivity implements IObserver {
     public void onResume(){
         super.onResume();
 
+        View view = getCurrentFocus();
+        if (view != null) view.clearFocus();
+
         if(!UserManager.getInstance().isUserSignedIn()){
             launchActivity(this, LoginActivity.class);
         }
@@ -211,7 +214,7 @@ public class MainActivity extends EnotesActivity implements IObserver {
         return pageAdapter;
     }
 
-    public void update(){
+    public void update(String id){
         pageAdapter.notifyDataSetChanged();
     }
 }

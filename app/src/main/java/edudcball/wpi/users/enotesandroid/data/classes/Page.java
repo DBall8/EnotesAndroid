@@ -19,12 +19,16 @@ import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
 public class Page extends Sortable {
 
+    private final static int MAX_Z = 9999;
+    private final static int MIN_Z = 100;
+
     private String pageID;      // Unique identifier
     private String name;        // Page's name
     private int index;          // Index for ordering
 
     private SortedList<Note> notes;
     private int activeNoteIndex = 0;
+    private int highestZIndex = 0;
     private boolean hasChanged;
 
     public Page(int index){
@@ -35,6 +39,7 @@ public class Page extends Sortable {
         this.hasChanged = false;
 
         notes = new SortedList();
+        notes.setSortMode(SortedList.SortMode.LATEST);
     }
 
     public Page(JSONObject json){
@@ -86,6 +91,9 @@ public class Page extends Sortable {
             return;
         }
 
+        if (newNote.getZ() > highestZIndex){
+            highestZIndex = newNote.getIndex();
+        }
         notes.add(newNote);
     }
 
@@ -186,17 +194,39 @@ public class Page extends Sortable {
     public void setName(String name){
         this.name = name;
         this.hasChanged = true;
-        notifyObservers();
+        notifyObservers(pageID);
     }
-    public void setIndex(int index){ this.index = index;
-        this.hasChanged = true; }
+    public void setIndex(int index){
+        this.index = index;
+        this.hasChanged = true;
+        notifyObservers(pageID);
+    }
 
     public String getId(){ return pageID; }
     public String getName() { return  name; }
     public int getIndex(){ return index; }
+    public SortedList.SortMode getSortMode(){ return notes.getSortMode(); }
+    public void setSortMode(SortedList.SortMode sortMode){ notes.setSortMode(sortMode); }
 
     public void selectNote(int index){
         activeNoteIndex = index;
+    }
+
+    public void updateLatestNote(){
+        highestZIndex++;
+        notes.getItem(activeNoteIndex).setZIndex(highestZIndex);
+
+        if (highestZIndex > MAX_Z){
+            reStackNotes();
+        }
+    }
+
+    private void reStackNotes(){
+        for (int i=0; i<notes.size(); i++){
+            notes.getItem(i).setZIndex(MIN_Z + i);
+        }
+
+        highestZIndex = notes.size() + MIN_Z;
     }
 
     public void selectNote(String id){
@@ -217,6 +247,9 @@ public class Page extends Sortable {
     }
 
     public String getDisplayTitle(){ return name; }
+
+    // not implemented
+    public JSONObject getColors(){ return null; }
 
     // DEBUG ---------------------------------------------------------------------------------------
     public void printNotes(){

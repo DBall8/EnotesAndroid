@@ -30,7 +30,6 @@ public class FontDialog extends CustomOptionsDialog<NoteLookupTable.NoteFont> {
         super.onCreate(savedInstanceState);
         buttonMap = new HashMap<>();
 
-        Resources res = context.getResources();
         buttonMap.put(NoteLookupTable.NoteFont.ARIAL, (RadioButton)findViewById(R.id.arialButton));
         buttonMap.put(NoteLookupTable.NoteFont.PALATINO, (RadioButton)findViewById(R.id.palatinoButton));
         buttonMap.put(NoteLookupTable.NoteFont.COURIER, (RadioButton)findViewById(R.id.courierButton));

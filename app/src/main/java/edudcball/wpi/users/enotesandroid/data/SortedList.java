@@ -1,16 +1,27 @@
 package edudcball.wpi.users.enotesandroid.data;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import edudcball.wpi.users.enotesandroid.data.classes.Sortable;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
 public class SortedList<T extends Sortable> extends Observable implements IObserver {
 
+    public enum SortMode{
+        LATEST,
+        COLOR,
+        ALPHA,
+        INDEX
+    }
+
     private List<T> items = new ArrayList<>();
     private List<String> titles = new ArrayList<>();
+    private SortMode sortMode = SortMode.LATEST;
 
     public SortedList(){}
 
@@ -46,7 +57,7 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
         titles.add(item.getDisplayTitle());
 
         item.subscribe(this);
-        notifyObservers();
+        notifyObservers(null);
     }
 
     public void remove(int index){
@@ -54,7 +65,7 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
         items.remove(index);
         titles.remove(index);
 
-        notifyObservers();
+        notifyObservers(null);
     }
 
     public void remove(String id){
@@ -63,7 +74,7 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
                 items.remove(i);
                 titles.remove(i);
 
-                notifyObservers();
+                notifyObservers(null);
                 return;
             }
         }
@@ -91,17 +102,98 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
     public List<String> getTitleList(){ return titles; }
 
     private void reSort(){
-        // TODO fill in
-        titles.clear();
-        for(Sortable item: items){
-            titles.add(item.getDisplayTitle());
+
+        // Sort items, and only recalculate titles if the order has changed
+        boolean hasChanged = sort();
+        if (hasChanged) {
+            titles.clear();
+            for (Sortable item : items) {
+                titles.add(item.getDisplayTitle());
+            }
         }
 
-        notifyObservers();
+        notifyObservers(null);
     }
 
     @Override
-    public void update() {
+    public void update(String id) {
+
+        // See if any resorting is needed
         reSort();
+
+        // See if the displayed title has changed
+        int itemIndex = getItemIndex(id);
+        if (itemIndex >=0){
+            String oldTitle = titles.get(itemIndex);
+            String currentTitle = items.get(itemIndex).getDisplayTitle();
+
+            if(!oldTitle.equals(currentTitle)){
+                titles.set(itemIndex, currentTitle);
+            }
+        }
+    }
+
+    public void setSortMode(SortMode sortMode){
+        if (this.sortMode != sortMode){
+            this.sortMode = sortMode;
+            reSort();
+        }
+    }
+    public SortMode getSortMode(){ return sortMode; }
+
+    private boolean sort(){
+
+        boolean hasChanged = false;
+        for (int i=items.size()-1; i>=1; i--){
+            for (int j=0; j<i; j++) {
+
+                T item1 = items.get(j);
+                T item2 = items.get(j + 1);
+
+                if (needsSwapped(item1, item2)) {
+                    hasChanged = true;
+                    items.set(j, item2);
+                    items.set(j + 1, item1);
+                }
+            }
+        }
+
+        return hasChanged;
+    }
+
+    private boolean needsSwapped(T item1, T item2){
+        switch (sortMode){
+            case LATEST:
+                return item1.getIndex() < item2.getIndex();
+            case INDEX:
+                return item1.getIndex() > item2.getIndex();
+            case ALPHA:
+                return !isFirstAlphabetically(item1.getDisplayTitle(), item2.getDisplayTitle());
+            case COLOR:
+                int color1Int = NoteLookupTable.getColorOrder(NoteLookupTable.getColorFromJson(item1.getColors()));
+                int color2Int = NoteLookupTable.getColorOrder(NoteLookupTable.getColorFromJson(item2.getColors()));
+                return color1Int > color2Int;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isFirstAlphabetically(String s1, String s2){
+        int shortestWordLength = Math.min(s1.length(), s2.length());
+
+        // Compare each character at the same position
+        for (int i=0; i<shortestWordLength; i++){
+
+            // If they are not the same character, return which is first alphabetically
+            // Otherwise, move to the next character
+            char c1 = Character.toLowerCase(s1.charAt(i));
+            char c2 = Character.toLowerCase(s2.charAt(i));
+            if (c1 != c2){
+                return c1 < c2;
+            }
+        }
+
+        // If all characters up to the shortest's length are the same, the shortest one is first
+        return s1.length() < s2.length();
     }
 }

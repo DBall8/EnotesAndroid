@@ -12,6 +12,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +35,7 @@ import edudcball.wpi.users.enotesandroid.EventHandler;
 import edudcball.wpi.users.enotesandroid.R;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.userTasks.LogoutTask;
+import edudcball.wpi.users.enotesandroid.data.SortedList;
 import edudcball.wpi.users.enotesandroid.data.UserManager;
 import edudcball.wpi.users.enotesandroid.data.classes.Note;
 import edudcball.wpi.users.enotesandroid.data.classes.Page;
@@ -68,9 +71,9 @@ public class PageActivity extends EnotesActivity implements IObserver {
         pageTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus){
-                    saveTitle();
-                }
+            if(!hasFocus){
+                saveTitle();
+            }
             }
         });
 
@@ -135,8 +138,16 @@ public class PageActivity extends EnotesActivity implements IObserver {
     public void onResume(){
         super.onResume();
 
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         page = UserManager.getInstance().getPageManager().getActivePage();
+
+        // Clear focus, unless the title is empty
+        if (page.getDisplayTitle().length() > 0){
+            View view = getCurrentFocus();
+            if (view != null) view.clearFocus();
+        }
+        else{
+            pageTitle.requestFocus();
+        }
 
         if(page == null){
             finish();
@@ -156,7 +167,6 @@ public class PageActivity extends EnotesActivity implements IObserver {
             saveTitle();
             page.selectNote(i);
             launchActivity(getApplicationContext(), NoteActivity.class);
-
             }
         });
 
@@ -181,11 +191,11 @@ public class PageActivity extends EnotesActivity implements IObserver {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         Menu sortByMenu = menu.findItem(R.id.action_sortBy).getSubMenu();
-        switch(Settings.getSortBy()){
+        switch(page.getSortMode()){
             case COLOR:
                 sortByMenu.findItem(R.id.action_color).setChecked(true);
                 break;
-            case RECENT:
+            case LATEST:
             default:
                 sortByMenu.findItem(R.id.action_recent).setChecked(true);
                 break;
@@ -193,6 +203,12 @@ public class PageActivity extends EnotesActivity implements IObserver {
                 sortByMenu.findItem(R.id.action_alpha).setChecked(true);
                 break;
         }
+
+        // Turn the Delete Page item red
+        MenuItem deletePageItem = menu.findItem(R.id.action_deletePage);
+        SpannableString s = new SpannableString(deletePageItem.getTitle());
+        s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.deleteRed)), 0, s.length(), 0);
+        deletePageItem.setTitle(s);
 
         return true;
     }
@@ -214,17 +230,17 @@ public class PageActivity extends EnotesActivity implements IObserver {
         // Get the id of the menu item that was selected
         switch(item.getItemId()){
             case R.id.action_color:
-                Settings.setSortBy(Settings.SortBy.COLOR);
+                page.setSortMode(SortedList.SortMode.COLOR);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_recent:
-                Settings.setSortBy(Settings.SortBy.RECENT);
+                page.setSortMode(SortedList.SortMode.LATEST);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_alpha:
-                Settings.setSortBy(Settings.SortBy.ALPHA);
+                page.setSortMode(SortedList.SortMode.ALPHA);
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
@@ -328,7 +344,7 @@ public class PageActivity extends EnotesActivity implements IObserver {
         page.setName(pageTitle.getText().toString());
     }
 
-    public void update() {
+    public void update(String id) {
         noteAdapter.notifyDataSetChanged();
     }
 }

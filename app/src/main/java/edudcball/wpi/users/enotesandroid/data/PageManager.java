@@ -13,6 +13,7 @@ import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.DeleteP
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.pageTasks.NewPageTask;
 import edudcball.wpi.users.enotesandroid.data.classes.Note;
 import edudcball.wpi.users.enotesandroid.data.classes.Page;
+import edudcball.wpi.users.enotesandroid.data.classes.Sortable;
 import edudcball.wpi.users.enotesandroid.exceptions.CustomException;
 import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 
@@ -23,6 +24,7 @@ public class PageManager {
 
     public PageManager(){
         pages = new SortedList<>();
+        pages.setSortMode(SortedList.SortMode.INDEX);
     }
 
     // PRIVATE METHODS -----------------------------------------------------------------------------

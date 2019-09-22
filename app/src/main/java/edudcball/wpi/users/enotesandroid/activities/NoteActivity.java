@@ -66,9 +66,6 @@ public class NoteActivity extends EnotesActivity {
         // load layout
         setContentView(R.layout.activity_note);
 
-        // hide the keyboard
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
         // get the tag from the calling activity
         page = UserManager.getInstance().getPageManager().getActivePage();
         note = page.getActiveNote();
@@ -154,6 +151,10 @@ public class NoteActivity extends EnotesActivity {
             }
         });
 
+        page.updateLatestNote();
+
+        View view = getCurrentFocus();
+        if (view != null) view.clearFocus();
     }
 
     /**
@@ -192,7 +193,7 @@ public class NoteActivity extends EnotesActivity {
                 int selectedColor = 0;
                 try {
                     selectedColor = Color.parseColor(note.getColors().getString("body"));
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     selectedColor = ContextCompat.getColor(this, R.color.defaultNote);
                 }
                 // open the dialog, and have it update the note and colors upon completion

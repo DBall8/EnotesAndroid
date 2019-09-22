@@ -10,6 +10,7 @@
     <color name="defaultNote">#ffe062</color>
     <color name="loginpurple">#9212d2</color>
     <color name="lightpurple">#cb62ff</color>
+    <color name="deleteRed">#CF2929</color>
     <!-- note colors -->
     <color name="noteYellow">#ffe062</color>
     <color name="noteOrange">#ffa63d</color>

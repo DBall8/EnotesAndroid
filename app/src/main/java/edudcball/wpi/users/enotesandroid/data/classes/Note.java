@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import edudcball.wpi.users.enotesandroid.Callback;
 import edudcball.wpi.users.enotesandroid.Settings;
 import edudcball.wpi.users.enotesandroid.connection.AsyncTasks.noteTasks.UpdateNoteTask;
+import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
 /**
@@ -35,6 +36,7 @@ public class Note extends Sortable {
      */
     public Note(String ownerPageId, JSONObject colors, String font, int fontSize){
         this.id = "note-" + System.currentTimeMillis(); // create a id from the current time
+        this.pageID = ownerPageId;
         this.title = "";        // empty title
         this.content = "";      // empty content
 
@@ -84,7 +86,14 @@ public class Note extends Sortable {
             try {
                 this.colors = new JSONObject(json.getString("colors"));
             } catch (Exception e) {
-                this.colors = null;
+                this.colors = NoteLookupTable.getColorJSON(Settings.getDefaultColor());
+            }
+
+            if (font == null ||
+                font.equals("null") ||
+                font.length() <=0){
+
+                font = NoteLookupTable.getFontString(Settings.getDefaultFont());
             }
 
             if(Settings.isDebug()){
@@ -196,13 +205,13 @@ public class Note extends Sortable {
     public void setTitle(String title){
         this.title = title;
         this.hasChanged = true;
-        notifyObservers();
+        notifyObservers(id);
     }
 
     public void setZIndex(int z){
         this.zindex = z;
         this.hasChanged = true;
-        notifyObservers();
+        notifyObservers(id);
     }
 
     public String getId(){
@@ -217,11 +226,15 @@ public class Note extends Sortable {
         return this.content;
     }
 
-    public String getFont(){ return this.font; }
+    public String getFont(){
+        return this.font;
+    }
 
     public int getFontSize(){ return this.fontSize; }
 
     public int getZ() { return this.zindex; }
+
+    public int getIndex() { return getZ(); }
 
     public JSONObject getColors() { return this.colors; }
 }

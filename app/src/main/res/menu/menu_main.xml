@@ -26,19 +26,19 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_deletePage"
-        android:orderInCategory="101"
-        android:title="Delete Page" />
-    <item
         android:id="@+id/action_password"
-        android:orderInCategory="102"
+        android:orderInCategory="101"
         android:title="Change Password" />
     <item
         android:id="@+id/action_help"
-        android:orderInCategory="103"
+        android:orderInCategory="102"
         android:title="Help" />
     <item
         android:id="@+id/action_logout"
-        android:orderInCategory="104"
+        android:orderInCategory="103"
         android:title="Logout" />
+    <item
+        android:id="@+id/action_deletePage"
+        android:orderInCategory="104"
+        android:title="Delete Page" />
 </menu>
