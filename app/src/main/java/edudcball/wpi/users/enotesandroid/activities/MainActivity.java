@@ -37,7 +37,8 @@ import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 public class MainActivity extends EnotesActivity implements IObserver {
 
     PageManager pages;
-    private static ArrayAdapter<String> pageAdapter;
+    private ArrayAdapter<String> pageAdapter;
+    private ListView pageList;
     private Menu menu;
 
     /**
@@ -62,7 +63,7 @@ public class MainActivity extends EnotesActivity implements IObserver {
         setSupportActionBar(toolbar);
 
         // Initialize the static note handler with the notesList
-        ListView pageList = findViewById(R.id.PageList);
+        pageList = findViewById(R.id.PageList);
         pageAdapter = buildPageAdapter();
         pageList.setAdapter(pageAdapter);
         pages.subscribe(this);

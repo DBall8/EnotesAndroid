@@ -56,6 +56,8 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
         items.add(item);
         titles.add(item.getDisplayTitle());
 
+        reSort();
+
         item.subscribe(this);
         notifyObservers(null);
     }
@@ -65,6 +67,8 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
         items.remove(index);
         titles.remove(index);
 
+        reSort();
+
         notifyObservers(null);
     }
 
@@ -73,6 +77,8 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
             if (items.get(i).getId().equals(id)){
                 items.remove(i);
                 titles.remove(i);
+
+                reSort();
 
                 notifyObservers(null);
                 return;

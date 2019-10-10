@@ -54,7 +54,7 @@ public class UserManager {
                     // If successful flag received, save the login info for next time
                     if (obj.getBoolean("successful")) {
                         saveLoginInfo(username, password, context);
-                        isUserSignedIn = true;
+                        postLoginSuccess();
                     }
                 }
                 catch (JSONException e)
@@ -86,7 +86,7 @@ public class UserManager {
                     JSONObject obj = new JSONObject(param);
                     // If successful flag received, save the login info for next time
                     if (obj.getBoolean("successful")) {
-                        isUserSignedIn = true;
+                        postLoginSuccess();
                     }
                 }
                 catch (JSONException e)
@@ -113,7 +113,7 @@ public class UserManager {
                     // If successful flag received, save the login info for next time
                     if (!obj.getBoolean("userAlreadyExists")) {
                         saveLoginInfo(username, password, context);
-                        isUserSignedIn = true;
+                        postLoginSuccess();
                     }
                 }
                 catch (JSONException e)
@@ -128,9 +128,14 @@ public class UserManager {
         }).execute();
     }
 
+    public void postLoginSuccess(){
+        isUserSignedIn = true;
+    }
+
     public void logOut(Context context, Callback<String> callback){
         clearLoginInfo(context);
         connectionManager.resetCookies();
+        connectionManager.stopSocket();
         isUserSignedIn = false;
 
         new LogoutTask(callback).execute();

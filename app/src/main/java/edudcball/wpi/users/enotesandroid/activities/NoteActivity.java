@@ -1,21 +1,22 @@
 package edudcball.wpi.users.enotesandroid.activities;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.SpannableString;
+import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -43,9 +44,7 @@ public class NoteActivity extends EnotesActivity {
     private final static int LARGE_FONT_SIZE_ADJUSTMENT = 16;
 
     // Views
-    private Button saveButton;
-    private Button cancelButton;
-    private Button deleteButton;
+    private Button doneButton;
     private EditText contentView;
     private Toolbar noteToolbar;
     private EditText titleBar;
@@ -74,9 +73,7 @@ public class NoteActivity extends EnotesActivity {
         noteToolbar = findViewById(R.id.noteToolbar);
         setSupportActionBar(noteToolbar);
         contentView = findViewById(R.id.noteText);
-        saveButton = findViewById(R.id.saveButton);
-        cancelButton = findViewById(R.id.cancelButton);
-        deleteButton = findViewById(R.id.deleteButton);
+        doneButton = findViewById(R.id.doneButton);
         titleBar = findViewById(R.id.titleBar);
 
         // load the title to the title bar
@@ -99,21 +96,40 @@ public class NoteActivity extends EnotesActivity {
 
         setColors();
 
-        // Set the save button to save changes
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        contentView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
-            // update text
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
-            note.setContent(contentView.getText().toString());
-            note.setTitle(titleBar.getText().toString());
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
-            finish();
+            @Override
+            public void afterTextChanged(Editable editable) {
+                note.setContent(editable.toString());
+            }
+        });
+
+        titleBar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                note.setTitle(editable.toString());
             }
         });
 
         // set the cancel button to close without saving changes
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+        doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
@@ -142,15 +158,6 @@ public class NoteActivity extends EnotesActivity {
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
 
-        // set the delete button to call the confirm dialog
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                confirmDialog.show();
-            }
-        });
-
         page.updateLatestNote();
 
         View view = getCurrentFocus();
@@ -161,9 +168,7 @@ public class NoteActivity extends EnotesActivity {
      * Sets the colors of all views that are set to match the note's color
      */
     private void setColors(){
-        saveButton.setBackgroundColor(color);
-        cancelButton.setBackgroundColor(color);
-        deleteButton.setBackgroundColor(color);
+        doneButton.setBackgroundColor(color);
         noteToolbar.setBackgroundColor(color);
     }
 
@@ -175,6 +180,13 @@ public class NoteActivity extends EnotesActivity {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_note, menu);
+
+        // Turn the Delete Page item red
+        MenuItem deleteNoteItem = menu.findItem(R.id.deleteNoteMenuItem);
+        SpannableString s = new SpannableString(deleteNoteItem.getTitle());
+        s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.deleteRed)), 0, s.length(), 0);
+        deleteNoteItem.setTitle(s);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -206,7 +218,7 @@ public class NoteActivity extends EnotesActivity {
                     }
                 });
                 cDialog.show();
-                return true;
+                break;
 
             // Opens the font menu
             case R.id.fontMenuItem:
@@ -221,7 +233,7 @@ public class NoteActivity extends EnotesActivity {
                     }
                 });
                 fDialog.show();
-                return true;
+                break;
 
             // Opens the font size menu
             case R.id.fontSizeMenuItem:
@@ -233,10 +245,16 @@ public class NoteActivity extends EnotesActivity {
                     }
                 });
                 fsDialog.show();
-                return true;
+                break;
+
+            case R.id.deleteNoteMenuItem:
+                confirmDialog.show();
+                break;
             default:
-                return true;
+                break;
         }
+
+        return true;
     }
 
     /**

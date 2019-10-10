@@ -10,4 +10,7 @@
     <item
         android:id="@+id/fontSizeMenuItem"
         android:title="Font Size" />
+    <item
+        android:id="@+id/deleteNoteMenuItem"
+        android:title="Delete Note" />
 </menu>

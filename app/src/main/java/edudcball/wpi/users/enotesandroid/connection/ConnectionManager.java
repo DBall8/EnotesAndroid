@@ -11,7 +11,7 @@ public class ConnectionManager {
 
     private final static int UPDATE_PERIOD_MS = 5000;
 
-    private SocketConnection socketConnection;
+    private SocketConnection socketConnection = null;
     private CookieManager cookies ; // manages cookies
     private Timer updateDaemonTimer = null;
 
@@ -42,4 +42,14 @@ public class ConnectionManager {
         updateDaemonTimer.cancel();
     }
 
+    public void startSocket(String username){
+        if (socketConnection == null){
+            socketConnection = new SocketConnection(username);
+        }
+    }
+
+    public void stopSocket(){
+        socketConnection.disconnect();
+        socketConnection = null;
+    }
 }

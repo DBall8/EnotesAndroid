@@ -73,37 +73,16 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/saveButton"
+            android:id="@+id/doneButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:background="@color/loginpurple"
-            android:text="@string/save"
+            android:text="@string/done"
             android:textColor="@color/black"
             android:textSize="18sp" />
 
-        <Button
-            android:id="@+id/cancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@color/loginpurple"
-            android:text="@string/cancel"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/deleteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:background="@color/loginpurple"
-            android:text="@string/delete"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -99,7 +99,7 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/backButton"
+        android:id="@+id/doneButton"
         style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

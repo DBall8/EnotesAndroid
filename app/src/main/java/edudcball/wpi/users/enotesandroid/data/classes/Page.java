@@ -78,8 +78,7 @@ public class Page extends Sortable {
 
     // PUBLIC METHODS ------------------------------------------------------------------------------
 
-    public Note getNote(String noteId){
-        return notes.getItem(noteId);
+    public Note getNote(String noteId){ return notes.getItem(noteId);
     }
     public Note getNote(int index){
         return notes.getItem(index);
@@ -191,6 +190,12 @@ public class Page extends Sortable {
         }
     }
 
+    public void consumeSocketUpdate(Page page){
+        this.index = page.index;
+        this.name = page.name;
+        notifyObservers(pageID);
+    }
+
     public void setName(String name){
         this.name = name;
         this.hasChanged = true;
@@ -200,6 +205,10 @@ public class Page extends Sortable {
         this.index = index;
         this.hasChanged = true;
         notifyObservers(pageID);
+    }
+
+    public void removeNote(String noteId){
+        notes.remove(noteId);
     }
 
     public String getId(){ return pageID; }

@@ -89,7 +89,7 @@ public class PageManager {
      * @return  the Page object
      */
     public Page getPage(String pageId){
-        return null;
+        return pages.getItem(pageId);
     }
 
     /**
@@ -126,7 +126,7 @@ public class PageManager {
         }).execute();
     }
 
-    private void addPage(Page page){
+    public void addPage(Page page){
         if (pages.containsItemWithId(page.getId())){
             Log.d("MYAPP", "Tried to add page with duplicate ID");
             return;
@@ -184,11 +184,37 @@ public class PageManager {
         this.activePageIndex = pages.getItemIndex(id);
     }
 
+    public void removePage(String id){
+        pages.remove(id);
+    }
+
     public Page getActivePage(){
         return pages.getItem(activePageIndex);
     }
 
     public List<String> getPageTitles(){ return pages.getTitleList(); }
+
+    public Note findNote(String noteId){
+        for (int i=0; i<pages.size(); i++){
+            Note note = pages.getItem(i).getNote(noteId);
+            if (note != null){
+                return note;
+            }
+        }
+
+        return null;
+    }
+
+    public Page findNoteOwner(String noteId){
+        for (int i=0; i<pages.size(); i++){
+            Page page = pages.getItem(i);
+            if (page.getNote(noteId) != null){
+                return page;
+            }
+        }
+
+        return null;
+    }
 
     public void subscribe(IObserver observer){
         pages.clearObservers();

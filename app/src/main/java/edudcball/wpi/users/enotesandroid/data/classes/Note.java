@@ -182,6 +182,30 @@ public class Note extends Sortable {
         }
     }
 
+    public void consumeSocketUpdate(Note note){
+        this.title = note.title;
+        this.content = note.content;
+        if (note.colors != null){
+            this.colors = note.colors;
+        }
+        this.x = note.x;
+        this.y = note.y;
+        this.width = note.width;
+        this.height = note.height;
+        this.font = note.font;
+        this.fontSize = note.fontSize;
+        this.zindex = note.zindex;
+
+        if (font == null ||
+            font.equals("null") ||
+            font.length() <=0){
+
+            font = NoteLookupTable.getFontString(Settings.getDefaultFont());
+        }
+
+        notifyObservers(id);
+    }
+
     public void setColor(JSONObject colors){
         this.colors = colors;
         this.hasChanged = true;
