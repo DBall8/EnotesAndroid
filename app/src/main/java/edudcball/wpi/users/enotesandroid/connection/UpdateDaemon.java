@@ -22,9 +22,9 @@ public class UpdateDaemon extends TimerTask {
         userManager.getPageManager().update(new Callback<Boolean>() {
             @Override
             public void run(Boolean successful) {
-                if(!successful){
-                    callingActivity.showErrorAndLogout("Error communicating with server.");
-                }
+            if(!successful){
+                callingActivity.showErrorAndLogout("Error communicating with server.");
+            }
             }
         });
     }

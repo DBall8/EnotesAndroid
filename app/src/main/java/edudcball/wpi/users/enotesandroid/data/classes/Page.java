@@ -193,18 +193,18 @@ public class Page extends Sortable {
     public void consumeSocketUpdate(Page page){
         this.index = page.index;
         this.name = page.name;
-        notifyObservers(pageID);
+        notifyObservers();
     }
 
     public void setName(String name){
         this.name = name;
         this.hasChanged = true;
-        notifyObservers(pageID);
+        notifyObservers();
     }
     public void setIndex(int index){
         this.index = index;
         this.hasChanged = true;
-        notifyObservers(pageID);
+        notifyObservers();
     }
 
     public void removeNote(String noteId){
@@ -240,11 +240,6 @@ public class Page extends Sortable {
 
     public void selectNote(String id){
         activeNoteIndex = notes.getItemIndex(id);
-    }
-
-    public void subscribeToNoteList(IObserver observer){
-        notes.clearObservers();
-        notes.subscribe(observer);
     }
 
     public List<String> getNoteTitleList(){

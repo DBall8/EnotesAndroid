@@ -203,7 +203,7 @@ public class Note extends Sortable {
             font = NoteLookupTable.getFontString(Settings.getDefaultFont());
         }
 
-        notifyObservers(id);
+        notifyObservers();
     }
 
     public void setColor(JSONObject colors){
@@ -229,13 +229,13 @@ public class Note extends Sortable {
     public void setTitle(String title){
         this.title = title;
         this.hasChanged = true;
-        notifyObservers(id);
+        notifyObservers();
     }
 
     public void setZIndex(int z){
         this.zindex = z;
         this.hasChanged = true;
-        notifyObservers(id);
+        notifyObservers();
     }
 
     public String getId(){

@@ -25,9 +25,9 @@ public class Observable {
         observers.clear();
     }
 
-    protected void notifyObservers(String id){
+    protected void notifyObservers(){
         for (IObserver observer: observers){
-            observer.update(id);
+            observer.update();
         }
     }
 }

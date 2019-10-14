@@ -169,12 +169,13 @@ public class UserManager {
 
     }
 
-    public boolean loadUser(){
+    public boolean loadUser(final Callback<Boolean> callback){
         isUserSignedIn = true;
         new LoadUserDataTask(new Callback<String>() {
             @Override
             public void run(String param) {
-                loadUserData(param);
+                boolean successful = loadUserData(param);
+                callback.run(successful);
             }
         }).execute();
         return true;

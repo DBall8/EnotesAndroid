@@ -236,8 +236,19 @@ public class LoginActivity extends EnotesActivity {
                 }
 
                 // Login successful, finish this activity
-                UserManager.getInstance().loadUser();
-                finish();
+                UserManager.getInstance().loadUser(new Callback<Boolean>() {
+                    @Override
+                    public void run(Boolean param) {
+                        if (param)
+                        {
+                            finish();
+                        }
+                        else
+                        {
+                            displayError("Loading user data failed.");
+                        }
+                    }
+                });
             } else {
                 // If no successful flag, show an error
                 displayError("Login failed. Incorrect username or password.");
@@ -269,8 +280,19 @@ public class LoginActivity extends EnotesActivity {
             // If server indicates that the user did not already exist, then success!!
             if (!obj.getBoolean("userAlreadyExists")) {
                 // User creation successful, return to main activity
-                UserManager.getInstance().loadUser();
-                finish();
+                UserManager.getInstance().loadUser(new Callback<Boolean>() {
+                    @Override
+                    public void run(Boolean param) {
+                        if (param)
+                        {
+                            finish();
+                        }
+                        else
+                        {
+                            displayError("Loading user data failed.");
+                        } 
+                    }
+                });
             } else {
                 // Display an error showing the user already exists
                 displayError("User already exists, please choose a different username.");
@@ -290,14 +312,14 @@ public class LoginActivity extends EnotesActivity {
         // If in new user mode, switch to login mode
         if(newUser){
             passwordConfirm.setVisibility(View.GONE);
-            loginButton.setText("Login");
+            loginButton.setText(getResources().getString(R.string.login));
             otherLoginModeText.setText(R.string.signUpSwitch);
             newUser = false;
         }
         // If in login mode, switch to new user mode
         else{
             passwordConfirm.setVisibility(View.VISIBLE);
-            loginButton.setText("Create Account");
+            loginButton.setText(getResources().getString(R.string.login));
             otherLoginModeText.setText(R.string.loginSwitch);
             newUser = true;
         }
@@ -310,6 +332,14 @@ public class LoginActivity extends EnotesActivity {
     private void displayError(String errorText){
         messageText.setText(errorText);
         messageText.setVisibility(View.VISIBLE);
+
+        passwordField.setText("");
+
+        String loginButtonText = newUser ?
+                getResources().getString(R.string.create_account) :
+                getResources().getString(R.string.login);
+        loginButton.setEnabled(true);
+        loginButton.setText(loginButtonText);
     }
 
     /**

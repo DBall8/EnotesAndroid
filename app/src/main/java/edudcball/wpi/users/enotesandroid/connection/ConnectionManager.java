@@ -34,8 +34,8 @@ public class ConnectionManager {
     }
 
     public void startUpdateDaemon(MainActivity mainActivity){
-        updateDaemonTimer = new Timer();
-        updateDaemonTimer.schedule(new UpdateDaemon(mainActivity), 0, UPDATE_PERIOD_MS);
+//        updateDaemonTimer = new Timer();
+//        updateDaemonTimer.schedule(new UpdateDaemon(mainActivity), 0, UPDATE_PERIOD_MS);
     }
 
     public void stopUpdateDaemon(){

@@ -34,7 +34,7 @@ import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 /**
  * Class for creating the main view of the app, which is the list of notes
  */
-public class MainActivity extends EnotesActivity implements IObserver {
+public class MainActivity extends EnotesActivity  {
 
     PageManager pages;
     private ArrayAdapter<String> pageAdapter;
@@ -66,7 +66,6 @@ public class MainActivity extends EnotesActivity implements IObserver {
         pageList = findViewById(R.id.PageList);
         pageAdapter = buildPageAdapter();
         pageList.setAdapter(pageAdapter);
-        pages.subscribe(this);
 
         final MainActivity self = this;
 
@@ -114,6 +113,10 @@ public class MainActivity extends EnotesActivity implements IObserver {
 
         if(!UserManager.getInstance().isUserSignedIn()){
             launchActivity(this, LoginActivity.class);
+        }
+        else
+        {
+            refreshTitles();
         }
     }
 
@@ -186,7 +189,9 @@ public class MainActivity extends EnotesActivity implements IObserver {
     private ArrayAdapter<String> buildPageAdapter(){
 
         final Context context = this.getApplicationContext();
-        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, pages.getPageTitles()){
+        ArrayAdapter<String> pageAdapter = new ArrayAdapter<String>(context,
+                android.R.layout.simple_list_item_1,
+                pages.getPageTitles()){
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView tv = (TextView) super.getView(position, convertView, parent);
@@ -215,7 +220,8 @@ public class MainActivity extends EnotesActivity implements IObserver {
         return pageAdapter;
     }
 
-    public void update(String id){
-        pageAdapter.notifyDataSetChanged();
+    private void refreshTitles(){
+        pageAdapter.clear();
+        pageAdapter.addAll(pages.getPageTitles());
     }
 }

@@ -45,7 +45,7 @@ import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
 /**
  * Class for creating the main view of the app, which is the list of notes
  */
-public class PageActivity extends EnotesActivity implements IObserver {
+public class PageActivity extends EnotesActivity {
 
     private Page page;
     private ArrayAdapter<String> noteAdapter;
@@ -62,6 +62,8 @@ public class PageActivity extends EnotesActivity implements IObserver {
         super.onCreate(savedInstanceState);
         // setup layout
         setContentView(R.layout.activity_note_page);
+
+        page = UserManager.getInstance().getPageManager().getActivePage();
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.pageNameToolbar);
@@ -129,6 +131,21 @@ public class PageActivity extends EnotesActivity implements IObserver {
             }
         });
         confirmDialog.setNegativeButton(android.R.string.no, null);
+
+        // Initialize the note handler with the notesList
+        ListView notesList = findViewById(R.id.NotesList);
+        noteAdapter = buildNotesAdapter();
+        notesList.setAdapter(noteAdapter);
+
+        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                saveTitle();
+                page.selectNote(i);
+                launchActivity(getApplicationContext(), NoteActivity.class);
+            }
+        });
     }
 
     /**
@@ -138,7 +155,8 @@ public class PageActivity extends EnotesActivity implements IObserver {
     public void onResume(){
         super.onResume();
 
-        page = UserManager.getInstance().getPageManager().getActivePage();
+        pageTitle.setText(page.getName());
+        refreshTitles();
 
         // Clear focus, unless the title is empty
         if (page.getDisplayTitle().length() > 0){
@@ -152,30 +170,6 @@ public class PageActivity extends EnotesActivity implements IObserver {
         if(page == null){
             finish();
         }
-
-        // Initialize the static note handler with the notesList
-        ListView notesList = findViewById(R.id.NotesList);
-        noteAdapter = buildNotesAdapter();
-        notesList.setAdapter(noteAdapter);
-
-        page.subscribeToNoteList(this);
-
-        notesList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            saveTitle();
-            page.selectNote(i);
-            launchActivity(getApplicationContext(), NoteActivity.class);
-            }
-        });
-
-        if(getIntent().getBooleanExtra("new", false)){
-            pageTitle.requestFocus();
-        }
-        pageTitle.setText(page.getName());
-
-
     }
 
     /**
@@ -231,16 +225,19 @@ public class PageActivity extends EnotesActivity implements IObserver {
         switch(item.getItemId()){
             case R.id.action_color:
                 page.setSortMode(SortedList.SortMode.COLOR);
+                refreshTitles();
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_recent:
                 page.setSortMode(SortedList.SortMode.LATEST);
+                refreshTitles();
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
             case R.id.action_alpha:
                 page.setSortMode(SortedList.SortMode.ALPHA);
+                refreshTitles();
                 clearMenuSelection(menu.findItem(R.id.action_sortBy).getSubMenu());
                 item.setChecked(true);
                 return true;
@@ -344,7 +341,8 @@ public class PageActivity extends EnotesActivity implements IObserver {
         page.setName(pageTitle.getText().toString());
     }
 
-    public void update(String id) {
-        noteAdapter.notifyDataSetChanged();
+    private void refreshTitles(){
+        noteAdapter.clear();
+        noteAdapter.addAll(page.getNoteTitleList());
     }
 }

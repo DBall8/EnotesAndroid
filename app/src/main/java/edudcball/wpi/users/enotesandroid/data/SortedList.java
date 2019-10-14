@@ -1,16 +1,13 @@
 package edudcball.wpi.users.enotesandroid.data;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import edudcball.wpi.users.enotesandroid.data.classes.Sortable;
 import edudcball.wpi.users.enotesandroid.noteDataTypes.NoteLookupTable;
 import edudcball.wpi.users.enotesandroid.observerPattern.IObserver;
-import edudcball.wpi.users.enotesandroid.observerPattern.Observable;
 
-public class SortedList<T extends Sortable> extends Observable implements IObserver {
+public class SortedList<T extends Sortable> implements IObserver {
 
     public enum SortMode{
         LATEST,
@@ -20,7 +17,6 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
     }
 
     private List<T> items = new ArrayList<>();
-    private List<String> titles = new ArrayList<>();
     private SortMode sortMode = SortMode.LATEST;
 
     public SortedList(){}
@@ -54,33 +50,24 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
     public void add(T item)
     {
         items.add(item);
-        titles.add(item.getDisplayTitle());
 
         reSort();
 
         item.subscribe(this);
-        notifyObservers(null);
     }
 
     public void remove(int index){
         items.get(index).unSubscribe(this);
         items.remove(index);
-        titles.remove(index);
 
         reSort();
-
-        notifyObservers(null);
     }
 
     public void remove(String id){
         for (int i=0; i<items.size(); i++){
             if (items.get(i).getId().equals(id)){
                 items.remove(i);
-                titles.remove(i);
-
                 reSort();
-
-                notifyObservers(null);
                 return;
             }
         }
@@ -89,7 +76,6 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
     }
 
     public void clear(){
-        titles.clear();
         items.clear();
     }
 
@@ -105,38 +91,24 @@ public class SortedList<T extends Sortable> extends Observable implements IObser
 
     public int size(){ return items.size(); }
 
-    public List<String> getTitleList(){ return titles; }
-
-    private void reSort(){
-
-        // Sort items, and only recalculate titles if the order has changed
-        boolean hasChanged = sort();
-        if (hasChanged) {
-            titles.clear();
-            for (Sortable item : items) {
-                titles.add(item.getDisplayTitle());
-            }
+    public List<String> getTitleList(){
+        List<String> titles = new ArrayList<>();
+        for (T item: items){
+            titles.add(item.getDisplayTitle());
         }
 
-        notifyObservers(null);
+        return titles;
+    }
+
+    private void reSort(){
+        // Sort items, and only recalculate titles if the order has changed
+        boolean hasChanged = sort();
     }
 
     @Override
-    public void update(String id) {
-
+    public void update() {
         // See if any resorting is needed
         reSort();
-
-        // See if the displayed title has changed
-        int itemIndex = getItemIndex(id);
-        if (itemIndex >=0){
-            String oldTitle = titles.get(itemIndex);
-            String currentTitle = items.get(itemIndex).getDisplayTitle();
-
-            if(!oldTitle.equals(currentTitle)){
-                titles.set(itemIndex, currentTitle);
-            }
-        }
     }
 
     public void setSortMode(SortMode sortMode){

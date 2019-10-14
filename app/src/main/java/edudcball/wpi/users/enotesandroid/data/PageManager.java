@@ -216,10 +216,6 @@ public class PageManager {
         return null;
     }
 
-    public void subscribe(IObserver observer){
-        pages.clearObservers();
-        pages.subscribe(observer);}
-
     // DEBUG ---------------------------------------------------------------------------------------
     public void printPages(){
         for (int i=0; i<pages.size(); i++){
